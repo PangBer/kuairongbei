@@ -21,7 +21,6 @@
     "@reduxjs/toolkit": "^2.9.0",
     "crypto-js": "^4.2.0",
     "expo": "~54.0.10",
-    "expo-barcode-scanner": "^13.0.1",
     "expo-camera": "~17.0.8",
     "expo-constants": "~18.0.9",
     "expo-document-picker": "~14.0.7",
