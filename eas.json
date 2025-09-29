@@ -26,15 +26,13 @@
     "production": {
       "autoIncrement": true,
       "android": {
-        "buildType": "aab"
+        "buildType": "apk"
       },
       "ios": {
         "simulator": false
       }
     },
-    "web": {
-      "platform": "web"
-    },
+    "web": {},
     "local": {
       "android": {
         "buildType": "apk",
