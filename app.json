@@ -41,7 +41,40 @@
           }
         }
       ],
-      "expo-barcode-scanner"
+      [
+        "expo-barcode-scanner",
+        {
+          "cameraPermission": "允许访问相机以扫描二维码"
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "允许访问相机以拍照和录像",
+          "microphonePermission": "允许访问麦克风以录制视频"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "允许访问相册以选择图片和视频"
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "允许访问相册以保存和读取媒体文件",
+          "savePhotosPermission": "允许保存图片到相册",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      [
+        "expo-document-picker",
+        {
+          "iCloudContainerEnvironment": "Production"
+        }
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
