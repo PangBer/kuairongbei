@@ -46,7 +46,7 @@ export default function SelectDropdown({
   };
 
   return (
-    <View style={selectStyles.container}>
+    <>
       <TouchableOpacity onPress={() => !disabled && showModal()}>
         <TextInput
           label={label + (required ? " *" : "")}
@@ -104,6 +104,6 @@ export default function SelectDropdown({
           </View>
         </TouchableOpacity>
       </Modal>
-    </View>
+    </>
   );
 }

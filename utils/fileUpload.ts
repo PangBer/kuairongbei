@@ -41,7 +41,7 @@ const defaultConfig: FileUploadConfig = {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   ],
   quality: 0.8,
-  allowsEditing: true,
+  allowsEditing: false,
 };
 
 /**
@@ -160,8 +160,9 @@ export const pickImageFromCamera = async (
  * 从相册选择图片
  */
 export const pickImageFromGallery = async (
-  config: FileUploadConfig = defaultConfig
-): Promise<UploadedFile | null> => {
+  config: FileUploadConfig = defaultConfig,
+  multiple: boolean = false
+): Promise<UploadedFile | UploadedFile[] | null> => {
   const hasPermission = await requestMediaLibraryPermission();
   if (!hasPermission) {
     Alert.alert("权限不足", "需要相册权限才能选择图片");
@@ -170,30 +171,51 @@ export const pickImageFromGallery = async (
 
   try {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images", "videos"],
       allowsEditing: config.allowsEditing,
       quality: config.quality,
       exif: false,
+      allowsMultipleSelection: multiple,
     });
 
     if (result.canceled || !result.assets || result.assets.length === 0) {
       return null;
     }
 
-    const asset = result.assets[0];
-    const file: UploadedFile = {
-      uri: asset.uri,
-      name: asset.fileName || `gallery_${Date.now()}.jpg`,
-      type: "image/jpeg",
-      size: asset.fileSize || 0,
-      mimeType: "image/jpeg",
-    };
+    if (multiple) {
+      // 多选模式：返回文件数组
+      const files: UploadedFile[] = [];
+      for (const asset of result.assets) {
+        const file: UploadedFile = {
+          uri: asset.uri,
+          name: asset.fileName || `gallery_${Date.now()}_${files.length}.jpg`,
+          type: "image/jpeg",
+          size: asset.fileSize || 0,
+          mimeType: "image/jpeg",
+        };
 
-    if (!validateFile(file, config)) {
-      return null;
+        if (validateFile(file, config)) {
+          files.push(file);
+        }
+      }
+      return files.length > 0 ? files : null;
+    } else {
+      // 单选模式：返回单个文件
+      const asset = result.assets[0];
+      const file: UploadedFile = {
+        uri: asset.uri,
+        name: asset.fileName || `gallery_${Date.now()}.jpg`,
+        type: "image/jpeg",
+        size: asset.fileSize || 0,
+        mimeType: "image/jpeg",
+      };
+
+      if (!validateFile(file, config)) {
+        return null;
+      }
+
+      return file;
     }
-
-    return file;
   } catch (error) {
     console.error("选择图片失败:", error);
     Alert.alert("选择失败", "无法打开相册，请重试");
@@ -205,32 +227,54 @@ export const pickImageFromGallery = async (
  * 选择文档文件
  */
 export const pickDocument = async (
-  config: FileUploadConfig = defaultConfig
-): Promise<UploadedFile | null> => {
+  config: FileUploadConfig = defaultConfig,
+  multiple: boolean = false
+): Promise<UploadedFile | UploadedFile[] | null> => {
   try {
     const result = await DocumentPicker.getDocumentAsync({
       type: config.allowedTypes?.join(",") || "*/*",
       copyToCacheDirectory: true,
+      multiple: multiple,
     });
 
     if (result.canceled || !result.assets || result.assets.length === 0) {
       return null;
     }
 
-    const asset = result.assets[0];
-    const file: UploadedFile = {
-      uri: asset.uri,
-      name: asset.name,
-      type: asset.mimeType || "application/octet-stream",
-      size: asset.size || 0,
-      mimeType: asset.mimeType,
-    };
+    if (multiple) {
+      // 多选模式：返回文件数组
+      const files: UploadedFile[] = [];
+      for (const asset of result.assets) {
+        const file: UploadedFile = {
+          uri: asset.uri,
+          name: asset.name,
+          type: asset.mimeType || "application/octet-stream",
+          size: asset.size || 0,
+          mimeType: asset.mimeType,
+        };
 
-    if (!validateFile(file, config)) {
-      return null;
+        if (validateFile(file, config)) {
+          files.push(file);
+        }
+      }
+      return files.length > 0 ? files : null;
+    } else {
+      // 单选模式：返回单个文件
+      const asset = result.assets[0];
+      const file: UploadedFile = {
+        uri: asset.uri,
+        name: asset.name,
+        type: asset.mimeType || "application/octet-stream",
+        size: asset.size || 0,
+        mimeType: asset.mimeType,
+      };
+
+      if (!validateFile(file, config)) {
+        return null;
+      }
+
+      return file;
     }
-
-    return file;
   } catch (error) {
     console.error("选择文档失败:", error);
     Alert.alert("选择失败", "无法打开文件选择器，请重试");
@@ -246,10 +290,17 @@ export const showUploadOptions = async (
 ): Promise<UploadedFile | null> => {
   return new Promise((resolve) => {
     const options = [
-      { text: "选择文件", onPress: () => pickDocument(config).then(resolve) },
       {
         text: "选择图片",
-        onPress: () => pickImageFromGallery(config).then(resolve),
+        onPress: () => {
+          pickImageFromGallery(config, false).then((result) => {
+            if (Array.isArray(result)) {
+              resolve(result[0] || null);
+            } else {
+              resolve(result);
+            }
+          });
+        },
       },
     ];
 

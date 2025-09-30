@@ -1,9 +1,6 @@
 import { StyleSheet } from "react-native";
 
 export const selectStyles = StyleSheet.create({
-  container: {
-    marginBottom: 10,
-  },
   textInput: {
     backgroundColor: "#fff",
   },

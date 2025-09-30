@@ -159,7 +159,7 @@ export default function MultiLevelSelect({
   };
 
   return (
-    <View style={selectStyles.container}>
+    <>
       <TouchableOpacity onPress={() => !disabled && showModal()}>
         <TextInput
           label={label + (required ? " *" : "")}
@@ -286,6 +286,6 @@ export default function MultiLevelSelect({
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
-    </View>
+    </>
   );
 }

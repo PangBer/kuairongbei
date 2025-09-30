@@ -9,6 +9,8 @@ import {
   validationRules,
 } from "@/constants/rules";
 import { useDicts, useDictsActions, useToastActions } from "@/store/hooks";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -69,6 +71,14 @@ export default function GatherScreen() {
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
+
+  // 步骤数据
+  const steps = [
+    { icon: "file-text", label: "填信息", step: 0 },
+    { icon: "contacts", label: "定需求", step: 1 },
+    { icon: "ci-circle", label: "选资质", step: 2 },
+    { icon: "upload", label: "传附件", step: 3 },
+  ];
 
   // React Hook Form
   const {
@@ -163,16 +173,18 @@ export default function GatherScreen() {
         name={fieldName}
         rules={validationRules[fieldName as keyof typeof validationRules]}
         render={({ field: { onChange, value } }) => (
-          <SelectDropdown
-            label={option.label}
-            value={value as string}
-            options={selectOptions}
-            onSelect={onChange}
-            placeholder="请选择"
-            error={!!errors[fieldName]}
-            errorMessage={errors[fieldName]?.message as string}
-            required={isRequired}
-          />
+          <View style={styles.inputContainer}>
+            <SelectDropdown
+              label={option.label}
+              value={value as string}
+              options={selectOptions}
+              onSelect={onChange}
+              placeholder="请选择"
+              error={!!errors[fieldName]}
+              errorMessage={errors[fieldName]?.message as string}
+              required={isRequired}
+            />
+          </View>
         )}
       />
     );
@@ -190,16 +202,18 @@ export default function GatherScreen() {
         name={fieldName}
         rules={validationRules[fieldName as keyof typeof validationRules]}
         render={({ field: { onChange, value } }) => (
-          <MultiLevelSelect
-            label={option.label}
-            value={value as string}
-            options={dictData}
-            onSelect={onChange}
-            placeholder="请选择"
-            error={!!errors[fieldName]}
-            errorMessage={errors[fieldName]?.message as string}
-            required={isRequired}
-          />
+          <View style={styles.inputContainer}>
+            <MultiLevelSelect
+              label={option.label}
+              value={value as string}
+              options={dictData}
+              onSelect={onChange}
+              placeholder="请选择"
+              error={!!errors[fieldName]}
+              errorMessage={errors[fieldName]?.message as string}
+              required={isRequired}
+            />
+          </View>
         )}
       />
     );
@@ -248,10 +262,9 @@ export default function GatherScreen() {
               {option.label}
             </TextPaper>
             <FileUpload
-              title=""
-              description=""
               onFileSelect={(file) => onChange(file)}
-              multiple={false}
+              maxFiles={2}
+              multiple={true}
               showPreview={true}
             />
           </View>
@@ -318,13 +331,13 @@ export default function GatherScreen() {
   const getFieldsForStep = (step: number): (keyof FormData)[] => {
     switch (step) {
       case 1:
-        return Options1.map((option) => option.prop as keyof FormData);
+        return Options1.map((option) => option.prop as keyof FormData); // 基本信息
       case 2:
-        return Options2.map((option) => option.prop as keyof FormData);
+        return Options2.map((option) => option.prop as keyof FormData); // 需求信息
       case 3:
-        return Options4.map((option) => option.prop as keyof FormData);
+        return Options4.map((option) => option.prop as keyof FormData); // 资质信息
       case 4:
-        return Options5.map((option) => option.prop as keyof FormData);
+        return Options5.map((option) => option.prop as keyof FormData); // 文件上传
       default:
         return [];
     }
@@ -334,31 +347,15 @@ export default function GatherScreen() {
   const getCurrentStepOptions = () => {
     switch (currentStep) {
       case 1:
-        return Options1;
+        return Options1; // 基本信息
       case 2:
-        return Options2;
+        return Options2; // 需求信息
       case 3:
-        return Options4;
+        return Options4; // 资质信息
       case 4:
-        return Options5;
+        return Options5; // 文件上传
       default:
         return [];
-    }
-  };
-
-  // 获取步骤标题
-  const getStepTitle = () => {
-    switch (currentStep) {
-      case 1:
-        return "基本信息";
-      case 2:
-        return "需求信息";
-      case 3:
-        return "资质信息";
-      case 4:
-        return "文件上传";
-      default:
-        return "";
     }
   };
 
@@ -368,15 +365,71 @@ export default function GatherScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* 步骤指示器 */}
-        <View style={styles.stepIndicator}>
-          <TextPaper variant="headlineSmall" style={styles.stepTitle}>
-            {getStepTitle()}
-          </TextPaper>
-          <TextPaper variant="bodyMedium" style={styles.stepCounter}>
-            第 {currentStep} 步，共 {totalSteps} 步
-          </TextPaper>
-        </View>
+        {/* 顶部渐变区域 */}
+        <LinearGradient
+          colors={["#4a9aff", "#6ab0ff"]}
+          style={styles.headerGradient}
+        >
+          {/* 步骤导航 */}
+          <View style={styles.stepsContainer}>
+            <View style={styles.stepsRow}>
+              {steps.map((step, index) => (
+                <View key={step.label} style={styles.stepItem}>
+                  <View style={styles.stepContent}>
+                    <View
+                      style={[
+                        styles.stepCircle,
+                        {
+                          backgroundColor:
+                            index < currentStep - 1
+                              ? "#10B981"
+                              : index === currentStep - 1
+                              ? "#F59E0B"
+                              : "rgba(255,255,255,0.2)",
+                        },
+                      ]}
+                    >
+                      <AntDesign
+                        name={step.icon as any}
+                        size={20}
+                        color="#FFFFFF"
+                      />
+                    </View>
+                    <TextPaper
+                      style={[
+                        styles.stepLabel,
+                        {
+                          color:
+                            index <= currentStep - 1
+                              ? "#FFFFFF"
+                              : "rgba(255,255,255,0.6)",
+                        },
+                      ]}
+                    >
+                      {step.label}
+                    </TextPaper>
+                  </View>
+                  {index < steps.length - 1 && (
+                    <View style={styles.stepConnector}>
+                      <AntDesign
+                        name="right"
+                        size={16}
+                        color="rgba(255,255,255,0.8)"
+                      />
+                    </View>
+                  )}
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* 积分显示 */}
+          <View style={styles.pointsDisplay}>
+            <TextPaper style={styles.pointsLabel}>当前累计积分：</TextPaper>
+            <TextPaper style={styles.pointsValue}>120</TextPaper>
+            <TextPaper style={styles.pointsUnit}>💰 10积分 = 1元</TextPaper>
+          </View>
+        </LinearGradient>
 
         <Card style={styles.formCard}>
           <Card.Content>
@@ -415,34 +468,82 @@ export default function GatherScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#F8F9FA",
   },
   scrollContainer: {
-    padding: 16,
     paddingBottom: 32,
   },
-  stepIndicator: {
+  headerGradient: {
+    paddingTop: 50,
+    paddingBottom: 30,
+    paddingHorizontal: 20,
+  },
+  stepsContainer: {
+    marginBottom: 20,
+  },
+  stepsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 24,
-    paddingVertical: 16,
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    elevation: 2,
   },
-  stepTitle: {
+  stepItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  stepContent: {
+    alignItems: "center",
+    flex: 1,
+  },
+  stepCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  stepLabel: {
+    fontSize: 12,
+    textAlign: "center",
+  },
+  stepConnector: {
+    marginHorizontal: 8,
+    marginBottom: 20,
+  },
+  pointsDisplay: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  pointsLabel: {
+    color: "rgba(255,255,255,0.8)",
+    fontSize: 14,
+  },
+  pointsValue: {
+    color: "#FFFFFF",
+    fontSize: 20,
     fontWeight: "bold",
-    color: "#1976D2",
-    marginBottom: 4,
+    marginHorizontal: 8,
   },
-  stepCounter: {
-    color: "#666",
+  pointsUnit: {
+    color: "rgba(255,255,255,0.6)",
+    fontSize: 12,
   },
   formCard: {
+    marginHorizontal: 16,
+    marginTop: -16,
     marginBottom: 24,
-    elevation: 2,
+    borderRadius: 16,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
   },
   inputContainer: {
-    marginBottom: 10,
+    marginBottom: 16,
   },
   input: {
     backgroundColor: "#fff",
@@ -458,26 +559,28 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   uploadContainer: {
-    marginBottom: 10,
+    marginBottom: 16,
   },
   uploadLabel: {
+    color: "#333",
     fontWeight: "600",
     marginBottom: 8,
-    color: "#333",
   },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     gap: 16,
+    paddingHorizontal: 16,
   },
   button: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 12,
+    borderRadius: 8,
   },
   previousButton: {
-    borderColor: "#1976D2",
+    borderColor: "#4a9aff",
   },
   nextButton: {
-    backgroundColor: "#1976D2",
+    backgroundColor: "#4a9aff",
   },
 });

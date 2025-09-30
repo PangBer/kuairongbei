@@ -1,4 +1,7 @@
+import req from "@/utils/fetch";
 import { UploadedFile } from "@/utils/fileUpload";
+import { getToken } from "@/utils/token";
+import { Platform } from "react-native";
 
 /**
  * 文件上传响应
@@ -10,8 +13,6 @@ export interface UploadResponse {
     fileId: string;
     fileName: string;
     fileUrl: string;
-    fileSize: number;
-    fileType: string;
     uploadTime: string;
   };
   error?: string;
@@ -30,8 +31,6 @@ export interface BatchUploadResponse {
       fileId: string;
       fileName: string;
       fileUrl: string;
-      fileSize: number;
-      fileType: string;
       uploadTime: string;
       success: boolean;
       error?: string;
@@ -46,36 +45,75 @@ export interface BatchUploadResponse {
 export class FileUploadService {
   private baseUrl: string;
   private timeout: number;
+  private pathId: string;
 
   constructor(
     baseUrl: string = process.env.EXPO_PUBLIC_BASE_URL ||
       "http://192.168.1.4:8081",
-    timeout: number = 30000
+    timeout: number = 30000,
+    pathId: string = "1939583832702820353"
   ) {
     this.baseUrl = baseUrl;
     this.timeout = timeout;
+    this.pathId = pathId;
   }
 
   /**
-   * 创建FormData
+   * 创建FormData - 统一使用二进制文件上传
    */
-  private createFormData(
+  private async createFormData(
     file: UploadedFile,
     additionalData?: Record<string, any>
-  ): FormData {
+  ): Promise<FormData> {
     const formData = new FormData();
 
-    // 添加文件
-    formData.append("file", {
-      uri: file.uri,
-      type: file.mimeType || file.type,
-      name: file.name,
-    } as any);
+    try {
+      if (Platform.OS === "web") {
+        // Web端：处理blob URL或文件URL
+        let fileBlob: Blob;
+
+        if (file.uri.startsWith("blob:")) {
+          const response = await fetch(file.uri);
+          fileBlob = await response.blob();
+        } else if (file.uri.startsWith("data:")) {
+          // 处理data URL
+          const response = await fetch(file.uri);
+          fileBlob = await response.blob();
+        } else {
+          // 处理文件URL
+          const response = await fetch(file.uri);
+          fileBlob = await response.blob();
+        }
+
+        // 创建File对象
+        const fileObj = new File([fileBlob], file.name, {
+          type: file.mimeType || file.type,
+        });
+
+        // 添加二进制文件
+        formData.append("file", fileObj);
+      } else {
+        // App端：直接使用React Native格式，服务器端会处理二进制转换
+        formData.append("file", {
+          uri: file.uri,
+          type: file.mimeType || file.type,
+          name: file.name,
+        } as any);
+      }
+    } catch (error) {
+      console.error("文件处理失败:", error);
+      // 降级处理：使用原始格式
+      formData.append("file", {
+        uri: file.uri,
+        type: file.mimeType || file.type,
+        name: file.name,
+      } as any);
+    }
 
     // 添加文件信息
-    formData.append("fileName", file.name);
-    formData.append("fileSize", file.size.toString());
-    formData.append("fileType", file.mimeType || file.type);
+    // formData.append("fileName", file.name);
+    // formData.append("fileSize", file.size.toString());
+    // formData.append("fileType", file.mimeType || file.type);
 
     // 添加额外数据
     if (additionalData) {
@@ -95,30 +133,37 @@ export class FileUploadService {
     additionalData?: Record<string, any>
   ): Promise<UploadResponse> {
     try {
-      const formData = this.createFormData(file, additionalData);
-
-      const response = await fetch(`${this.baseUrl}/api/upload`, {
-        method: "POST",
-        body: formData,
-        // 移除 Content-Type 头，让浏览器自动设置 multipart/form-data 边界
-      });
+      const formData = await this.createFormData(file, additionalData);
+      const token = await getToken();
+      const response = await fetch(
+        `${this.baseUrl}/resource/oss/uploadNotCheck?pathId=${this.pathId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer " + token,
+            clientid: process.env.EXPO_PUBLIC_CLIENT_ID || "",
+          },
+          body: formData,
+          // 移除 Content-Type 头，让浏览器自动设置 multipart/form-data 边界
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
-
+      if (result.code !== 200) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       return {
         success: true,
         message: "文件上传成功",
         data: {
-          fileId: result.fileId || result.id,
-          fileName: result.fileName || file.name,
-          fileUrl: result.fileUrl || result.url,
-          fileSize: result.fileSize || file.size,
-          fileType: result.fileType || file.type,
-          uploadTime: result.uploadTime || new Date().toISOString(),
+          fileId: result.data?.ossId,
+          fileName: result.data?.fileName,
+          fileUrl: result.data?.url,
+          uploadTime: result.data?.uploadTime || new Date().toISOString(),
         },
       };
     } catch (error) {
@@ -150,11 +195,9 @@ export class FileUploadService {
 
         results.push({
           fileId: result.data?.fileId || "",
-          fileName: file.name,
+          fileName: result.data?.fileName || "",
           fileUrl: result.data?.fileUrl || "",
-          fileSize: file.size,
-          fileType: file.type,
-          uploadTime: result.data?.uploadTime || new Date().toISOString(),
+          uploadTime: result.data?.uploadTime || "",
           success: result.success,
           error: result.error,
         });
@@ -169,8 +212,6 @@ export class FileUploadService {
           fileId: "",
           fileName: file.name,
           fileUrl: "",
-          fileSize: file.size,
-          fileType: file.type,
           uploadTime: new Date().toISOString(),
           success: false,
           error: error instanceof Error ? error.message : "上传失败",
@@ -197,15 +238,9 @@ export class FileUploadService {
     fileId: string
   ): Promise<{ success: boolean; message: string }> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/upload/${fileId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const response = await req.delete("/h5/app/oss/" + fileId);
+      if (response.code !== 200) {
+        throw new Error(`HTTP error! status: ${response.code}`);
       }
 
       return {
@@ -217,39 +252,6 @@ export class FileUploadService {
       return {
         success: false,
         message: "文件删除失败",
-      };
-    }
-  }
-
-  /**
-   * 获取文件信息
-   */
-  async getFileInfo(fileId: string): Promise<UploadResponse> {
-    try {
-      const response = await fetch(`${this.baseUrl}/api/upload/${fileId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-
-      return {
-        success: true,
-        message: "获取文件信息成功",
-        data: result,
-      };
-    } catch (error) {
-      console.error("获取文件信息失败:", error);
-      return {
-        success: false,
-        message: "获取文件信息失败",
-        error: error instanceof Error ? error.message : "未知错误",
       };
     }
   }

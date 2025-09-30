@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { Alert, Platform, StyleSheet, View } from "react-native";
-import { Button, Card, IconButton, Text } from "react-native-paper";
+import { Button, IconButton, Text } from "react-native-paper";
 
 import {
   BatchUploadResponse,
   fileUploadService,
   UploadResponse,
 } from "@/service/fileUploadService";
+
+import { showInfo } from "@/store/slices/toastSlice";
 import {
   FileUploadConfig,
   getFileSizeText,
@@ -14,16 +16,12 @@ import {
   pickDocument,
   pickImageFromCamera,
   pickImageFromGallery,
-  showUploadOptions,
   UploadedFile,
 } from "@/utils/fileUpload";
 
 interface FileUploadProps {
-  title?: string;
-  description?: string;
   config?: FileUploadConfig;
-  onFileSelect?: (file: UploadedFile | null) => void;
-  onFilesSelect?: (files: UploadedFile[]) => void;
+  onFileSelect?: (files: UploadResponse[]) => void;
   onUploadSuccess?: (response: UploadResponse | BatchUploadResponse) => void;
   onUploadError?: (error: string) => void;
   multiple?: boolean;
@@ -35,18 +33,15 @@ interface FileUploadProps {
 }
 
 export default function FileUpload({
-  title = "文件上传",
-  description = "点击选择要上传的文件",
   config,
   onFileSelect,
-  onFilesSelect,
   onUploadSuccess,
   onUploadError,
   multiple = false,
   showPreview = true,
   maxFiles = 5,
   disabled = false,
-  autoUpload = false,
+  autoUpload = true,
   additionalData,
 }: FileUploadProps) {
   const [selectedFiles, setSelectedFiles] = useState<UploadedFile[]>([]);
@@ -59,91 +54,117 @@ export default function FileUpload({
   ) => {
     if (disabled) return;
 
-    setIsUploading(true);
-    let file: UploadedFile | null = null;
-
     try {
+      let result: UploadedFile | UploadedFile[] | null = null;
+      const isMultipleSelection = multiple && maxFiles > 1;
+
       switch (source) {
         case "camera":
-          file = await pickImageFromCamera(config);
+          result = await pickImageFromCamera(config);
           break;
         case "gallery":
-          file = await pickImageFromGallery(config);
+          result = await pickImageFromGallery(config, isMultipleSelection);
           break;
         case "document":
-          file = await pickDocument(config);
+          result = await pickDocument(config, isMultipleSelection);
           break;
       }
 
-      if (file) {
+      if (result) {
         if (multiple) {
-          const newFiles = [...selectedFiles, file];
+          // 多文件模式
+          const newFiles = Array.isArray(result)
+            ? [...selectedFiles, ...result]
+            : [...selectedFiles, result];
+
           if (newFiles.length > maxFiles) {
-            Alert.alert("文件数量超限", `最多只能选择 ${maxFiles} 个文件`);
-            return;
+            // Alert.alert("文件数量超限", `最多只能选择 ${maxFiles} 个文件`);
+            showInfo({
+              title: "文件数量超限",
+              message: `最多只能选择 ${maxFiles} 个文件`,
+            });
+            // return;
+            newFiles.splice(maxFiles, newFiles.length - maxFiles);
           }
+
           setSelectedFiles(newFiles);
-          onFilesSelect?.(newFiles);
+
+          // 自动上传
+          if (autoUpload) {
+            await uploadFiles(newFiles);
+          }
         } else {
+          // 单文件模式
+          const file = Array.isArray(result) ? result[0] : result;
           setSelectedFiles([file]);
-          onFileSelect?.(file);
+
+          // 自动上传
+          if (autoUpload) {
+            await uploadFiles([file]);
+          }
         }
       }
     } catch (error) {
       console.error("文件选择失败:", error);
       Alert.alert("选择失败", "文件选择过程中出现错误");
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  // 显示上传选项
-  const handleShowOptions = async () => {
-    if (disabled) return;
-
-    const file = await showUploadOptions(config);
-    if (file) {
-      if (multiple) {
-        const newFiles = [...selectedFiles, file];
-        if (newFiles.length > maxFiles) {
-          Alert.alert("文件数量超限", `最多只能选择 ${maxFiles} 个文件`);
-          return;
-        }
-        setSelectedFiles(newFiles);
-        onFilesSelect?.(newFiles);
-      } else {
-        setSelectedFiles([file]);
-        onFileSelect?.(file);
-      }
     }
   };
 
   // 移除文件
-  const removeFile = (index: number) => {
-    const newFiles = selectedFiles.filter((_, i) => i !== index);
-    setSelectedFiles(newFiles);
-    if (multiple) {
-      onFilesSelect?.(newFiles);
-    } else {
-      onFileSelect?.(newFiles[0] || null);
+  const removeFile = async (index: number) => {
+    const uploadResult = uploadResults[index];
+    // 如果文件已上传成功，调用删除接口
+    if (uploadResult?.success && uploadResult.data?.fileId) {
+      try {
+        await fileUploadService.deleteFile(uploadResult.data.fileId);
+        console.log("文件删除成功:", uploadResult.data.fileId);
+      } catch (error) {
+        console.error("文件删除失败:", error);
+        Alert.alert("删除失败", "服务器端文件删除失败，但已从列表中移除");
+      }
     }
+
+    // 从本地状态中移除文件
+    const newFiles = selectedFiles.filter((_, i) => i !== index);
+    const newUploadResults = uploadResults.filter((_, i) => i !== index);
+
+    setSelectedFiles(newFiles);
+    setUploadResults(newUploadResults);
+
+    onFileSelect?.(newUploadResults);
   };
 
   // 清空所有文件
-  const clearAllFiles = () => {
+  const clearAllFiles = async () => {
+    // 批量删除已上传成功的文件
+    const deletePromises = uploadResults
+      .filter((result) => result.success && result.data?.fileId)
+      .map((result) =>
+        fileUploadService.deleteFile(result.data!.fileId).catch((error) => {
+          console.error("文件删除失败:", result.data!.fileId, error);
+          return { success: false, error };
+        })
+      );
+
+    if (deletePromises.length > 0) {
+      try {
+        await Promise.all(deletePromises);
+        console.log("批量删除文件完成");
+      } catch (error) {
+        console.error("批量删除文件失败:", error);
+      }
+    }
+
+    // 清空本地状态
     setSelectedFiles([]);
     setUploadResults([]);
-    if (multiple) {
-      onFilesSelect?.([]);
-    } else {
-      onFileSelect?.(null);
-    }
+
+    onFileSelect?.([]);
   };
 
   // 上传文件
-  const uploadFiles = async () => {
-    if (selectedFiles.length === 0) {
-      Alert.alert("提示", "请先选择要上传的文件");
+  const uploadFiles = async (files: UploadedFile[]) => {
+    if (files.length === 0) {
       return;
     }
 
@@ -151,44 +172,115 @@ export default function FileUpload({
 
     try {
       if (multiple) {
+        // 过滤掉已经上传成功的文件
+        const filesToUpload: UploadedFile[] = [];
+        const alreadyUploadedFiles: UploadedFile[] = [];
+
+        files.forEach((file, index) => {
+          const uploadResult = uploadResults[index];
+          if (uploadResult?.success) {
+            // 文件已经上传成功，不需要重复上传
+            alreadyUploadedFiles.push(file);
+          } else {
+            // 文件未上传或上传失败，需要上传
+            filesToUpload.push(file);
+          }
+        });
+
+        // 如果没有需要上传的文件，直接返回
+        if (filesToUpload.length === 0) {
+          setIsUploading(false);
+          return;
+        }
+
         // 批量上传
         const response = await fileUploadService.uploadFiles(
-          selectedFiles,
+          filesToUpload,
           additionalData
         );
 
-        setUploadResults(
-          response.data?.files.map((f) => ({
-            success: f.success,
-            message: f.success ? "上传成功" : "上传失败",
-            data: f.success
-              ? {
-                  fileId: f.fileId,
-                  fileName: f.fileName,
-                  fileUrl: f.fileUrl,
-                  fileSize: f.fileSize,
-                  fileType: f.fileType,
-                  uploadTime: f.uploadTime,
-                }
-              : undefined,
-            error: f.error,
-          })) || []
-        );
+        // 处理上传结果，合并已上传和新增上传成功的文件
+        const newSuccessfulFiles: UploadedFile[] = [];
+        const newSuccessfulResults: UploadResponse[] = [];
+        const failedFiles: UploadedFile[] = [];
+
+        // 先添加已经上传成功的文件
+        alreadyUploadedFiles.forEach((file, index) => {
+          const originalIndex = files.indexOf(file);
+          const existingResult = uploadResults[originalIndex];
+          if (existingResult) {
+            newSuccessfulFiles.push(file);
+            newSuccessfulResults.push(existingResult);
+          }
+        });
+
+        // 处理新上传的文件结果
+        response.data?.files.forEach((f, uploadIndex) => {
+          const file = filesToUpload[uploadIndex];
+          if (f.success) {
+            newSuccessfulFiles.push(file);
+            newSuccessfulResults.push({
+              success: true,
+              message: "上传成功",
+              data: {
+                fileId: f.fileId,
+                fileName: f.fileName,
+                fileUrl: f.fileUrl,
+                uploadTime: f.uploadTime,
+              },
+            });
+          } else {
+            failedFiles.push(file);
+            console.error(`文件上传失败: ${file.name}`, f.error);
+          }
+        });
+
+        // 更新文件列表，只保留成功的文件
+        setSelectedFiles(newSuccessfulFiles);
+        setUploadResults(newSuccessfulResults);
+
+        // 更新回调
+        onFileSelect?.(newSuccessfulResults);
+
+        // 如果有失败的文件，显示提示
+        if (failedFiles.length > 0) {
+          Alert.alert(
+            "部分文件上传失败",
+            `有 ${failedFiles.length} 个文件上传失败，已自动移除`
+          );
+        }
 
         onUploadSuccess?.(response);
       } else {
         // 单文件上传
-        const file = selectedFiles[0];
+        const file = files[0];
         const response = await fileUploadService.uploadFile(
           file,
           additionalData
         );
 
-        setUploadResults([response]);
-        onUploadSuccess?.(response);
+        if (response.success) {
+          setUploadResults([response]);
+          onUploadSuccess?.(response);
+        } else {
+          // 上传失败，清空文件
+          setSelectedFiles([]);
+          setUploadResults([]);
+          onFileSelect?.([]);
+
+          const errorMessage = response.error || "上传失败";
+          Alert.alert("上传失败", errorMessage);
+          onUploadError?.(errorMessage);
+        }
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "上传失败";
+
+      // 上传异常，清空所有文件
+      setSelectedFiles([]);
+      setUploadResults([]);
+      onFileSelect?.([]);
+
       Alert.alert("上传失败", errorMessage);
       onUploadError?.(errorMessage);
     } finally {
@@ -197,189 +289,119 @@ export default function FileUpload({
   };
 
   return (
-    <Card style={styles.container}>
-      <Card.Content style={styles.content}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.description}>{description}</Text>
-
-        {/* 上传按钮区域 */}
-        <View style={styles.buttonContainer}>
+    <View>
+      {/* 单独的操作按钮 */}
+      <View style={styles.actionButtons}>
+        <Button
+          mode="outlined"
+          onPress={() => handleFileSelect("document")}
+          disabled={disabled || isUploading}
+          style={styles.actionButton}
+          icon="file-document"
+          compact
+        >
+          文件
+        </Button>
+        <Button
+          mode="outlined"
+          onPress={() => handleFileSelect("gallery")}
+          disabled={disabled || isUploading}
+          style={styles.actionButton}
+          icon="image"
+          compact
+        >
+          相册
+        </Button>
+        {Platform.OS !== "web" && (
           <Button
-            mode="contained"
-            onPress={handleShowOptions}
-            loading={isUploading}
+            mode="outlined"
+            onPress={() => handleFileSelect("camera")}
             disabled={disabled || isUploading}
-            style={styles.uploadButton}
-            icon="upload"
+            style={styles.actionButton}
+            icon="camera"
+            compact
           >
-            {isUploading ? "选择中..." : "选择文件"}
+            拍照
           </Button>
+        )}
+      </View>
 
-          {/* 单独的操作按钮 */}
-          <View style={styles.actionButtons}>
-            <Button
-              mode="outlined"
-              onPress={() => handleFileSelect("document")}
-              disabled={disabled || isUploading}
-              style={styles.actionButton}
-              icon="file-document"
-              compact
-            >
-              文件
-            </Button>
-            <Button
-              mode="outlined"
-              onPress={() => handleFileSelect("gallery")}
-              disabled={disabled || isUploading}
-              style={styles.actionButton}
-              icon="image"
-              compact
-            >
-              相册
-            </Button>
-            {Platform.OS !== "web" && (
+      {/* 上传状态 */}
+      {isUploading && (
+        <View style={styles.uploadingContainer}>
+          <Text style={styles.uploadingText}>上传中...</Text>
+        </View>
+      )}
+
+      {/* 已选择的文件列表 */}
+      {selectedFiles.length > 0 && (
+        <View style={styles.filesContainer}>
+          <View style={styles.filesHeader}>
+            <Text style={styles.filesTitle}>
+              已选择文件 ({selectedFiles.length}
+              {multiple ? `/${maxFiles}` : ""})
+            </Text>
+            {selectedFiles.length > 0 && !isUploading && (
               <Button
-                mode="outlined"
-                onPress={() => handleFileSelect("camera")}
-                disabled={disabled || isUploading}
-                style={styles.actionButton}
-                icon="camera"
+                mode="text"
+                onPress={clearAllFiles}
+                textColor="#FF6B6B"
                 compact
               >
-                拍照
+                清空
               </Button>
             )}
           </View>
-        </View>
 
-        {/* 上传状态 */}
-        {isUploading && (
-          <View style={styles.uploadingContainer}>
-            <Text style={styles.uploadingText}>上传中...</Text>
-          </View>
-        )}
-
-        {/* 上传按钮 */}
-        {selectedFiles.length > 0 && !isUploading && (
-          <View style={styles.uploadContainer}>
-            <Button
-              mode="contained"
-              onPress={uploadFiles}
-              style={styles.uploadButton}
-              icon="cloud-upload"
-            >
-              上传文件
-            </Button>
-          </View>
-        )}
-
-        {/* 已选择的文件列表 */}
-        {selectedFiles.length > 0 && (
-          <View style={styles.filesContainer}>
-            <View style={styles.filesHeader}>
-              <Text style={styles.filesTitle}>
-                已选择文件 ({selectedFiles.length}
-                {multiple ? `/${maxFiles}` : ""})
-              </Text>
-              {selectedFiles.length > 0 && !isUploading && (
-                <Button
-                  mode="text"
-                  onPress={clearAllFiles}
-                  textColor="#FF6B6B"
-                  compact
-                >
-                  清空
-                </Button>
-              )}
-            </View>
-
-            {selectedFiles.map((file, index) => {
-              const uploadResult = uploadResults[index];
-              return (
-                <View key={index} style={styles.fileItem}>
-                  <View style={styles.fileInfo}>
-                    <Text style={styles.fileIcon}>
-                      {getFileTypeIcon(file.mimeType || file.type)}
+          {selectedFiles.map((file, index) => {
+            const uploadResult = uploadResults[index];
+            return (
+              <View key={index} style={styles.fileItem}>
+                <View style={styles.fileInfo}>
+                  <Text style={styles.fileIcon}>
+                    {getFileTypeIcon(file.mimeType || file.type)}
+                  </Text>
+                  <View style={styles.fileDetails}>
+                    <Text style={styles.fileName} numberOfLines={1}>
+                      {file.name}
                     </Text>
-                    <View style={styles.fileDetails}>
-                      <Text style={styles.fileName} numberOfLines={1}>
-                        {file.name}
+                    <Text style={styles.fileSize}>
+                      {getFileSizeText(file.size)}
+                    </Text>
+                    {uploadResult && (
+                      <Text
+                        style={[
+                          styles.uploadStatus,
+                          {
+                            color: uploadResult.success ? "#4CAF50" : "#F44336",
+                          },
+                        ]}
+                      >
+                        {uploadResult.success
+                          ? "✅ 上传成功"
+                          : `❌ 上传失败: ${uploadResult.error}`}
                       </Text>
-                      <Text style={styles.fileSize}>
-                        {getFileSizeText(file.size)}
-                      </Text>
-                      {uploadResult && (
-                        <Text
-                          style={[
-                            styles.uploadStatus,
-                            {
-                              color: uploadResult.success
-                                ? "#4CAF50"
-                                : "#F44336",
-                            },
-                          ]}
-                        >
-                          {uploadResult.success
-                            ? "✅ 上传成功"
-                            : `❌ 上传失败: ${uploadResult.error}`}
-                        </Text>
-                      )}
-                    </View>
+                    )}
                   </View>
-                  {!isUploading && (
-                    <IconButton
-                      icon="close"
-                      size={20}
-                      onPress={() => removeFile(index)}
-                      iconColor="#FF6B6B"
-                    />
-                  )}
                 </View>
-              );
-            })}
-          </View>
-        )}
-
-        {/* 平台提示 */}
-        <View style={styles.platformTip}>
-          <Text style={styles.tipText}>
-            {Platform.OS === "web"
-              ? "Web端支持：文件选择、相册图片"
-              : "App端支持：文件选择、相册图片（可编辑）、拍照上传（直接拍照）"}
-          </Text>
+                {!isUploading && (
+                  <IconButton
+                    icon="close"
+                    size={20}
+                    onPress={() => removeFile(index)}
+                    iconColor="#FF6B6B"
+                  />
+                )}
+              </View>
+            );
+          })}
         </View>
-      </Card.Content>
-    </Card>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginVertical: 8,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-  },
-  content: {
-    padding: 16,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 8,
-    color: "#333",
-  },
-  description: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 16,
-    lineHeight: 20,
-  },
-  buttonContainer: {
-    marginBottom: 16,
-  },
   actionButtons: {
     flexDirection: "row",
     gap: 8,
@@ -438,17 +460,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#666",
   },
-  platformTip: {
-    marginTop: 12,
-    padding: 8,
-    backgroundColor: "#E3F2FD",
-    borderRadius: 6,
-  },
-  tipText: {
-    fontSize: 12,
-    color: "#1976D2",
-    textAlign: "center",
-  },
   // 上传相关样式
   uploadingContainer: {
     marginVertical: 16,
@@ -460,13 +471,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     textAlign: "center",
-  },
-  uploadContainer: {
-    marginVertical: 16,
-    alignItems: "center",
-  },
-  uploadButton: {
-    minWidth: 120,
   },
   uploadStatus: {
     fontSize: 12,
