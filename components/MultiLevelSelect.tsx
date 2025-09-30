@@ -10,11 +10,7 @@ import {
 } from "react-native-paper";
 import { useSelectModal } from "./hooks/useSelectModal";
 import { selectStyles } from "./styles/selectStyles";
-import {
-  buildOptionPath,
-  getParentOptions,
-  getPathDisplayText,
-} from "./utils/selectUtils";
+import { buildOptionPath, getPathDisplayText } from "./utils/selectUtils";
 
 interface SelectOption {
   id?: string;
@@ -54,6 +50,7 @@ export default function MultiLevelSelect({
   const [currentLevel, setCurrentLevel] = useState(0);
   const [selectedPath, setSelectedPath] = useState<SelectOption[]>([]);
   const [currentOptions, setCurrentOptions] = useState<SelectOption[]>(options);
+  const [selectedValue, setSelectedValue] = useState<string>("");
   const [displayValue, setDisplayValue] = useState<string>("");
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -75,15 +72,42 @@ export default function MultiLevelSelect({
     }
   }, [value, options]);
 
+  // 当模态框显示时，重新初始化选中状态
+  useEffect(() => {
+    if (visible && value && options.length > 0) {
+      initializeSelection(value);
+    } else if (visible) {
+      // 如果没有value，重置到初始状态
+      setCurrentLevel(0);
+      setSelectedPath([]);
+      setCurrentOptions(options);
+    }
+  }, [visible]);
+
   // 初始化选中状态
   const initializeSelection = (targetValue: string) => {
     const path = buildOptionPath(options, targetValue);
+    setSelectedValue(targetValue);
     if (path.length > 0) {
       setSelectedPath(path);
-      setCurrentLevel(path.length - 1);
       setDisplayValue(getPathDisplayText(path));
+
+      // 如果选中的是最后一级（没有子级），显示其父级的子级选项
       const lastOption = path[path.length - 1];
-      setCurrentOptions(lastOption?.children || []);
+      if (lastOption.children?.length) {
+        // 选中的选项有子级，显示其子级
+        setCurrentLevel(path.length);
+        setCurrentOptions(lastOption.children);
+      } else {
+        // 选中的选项没有子级，显示其父级的子级选项
+        setCurrentLevel(path.length - 1);
+        if (path.length > 1) {
+          const parentOption = path[path.length - 2];
+          setCurrentOptions(parentOption.children || []);
+        } else {
+          setCurrentOptions(options);
+        }
+      }
     }
   };
 
@@ -99,15 +123,18 @@ export default function MultiLevelSelect({
     } else {
       // 选择完成
       const fullPath = newPath
-        .map((opt) => opt.label || opt.dictLabel)
+        .map((opt) => opt.name || opt.dictLabel)
         .join(" - ");
       setDisplayValue(fullPath);
 
       onSelect(option.value || option.dictValue, fullPath);
       hideModal();
-      setCurrentLevel(0);
-      setSelectedPath([]);
-      setCurrentOptions(options);
+      // 不立即重置状态，让模态框关闭后再重置
+      setTimeout(() => {
+        setCurrentLevel(0);
+        setSelectedPath([]);
+        setCurrentOptions(options);
+      }, 300);
     }
   };
 
@@ -117,17 +144,18 @@ export default function MultiLevelSelect({
       setCurrentLevel(newLevel);
       const newPath = selectedPath.slice(0, newLevel);
       setSelectedPath(newPath);
-      setCurrentOptions(getParentOptions(options, newPath));
+
+      // 根据新的路径设置当前选项
+      if (newLevel === 0) {
+        setCurrentOptions(options);
+      } else {
+        const parentOption = newPath[newLevel - 1];
+        setCurrentOptions(parentOption?.children || []);
+      }
+
       // 滚动到顶部
       setTimeout(() => scrollToTop(), 100);
     }
-  };
-
-  const resetSelection = () => {
-    setCurrentLevel(0);
-    setSelectedPath([]);
-    setCurrentOptions(options);
-    setDisplayValue("");
   };
 
   return (
@@ -156,7 +184,7 @@ export default function MultiLevelSelect({
         onRequestClose={hideModal}
       >
         <TouchableOpacity style={selectStyles.modalOverlay} onPress={hideModal}>
-          <View style={selectStyles.modalContent}>
+          <TouchableOpacity style={selectStyles.modalContent} activeOpacity={1}>
             {/* 面包屑导航 */}
             {currentLevel > 0 && (
               <>
@@ -179,23 +207,16 @@ export default function MultiLevelSelect({
                                 setSelectedPath(newPath);
                                 setCurrentLevel(index + 1);
 
+                                // 根据点击的面包屑项设置当前选项
                                 if (index === 0) {
                                   setCurrentOptions(options);
                                 } else {
-                                  let parentOptions = options;
-                                  for (let i = 0; i < index; i++) {
-                                    const parent = parentOptions.find(
-                                      (opt) =>
-                                        (opt.id || opt.dictCode) ===
-                                        (selectedPath[i].id ||
-                                          selectedPath[i].dictCode)
-                                    );
-                                    if (parent?.children) {
-                                      parentOptions = parent.children;
-                                    }
-                                  }
-                                  setCurrentOptions(parentOptions);
+                                  const parentOption = newPath[index - 1];
+                                  setCurrentOptions(
+                                    parentOption?.children || []
+                                  );
                                 }
+
                                 // 滚动到顶部
                                 setTimeout(() => scrollToTop(), 100);
                               }}
@@ -215,45 +236,44 @@ export default function MultiLevelSelect({
                         ))}
                     </View>
                   </ScrollView>
+                  {/* 返回上级按钮放在面包屑右侧 */}
+                  <Button
+                    mode="text"
+                    onPress={goBack}
+                    compact
+                    style={selectStyles.actionButton}
+                  >
+                    返回上级
+                  </Button>
                 </View>
                 <Divider />
               </>
             )}
-
-            {/* 操作按钮 */}
-            <View style={selectStyles.actionContainer}>
-              {currentLevel > 0 && (
-                <Button
-                  mode="text"
-                  onPress={goBack}
-                  compact
-                  style={selectStyles.actionButton}
-                >
-                  返回上级
-                </Button>
-              )}
-              <Button
-                mode="text"
-                onPress={resetSelection}
-                compact
-                style={selectStyles.actionButton}
-              >
-                重新选择
-              </Button>
-            </View>
-
-            {currentLevel > 0 && <Divider />}
 
             {/* 选项列表 */}
             <ScrollView ref={scrollViewRef} style={selectStyles.optionsList}>
               {currentOptions.map((option, index) => (
                 <React.Fragment key={option.id || option.dictCode || index}>
                   <TouchableOpacity
-                    style={selectStyles.optionItem}
+                    style={{
+                      ...selectStyles.optionItem,
+                      ...(option.value === selectedValue
+                        ? selectStyles.selectedOptionItem
+                        : {}),
+                    }}
                     onPress={() => handleOptionSelect(option)}
                   >
                     <View style={selectStyles.optionText}>
-                      <TextPaper>{option.name || option.dictLabel}</TextPaper>
+                      <TextPaper
+                        style={{
+                          ...selectStyles.optionText,
+                          ...(option.value === selectedValue
+                            ? selectStyles.selectedOptionText
+                            : {}),
+                        }}
+                      >
+                        {option.name || option.dictLabel}
+                      </TextPaper>
                       {option.children?.length && (
                         <AntDesign name="right" size={16} color="darkgray" />
                       )}
@@ -263,7 +283,7 @@ export default function MultiLevelSelect({
                 </React.Fragment>
               ))}
             </ScrollView>
-          </View>
+          </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
     </View>

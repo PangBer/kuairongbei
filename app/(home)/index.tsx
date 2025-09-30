@@ -48,6 +48,13 @@ const menuItems: MenuItem[] = [
     ) as React.ReactNode,
     link: "/contact-service" as RelativePathString,
   },
+  {
+    title: "Demo",
+    icon: (
+      <AntDesign name="experiment" size={24} color="#1976D2" />
+    ) as React.ReactNode,
+    link: "/demo" as RelativePathString,
+  },
 ];
 
 export default function HomeScreen() {

@@ -22,7 +22,7 @@ export const selectStyles = StyleSheet.create({
     elevation: 8,
   },
   optionsList: {
-    maxHeight: 300,
+    maxHeight: 500,
   },
   optionItem: {
     flexDirection: "row",
@@ -54,6 +54,9 @@ export const selectStyles = StyleSheet.create({
   },
   // MultiLevelSelect 专用样式
   breadcrumbContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 8,
     backgroundColor: "#F5F5F5",
