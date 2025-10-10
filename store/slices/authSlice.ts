@@ -50,9 +50,12 @@ export const login = createAsyncThunk(
 // 异步 thunk：登出
 export const logout = createAsyncThunk(
   "auth/logout",
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, dispatch }) => {
     try {
       await removeToken();
+      debugger;
+      // 清除所有相关的state
+      dispatch(clearAllUserData());
       return true;
     } catch (error) {
       return rejectWithValue("登出失败");
@@ -87,6 +90,12 @@ const authSlice = createSlice({
     },
     // 清除错误
     clearError: (state) => {
+      state.error = null;
+    },
+    // 清除所有用户数据
+    clearAllUserData: (state) => {
+      state.isAuthenticated = false;
+      state.userInfo = null;
       state.error = null;
     },
     // 注意：updateUserInfo 现在是异步 thunk，不再需要同步 reducer
@@ -138,6 +147,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = false;
         state.userInfo = null;
+        state.error = null;
       })
       .addCase(logout.rejected, (state, action) => {
         state.isLoading = false;
@@ -162,7 +172,7 @@ const authSlice = createSlice({
 });
 
 // 导出 actions
-export const { setLoading, clearError } = authSlice.actions;
+export const { setLoading, clearError, clearAllUserData } = authSlice.actions;
 
 // 导出 reducer
 export default authSlice.reducer;

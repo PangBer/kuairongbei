@@ -1,8 +1,8 @@
-import req from "@/utils/fetch";
+import req, { getGlobalClearAuthState, showToast } from "@/utils/fetch";
 import { UploadedFile } from "@/utils/fileUpload";
-import { getToken } from "@/utils/token";
+import { getToken, removeToken } from "@/utils/token";
+import { router } from "expo-router";
 import { Platform } from "react-native";
-
 /**
  * 文件上传响应
  */
@@ -154,7 +154,24 @@ export class FileUploadService {
 
       const result = await response.json();
       if (result.code !== 200) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        if (result.code === 401) {
+          showToast("error", "未授权", "请先登录");
+
+          // 清除所有认证状态
+          try {
+            const clearAuthState = getGlobalClearAuthState();
+
+            await removeToken();
+            clearAuthState?.();
+          } catch (error) {
+            console.error("清除token失败:", error);
+          }
+
+          // 使用 expo-router 导航到登录页面
+          router.replace("/login");
+        } else {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
       }
       return {
         success: true,

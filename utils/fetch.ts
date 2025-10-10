@@ -5,13 +5,25 @@ import {
   encryptWithAes,
   generateAesKey,
 } from "@/utils/crypto";
+import { router } from "expo-router";
 import { getToken } from "./token";
 // 全局 Toast 管理器
 let globalToastActions: any = null;
+// 全局认证状态清除函数
+let globalClearAuthState: (() => void) | null = null;
 
 // 设置全局 Toast actions
 export const setGlobalToastActions = (actions: any) => {
   globalToastActions = actions;
+};
+
+// 设置全局认证状态清除函数
+export const setGlobalClearAuthState = (clearAuthState: () => void) => {
+  globalClearAuthState = clearAuthState;
+};
+
+export const getGlobalClearAuthState = () => {
+  return globalClearAuthState;
 };
 
 // 显示 Toast 的辅助函数
@@ -95,8 +107,20 @@ const responseInterceptor = async (response: Response) => {
   }
 
   if (data.code !== 200) {
+    if (data.code === 401) {
+      showToast("error", "未授权", "请先登录");
+
+      // 清除所有认证状态
+      if (globalClearAuthState) {
+        globalClearAuthState();
+      }
+
+      // 使用 expo-router 导航到登录页面
+      router.replace("/login");
+    }
     // 显示业务错误 Toast
     showToast("error", "操作失败", data.msg || "请求处理失败");
+
     return Promise.reject(data);
   }
 

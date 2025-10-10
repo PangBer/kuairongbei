@@ -69,7 +69,7 @@ export default function GatherScreen() {
   const { showSuccess, showError } = useToastActions();
 
   const [loading, setLoading] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(4);
   const totalSteps = 4;
 
   // 步骤数据
@@ -89,7 +89,7 @@ export default function GatherScreen() {
     formState: { errors, isValid },
     trigger,
   } = useForm<FormData>({
-    mode: "onBlur",
+    mode: "all",
     defaultValues: {
       name: "",
       phone: "",
@@ -263,8 +263,9 @@ export default function GatherScreen() {
             </TextPaper>
             <FileUpload
               onFileSelect={(file) => onChange(file)}
-              maxFiles={2}
+              maxFiles={1}
               multiple={true}
+              allowedSources={["gallery", "camera", "document"]}
               showPreview={true}
             />
           </View>
@@ -283,12 +284,11 @@ export default function GatherScreen() {
         return renderSelect(option);
       case "levelSelect":
         return renderMultiLevelSelect(option);
+      case "checkbox":
+        return renderCheckbox(option);
       case "upload":
         return renderFileUpload(option);
       default:
-        if (option.haveAcore && typeof option.haveAcore === "number") {
-          return renderCheckbox(option);
-        }
         return renderTextInput(option);
     }
   };
@@ -574,7 +574,7 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 4,
     borderRadius: 8,
   },
   previousButton: {

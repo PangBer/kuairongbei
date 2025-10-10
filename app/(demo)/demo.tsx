@@ -197,30 +197,6 @@ export default function HomeScreen() {
           </Card.Content>
         </Card>
 
-        {/* 文件上传功能 */}
-        <Card style={styles.detailCard}>
-          <Card.Content style={styles.detailCardContent}>
-            <View style={styles.detailHeader}>
-              <View style={styles.detailIconContainer}>
-                <Text style={styles.detailIcon}>📁</Text>
-              </View>
-              <View style={styles.detailInfo}>
-                <Text style={styles.detailTitle}>文件上传</Text>
-                <Text style={styles.detailDescription}>
-                  跨平台文件上传，支持多种上传方式
-                </Text>
-              </View>
-            </View>
-            <View style={styles.detailActions}>
-              <Link href="./file-upload" asChild>
-                <Button mode="contained" compact style={styles.detailButton}>
-                  上传演示
-                </Button>
-              </Link>
-            </View>
-          </Card.Content>
-        </Card>
-
         {/* 选择器功能 */}
         <Card style={styles.detailCard}>
           <Card.Content style={styles.detailCardContent}>
@@ -236,7 +212,7 @@ export default function HomeScreen() {
               </View>
             </View>
             <View style={styles.detailActions}>
-              <Link href="./select-demo" asChild>
+              <Link href="/select-demo" asChild>
                 <Button mode="contained" compact style={styles.detailButton}>
                   选择器演示
                 </Button>

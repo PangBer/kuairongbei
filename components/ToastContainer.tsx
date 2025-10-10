@@ -1,5 +1,5 @@
-import { useToast, useToastActions } from "@/store/hooks";
-import { setGlobalToastActions } from "@/utils/fetch";
+import { useAuthActions, useToast, useToastActions } from "@/store/hooks";
+import { setGlobalClearAuthState, setGlobalToastActions } from "@/utils/fetch";
 import React, { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import Toast from "./Toast";
@@ -8,6 +8,7 @@ export default function ToastContainer() {
   const { toasts, isVisible } = useToast();
   const { removeToast, showSuccess, showError, showWarning, showInfo } =
     useToastActions();
+  const { logout } = useAuthActions();
 
   // 设置全局 Toast actions，供 fetch 工具使用
   useEffect(() => {
@@ -18,6 +19,11 @@ export default function ToastContainer() {
       showInfo,
     });
   }, [showSuccess, showError, showWarning, showInfo]);
+
+  // 设置全局清除认证状态函数，供 fetch 工具使用
+  useEffect(() => {
+    setGlobalClearAuthState(logout);
+  }, [logout]);
 
   // 自动关闭逻辑已移至 Toast 组件内部处理
 

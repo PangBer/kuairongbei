@@ -43,8 +43,8 @@ export const generateWebLink = (
   params?: Record<string, any>
 ): string => {
   const protocol = Platform.OS === "web" ? window.location.protocol : "https:";
-  const hostname = "192.168.1.4";
-  const port = Platform.OS === "web" ? window.location.port : "8081";
+  const hostname = Platform.OS === "web" ? window.location.hostname : "";
+  const port = Platform.OS === "web" ? window.location.port : "";
 
   const baseUrl = `${protocol}//${hostname}${port ? `:${port}` : ""}`;
   const url = new URL(path, baseUrl);

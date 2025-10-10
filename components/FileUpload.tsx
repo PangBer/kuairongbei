@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { Alert, Platform, StyleSheet, View } from "react-native";
-import { Button, IconButton, Text } from "react-native-paper";
+import { useToastActions } from "@/store/hooks";
+import React, { useMemo, useState } from "react";
+import { Platform, StyleSheet, View } from "react-native";
+import { Button, IconButton, Modal, Portal, Text } from "react-native-paper";
 
 import {
   BatchUploadResponse,
@@ -8,7 +9,6 @@ import {
   UploadResponse,
 } from "@/service/fileUploadService";
 
-import { showInfo } from "@/store/slices/toastSlice";
 import {
   FileUploadConfig,
   getFileSizeText,
@@ -30,6 +30,8 @@ interface FileUploadProps {
   disabled?: boolean;
   autoUpload?: boolean; // 是否自动上传
   additionalData?: Record<string, any>; // 额外数据
+  allowedSources?: Array<"camera" | "gallery" | "document">; // 允许的来源
+  buttonTitle?: string; // 触发按钮标题
 }
 
 export default function FileUpload({
@@ -43,10 +45,25 @@ export default function FileUpload({
   disabled = false,
   autoUpload = true,
   additionalData,
+  allowedSources,
+  buttonTitle = "上传文件",
 }: FileUploadProps) {
   const [selectedFiles, setSelectedFiles] = useState<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadResults, setUploadResults] = useState<UploadResponse[]>([]);
+  const [sourceSheetVisible, setSourceSheetVisible] = useState(false);
+
+  const { showError, showInfo } = useToastActions();
+
+  const effectiveSources = useMemo<Array<"camera" | "gallery" | "document">>(
+    () =>
+      allowedSources && allowedSources.length > 0
+        ? allowedSources
+        : Platform.OS === "web"
+        ? ["document", "gallery"]
+        : ["document", "gallery", "camera"],
+    [allowedSources]
+  );
 
   // 处理文件选择
   const handleFileSelect = async (
@@ -79,10 +96,7 @@ export default function FileUpload({
 
           if (newFiles.length > maxFiles) {
             // Alert.alert("文件数量超限", `最多只能选择 ${maxFiles} 个文件`);
-            showInfo({
-              title: "文件数量超限",
-              message: `最多只能选择 ${maxFiles} 个文件`,
-            });
+            showInfo("系统提醒", `最多只能选择 ${maxFiles} 个文件`);
             // return;
             newFiles.splice(maxFiles, newFiles.length - maxFiles);
           }
@@ -106,7 +120,8 @@ export default function FileUpload({
       }
     } catch (error) {
       console.error("文件选择失败:", error);
-      Alert.alert("选择失败", "文件选择过程中出现错误");
+      // Alert.alert("选择失败", "文件选择过程中出现错误");
+      showError("系统错误", "文件选择过程中出现错误");
     }
   };
 
@@ -120,7 +135,7 @@ export default function FileUpload({
         console.log("文件删除成功:", uploadResult.data.fileId);
       } catch (error) {
         console.error("文件删除失败:", error);
-        Alert.alert("删除失败", "服务器端文件删除失败，但已从列表中移除");
+        showError("系统错误", "文件删除失败");
       }
     }
 
@@ -149,9 +164,8 @@ export default function FileUpload({
     if (deletePromises.length > 0) {
       try {
         await Promise.all(deletePromises);
-        console.log("批量删除文件完成");
       } catch (error) {
-        console.error("批量删除文件失败:", error);
+        showError("系统错误:", '批量删除文件失败"');
       }
     }
 
@@ -244,8 +258,8 @@ export default function FileUpload({
 
         // 如果有失败的文件，显示提示
         if (failedFiles.length > 0) {
-          Alert.alert(
-            "部分文件上传失败",
+          showInfo(
+            "系统提醒",
             `有 ${failedFiles.length} 个文件上传失败，已自动移除`
           );
         }
@@ -269,7 +283,7 @@ export default function FileUpload({
           onFileSelect?.([]);
 
           const errorMessage = response.error || "上传失败";
-          Alert.alert("上传失败", errorMessage);
+          showError("系统错误", errorMessage);
           onUploadError?.(errorMessage);
         }
       }
@@ -281,7 +295,7 @@ export default function FileUpload({
       setUploadResults([]);
       onFileSelect?.([]);
 
-      Alert.alert("上传失败", errorMessage);
+      showError("系统错误", errorMessage);
       onUploadError?.(errorMessage);
     } finally {
       setIsUploading(false);
@@ -290,48 +304,75 @@ export default function FileUpload({
 
   return (
     <View>
-      {/* 单独的操作按钮 */}
-      <View style={styles.actionButtons}>
-        <Button
-          mode="outlined"
-          onPress={() => handleFileSelect("document")}
-          disabled={disabled || isUploading}
-          style={styles.actionButton}
-          icon="file-document"
-          compact
-        >
-          文件
-        </Button>
-        <Button
-          mode="outlined"
-          onPress={() => handleFileSelect("gallery")}
-          disabled={disabled || isUploading}
-          style={styles.actionButton}
-          icon="image"
-          compact
-        >
-          相册
-        </Button>
-        {Platform.OS !== "web" && (
-          <Button
-            mode="outlined"
-            onPress={() => handleFileSelect("camera")}
-            disabled={disabled || isUploading}
-            style={styles.actionButton}
-            icon="camera"
-            compact
-          >
-            拍照
-          </Button>
-        )}
-      </View>
+      {/* 统一触发按钮 */}
+      <Button
+        mode="contained"
+        onPress={() => setSourceSheetVisible(true)}
+        disabled={disabled || isUploading}
+        icon="upload"
+      >
+        {buttonTitle}
+      </Button>
 
-      {/* 上传状态 */}
-      {isUploading && (
-        <View style={styles.uploadingContainer}>
-          <Text style={styles.uploadingText}>上传中...</Text>
-        </View>
-      )}
+      {/* 底部抽屉：来源选择 */}
+      <Portal>
+        <Modal
+          visible={sourceSheetVisible}
+          onDismiss={() => setSourceSheetVisible(false)}
+          contentContainerStyle={styles.bottomSheet}
+        >
+          <View style={styles.sheetHandle} />
+          <Text style={styles.sheetTitle}>选择上传来源</Text>
+          <View style={styles.sheetOptions}>
+            {effectiveSources.includes("document") && (
+              <Button
+                mode="outlined"
+                icon="file-document"
+                style={styles.sheetOptionButton}
+                onPress={async () => {
+                  setSourceSheetVisible(false);
+                  await handleFileSelect("document");
+                }}
+              >
+                文件
+              </Button>
+            )}
+            {effectiveSources.includes("gallery") && (
+              <Button
+                mode="outlined"
+                icon="image"
+                style={styles.sheetOptionButton}
+                onPress={async () => {
+                  setSourceSheetVisible(false);
+                  await handleFileSelect("gallery");
+                }}
+              >
+                相册
+              </Button>
+            )}
+            {effectiveSources.includes("camera") && Platform.OS !== "web" && (
+              <Button
+                mode="outlined"
+                icon="camera"
+                style={styles.sheetOptionButton}
+                onPress={async () => {
+                  setSourceSheetVisible(false);
+                  await handleFileSelect("camera");
+                }}
+              >
+                拍照
+              </Button>
+            )}
+          </View>
+          <Button
+            mode="text"
+            onPress={() => setSourceSheetVisible(false)}
+            textColor="#666"
+          >
+            取消
+          </Button>
+        </Modal>
+      </Portal>
 
       {/* 已选择的文件列表 */}
       {selectedFiles.length > 0 && (
@@ -402,14 +443,43 @@ export default function FileUpload({
 }
 
 const styles = StyleSheet.create({
-  actionButtons: {
-    flexDirection: "row",
-    gap: 8,
-    flexWrap: "wrap",
+  bottomSheet: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    padding: 16,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
   },
-  actionButton: {
+  sheetHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: "#E0E0E0",
+    alignSelf: "center",
+    borderRadius: 2,
+    marginBottom: 12,
+  },
+  sheetTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  sheetOptions: {
+    flexDirection: "column",
+    gap: 8,
+    marginBottom: 8,
+    flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  sheetOptionButton: {
     flex: 1,
-    minWidth: 80,
+    minWidth: "100%",
+    marginBottom: 8,
   },
   filesContainer: {
     marginTop: 16,

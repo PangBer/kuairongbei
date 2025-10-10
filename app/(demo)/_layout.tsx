@@ -9,7 +9,7 @@ export default () => {
         <Stack.Screen name="qrcode/index" />
         <Stack.Screen name="qrcode-scanner/index" />
         <Stack.Screen name="contact-service/index" />
-        <Stack.Screen name="file-upload/index" />
+        <Stack.Screen name="select-demo/index" />
       </Stack>
     </AuthGuard>
   );
