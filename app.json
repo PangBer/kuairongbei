@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "kuairongbei",
-    "slug": "kuairongbei",
+    "name": "容羿融",
+    "slug": "rongyirong",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "kuairongbei",
+    "scheme": "rongyirong.app",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -17,9 +17,8 @@
         "NSPhotoLibraryAddUsageDescription": "This app needs access to save photos to your photo library",
         "NSAppTransportSecurity": {
           "NSExceptionDomains": {
-            "8.156.82.112": {
-              "NSExceptionAllowsInsecureHTTPLoads": true,
-              "NSExceptionMinimumTLSVersion": "1.0",
+            "ryr123.com": {
+              "NSExceptionMinimumTLSVersion": "1.2",
               "NSIncludesSubdomains": true
             }
           }
@@ -27,7 +26,7 @@
       }
     },
     "android": {
-      "package": "com.kuairongbei.app",
+      "package": "com.andriod.rongyirong",
       "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -45,12 +44,24 @@
         "android.permission.READ_MEDIA_IMAGES",
         "android.permission.READ_MEDIA_VIDEO",
         "android.permission.INTERNET",
-        "android.permission.ACCESS_NETWORK_STATE"
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.ACCESS_MEDIA_LOCATION",
+        "android.permission.READ_MEDIA_AUDIO"
       ]
     },
     "web": {
+      "basePath": "/h5test/",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
+    },
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff",
+      "dark": {
+        "backgroundColor": "#151718"
+      }
     },
     "plugins": [
       "expo-router",
@@ -93,7 +104,8 @@
           "iCloudContainerEnvironment": "Production"
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -102,8 +114,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "479692e2-a986-40ec-bbfb-dbee6ef7b3cc"
+        "projectId": "b404ab0a-b602-4440-a516-0e20140fb466"
       }
-    }
+    },
+    "owner": "xiongyi"
   }
 }

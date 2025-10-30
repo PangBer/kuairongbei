@@ -6,9 +6,16 @@ import { Button, Card, IconButton, Text } from "react-native-paper";
 interface ToastProps {
   toast: ToastItem;
   onRemove: (id: string) => void;
+  onRemoveAll?: () => void;
+  totalCount?: number;
 }
 
-export default function Toast({ toast, onRemove }: ToastProps) {
+export default function Toast({
+  toast,
+  onRemove,
+  onRemoveAll,
+  totalCount,
+}: ToastProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(-100)).current;
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -114,7 +121,13 @@ export default function Toast({ toast, onRemove }: ToastProps) {
     if (toast.onClose) {
       toast.onClose();
     }
-    handleClose();
+    // 如果有多个 toast，则关闭全部；否则关闭当前
+    if ((totalCount ?? 1) > 1 && onRemoveAll) {
+      // 直接清除全部（不逐个动画）
+      onRemoveAll();
+    } else {
+      handleClose();
+    }
   };
 
   return (

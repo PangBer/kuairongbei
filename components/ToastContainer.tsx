@@ -6,8 +6,14 @@ import Toast from "./Toast";
 
 export default function ToastContainer() {
   const { toasts, isVisible } = useToast();
-  const { removeToast, showSuccess, showError, showWarning, showInfo } =
-    useToastActions();
+  const {
+    removeToast,
+    clearAllToasts,
+    showSuccess,
+    showError,
+    showWarning,
+    showInfo,
+  } = useToastActions();
   const { logout } = useAuthActions();
 
   // 设置全局 Toast actions，供 fetch 工具使用
@@ -34,7 +40,13 @@ export default function ToastContainer() {
   return (
     <View style={styles.container}>
       {toasts.map((toast: any) => (
-        <Toast key={toast.id} toast={toast} onRemove={removeToast} />
+        <Toast
+          key={toast.id}
+          toast={toast}
+          onRemove={removeToast}
+          onRemoveAll={clearAllToasts}
+          totalCount={toasts.length}
+        />
       ))}
     </View>
   );

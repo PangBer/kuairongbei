@@ -1,5 +1,5 @@
 import { useAuth, useAuthActions } from "@/store/hooks";
-import { router, usePathname } from "expo-router";
+import { usePathname, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
@@ -12,7 +12,7 @@ export function AuthGuard({ children, requireAuth = true }: AuthGuardProps) {
   const { isAuthenticated, isLoading } = useAuth();
   const { checkAuth } = useAuthActions();
   const pathname = usePathname();
-
+  const router = useRouter();
   // 初始化时检查认证状态，只在组件挂载时执行一次
   useEffect(() => {
     // 只有在未初始化时才检查认证状态
@@ -48,12 +48,6 @@ export function AuthGuard({ children, requireAuth = true }: AuthGuardProps) {
         <Text style={styles.redirectText}>重定向到登录页面...</Text>
       </View>
     );
-  }
-
-  // 不需要登录但已登录（可选：重定向到认证页面）
-  if (!requireAuth && isAuthenticated) {
-    // 这里可以选择是否重定向到认证页面
-    // router.replace('/(auth)');
   }
 
   return <>{children}</>;

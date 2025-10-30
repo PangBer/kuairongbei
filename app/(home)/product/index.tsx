@@ -4,7 +4,7 @@ import globalStyles from "@/styles/globalStyles";
 export default () => {
   return (
     <ThemedView style={globalStyles.globalContainer}>
-      <ThemedText>留资</ThemedText>
+      <ThemedText>产品</ThemedText>
     </ThemedView>
   );
 };

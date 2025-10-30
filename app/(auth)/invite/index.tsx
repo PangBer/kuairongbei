@@ -1,14 +1,10 @@
-import { StyleSheet, Text, View } from "react-native";
-export default function InviteScreen() {
-  return (
-    <View style={styles.container}>
-      <Text>Invite</Text>
-    </View>
-  );
-}
+import { ThemedText, ThemedView } from "@/components/ui";
+import globalStyles from "@/styles/globalStyles";
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
+export default () => {
+  return (
+    <ThemedView style={globalStyles.globalContainer}>
+      <ThemedText>邀请</ThemedText>
+    </ThemedView>
+  );
+};

@@ -1,7 +1,7 @@
 import { MD3DarkTheme, MD3LightTheme } from "react-native-paper";
 
 // 自定义主题色调
-const customColors = {
+export const customColors = {
   primary: "#4a9aff",
   primaryContainer: "#e3f2fd",
   secondary: "#4a9aff",
@@ -153,12 +153,37 @@ const customTypography = {
 // 简约设计圆角配置
 const customRoundness = 12;
 
+const tintColorLight = "#0a7ea4";
+const tintColorDark = "#fff";
+export const Colors = {
+  light: {
+    text: "#11181C",
+    background: "#ffffff",
+    foreground: "#ebebeb",
+    tint: tintColorLight,
+    icon: "#687076",
+    tabIconDefault: "#687076",
+    tabIconSelected: tintColorLight,
+  },
+  dark: {
+    text: "#ECEDEE",
+    background: "#000000",
+    foreground: "#292929",
+    tint: tintColorDark,
+    icon: "#9BA1A6",
+    tabIconDefault: "#9BA1A6",
+    tabIconSelected: tintColorDark,
+  },
+};
+
 // 创建自定义主题
 export const customLightTheme = {
   ...MD3LightTheme,
   colors: {
     ...MD3LightTheme.colors,
     ...customColors,
+    background: Colors.light.background,
+    foreground: Colors.light.foreground,
   },
   typography: customTypography,
   roundness: customRoundness,
@@ -169,33 +194,22 @@ export const customDarkTheme = {
   colors: {
     ...MD3DarkTheme.colors,
     ...customColors,
+    background: Colors.dark.background,
+    foreground: Colors.dark.foreground,
     surface: "#1a1a1a",
-    background: "#121212",
     onSurface: "#ffffff",
-    onBackground: "#ffffff",
     onSurfaceVariant: "#cccccc",
+    elevation: {
+      level0: "transparent",
+      level1: "#1a1a1a",
+      level2: "#1e1e1e",
+      level3: "#222222",
+      level4: "#252525",
+      level5: "#292929",
+    },
   },
   typography: customTypography,
   roundness: customRoundness,
 };
-const tintColorLight = "#0a7ea4";
-const tintColorDark = "#fff";
-export const Colors = {
-  light: {
-    text: "#11181C",
-    background: "#fff",
-    tint: tintColorLight,
-    icon: "#687076",
-    tabIconDefault: "#687076",
-    tabIconSelected: tintColorLight,
-  },
-  dark: {
-    text: "#ECEDEE",
-    background: "#151718",
-    tint: tintColorDark,
-    icon: "#9BA1A6",
-    tabIconDefault: "#9BA1A6",
-    tabIconSelected: tintColorDark,
-  },
-};
+
 export default customLightTheme;
