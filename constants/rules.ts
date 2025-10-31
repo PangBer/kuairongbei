@@ -50,20 +50,17 @@ export const Options1 = [
   {
     label: "姓名",
     prop: "name",
-    required: true,
     type: "text",
   },
   {
     label: "联系电话",
     prop: "phone",
-    required: true,
     type: "number",
     maxlength: 11,
   },
   {
     label: "身份证",
     prop: "idcard",
-    required: true,
     type: "text",
   },
   {

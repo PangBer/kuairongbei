@@ -2,7 +2,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { Platform } from "react-native";
 import { persistReducer, persistStore } from "redux-persist";
-import appSlice from "./slices/appSlice";
 import authSlice from "./slices/authSlice";
 import dictsSlice from "./slices/dictsSlice";
 import toastSlice from "./slices/toastSlice";
@@ -32,13 +31,6 @@ const authPersistConfig = {
   whitelist: ["isAuthenticated", "userInfo"], // 只持久化这些字段，不持久化 token
 };
 
-// 应用设置持久化配置
-const appPersistConfig = {
-  key: "app",
-  storage: getStorage(),
-  whitelist: ["settings", "isFirstLaunch"], // 只持久化这些字段
-};
-
 // 字典持久化配置
 const dictsPersistConfig = {
   key: "dicts",
@@ -46,19 +38,12 @@ const dictsPersistConfig = {
   whitelist: ["dicts", "lastUpdated"], // 只持久化这些字段
 };
 
-// Toast 持久化配置（不持久化，因为 Toast 是临时状态）
-const toastPersistConfig = {
-  key: "toast",
-  storage: getStorage(),
-  whitelist: [], // 不持久化 Toast 状态
-};
-
 // 根 reducer
+// 注意：不需要持久化的 reducer（如 toast）直接使用原始 reducer，不需要 persistReducer 包装
 const rootReducer = combineReducers({
   auth: persistReducer(authPersistConfig, authSlice),
-  app: persistReducer(appPersistConfig, appSlice),
   dicts: persistReducer(dictsPersistConfig, dictsSlice),
-  toast: persistReducer(toastPersistConfig, toastSlice),
+  toast: toastSlice, // 不需要持久化，直接使用原始 reducer
 });
 
 // 持久化根 reducer

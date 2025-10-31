@@ -2,7 +2,6 @@
 export * from "./hooks/baseHooks";
 
 // 导出所有功能 hooks
-export * from "./hooks/appHooks";
 export * from "./hooks/authHooks";
 export * from "./hooks/dictsHooks";
 export * from "./hooks/toastHooks";

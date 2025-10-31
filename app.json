@@ -51,7 +51,6 @@
       ]
     },
     "web": {
-      "basePath": "/h5test/",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },

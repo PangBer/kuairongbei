@@ -2,8 +2,10 @@ import { ThemedCard, ThemedText } from "@/components/ui";
 import globalStyles from "@/styles/globalStyles";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useState } from "react";
 import {
   Dimensions,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -13,10 +15,26 @@ import {
 const { width } = Dimensions.get("window");
 
 export default () => {
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
+  };
   return (
     <ScrollView
       style={globalStyles.globalContainer}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={["#007aff"]} // Android 下拉圈颜色
+          tintColor="#007aff" // iOS 下拉圈颜色
+          title="正在刷新..." // iOS 提示文本
+        />
+      }
     >
       {/* 顶部渐变头部区域 */}
       <LinearGradient
