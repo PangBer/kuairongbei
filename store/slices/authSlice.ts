@@ -53,7 +53,6 @@ export const logout = createAsyncThunk(
   async (_, { rejectWithValue, dispatch }) => {
     try {
       await removeToken();
-      debugger;
       // 清除所有相关的state
       dispatch(clearAllUserData());
       return true;

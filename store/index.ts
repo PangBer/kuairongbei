@@ -57,6 +57,13 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
       },
+      // 放宽不可变性检查的阈值，避免性能警告
+      // 如果状态很大且警告仍然频繁出现，可以设置为 false 完全禁用
+      immutableCheck: {
+        warnAfter: 128, // 提高到 128ms，默认是 32ms
+        // 如果警告仍然频繁，可以取消下面的注释以完全禁用
+        ignore: true,
+      },
     }),
 });
 
