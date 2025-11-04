@@ -495,7 +495,7 @@ export default function FileUpload({
                   <TouchableOpacity
                     onPress={() => removeFile(index)}
                     style={styles.closeIcon}
-                    activeOpacity={0.7}
+                    activeOpacity={0.8}
                   >
                     <AntDesign name="close" size={20} color="#ff6b6b" />
                   </TouchableOpacity>

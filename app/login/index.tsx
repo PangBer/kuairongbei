@@ -253,7 +253,7 @@ export default function LoginScreen() {
               <TouchableOpacity
                 style={styles.captchaImageContainer}
                 onPress={getImageCaptcha}
-                activeOpacity={0.7}
+                activeOpacity={0.8}
               >
                 {imageCaptchaLoading ? (
                   <ActivityIndicator size="small" />
@@ -261,6 +261,7 @@ export default function LoginScreen() {
                   <Image
                     source={{ uri: captchaImage }}
                     style={styles.captchaImage}
+                    resizeMode="contain"
                   />
                 ) : (
                   <ThemedText style={styles.captchaPlaceholder}>

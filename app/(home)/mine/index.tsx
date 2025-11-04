@@ -1,5 +1,4 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import {
@@ -21,68 +20,81 @@ interface MenuItem {
   link: RelativePathString;
 }
 
-// 菜单项数组 - 快融呗风格
-const menuItems: MenuItem[] = [
+// 功能服务项数组 - 根据图片设计
+const functionServices: MenuItem[] = [
   {
     title: "我的资料",
     icon: (
-      <AntDesign name="profile" size={20} color="#4a9aff" />
+      <AntDesign name="user" size={24} color="#4a9aff" />
     ) as React.ReactNode,
     link: "/gather" as RelativePathString,
   },
   {
-    title: "消息通知",
+    title: "提现记录",
     icon: (
-      <AntDesign name="notification" size={20} color="#ff9f43" />
+      <AntDesign name="reload" size={24} color="#4a9aff" />
     ) as React.ReactNode,
-    link: "/notifications" as RelativePathString,
+    link: "/withdrawal-record" as RelativePathString,
   },
   {
-    title: "我的收藏",
+    title: "邀请助力",
     icon: (
-      <AntDesign name="heart" size={20} color="#ee5a6f" />
+      <AntDesign name="team" size={24} color="#4a9aff" />
     ) as React.ReactNode,
-    link: "/favorites" as RelativePathString,
+    link: "/invite" as RelativePathString,
   },
   {
-    title: "分享推荐",
+    title: "成为推荐官",
     icon: (
-      <AntDesign name="share-alt" size={20} color="#26de81" />
+      <AntDesign name="trophy" size={24} color="#4a9aff" />
     ) as React.ReactNode,
-    link: "/share" as RelativePathString,
+    link: "/promotion" as RelativePathString,
   },
+
   {
-    title: "隐私安全",
+    title: "我的团队码",
     icon: (
-      <AntDesign name="safety" size={20} color="#a55eea" />
+      <AntDesign name="qrcode" size={24} color="#4a9aff" />
     ) as React.ReactNode,
-    link: "/privacy" as RelativePathString,
+    link: "/team-qrcode" as RelativePathString,
   },
+
   {
-    title: "意见反馈",
+    title: "联系我们",
+    icon: (
+      <AntDesign name="phone" size={24} color="#4a9aff" />
+    ) as React.ReactNode,
+    link: "/contact" as RelativePathString,
+  },
+];
+
+// 设置链接项数组 - 根据图片设计
+const settingsItems: MenuItem[] = [
+  {
+    title: "关注公众号",
     icon: (
       <AntDesign name="message" size={20} color="#4a9aff" />
     ) as React.ReactNode,
-    link: "/feedback" as RelativePathString,
+    link: "/loans" as RelativePathString,
   },
   {
-    title: "demo",
+    title: "账户安全",
     icon: (
-      <AntDesign name="api" size={20} color="#3a4b9f" />
+      <AntDesign name="safety" size={20} color="#4a9aff" />
     ) as React.ReactNode,
-    link: "/demo" as RelativePathString,
+    link: "/security" as RelativePathString,
   },
   {
-    title: "设置",
+    title: "隐私政策",
     icon: (
-      <AntDesign name="setting" size={20} color="#778ca3" />
+      <AntDesign name="eye" size={20} color="#4a9aff" />
     ) as React.ReactNode,
-    link: "/settings" as RelativePathString,
+    link: "/privacy-policy" as RelativePathString,
   },
   {
     title: "帮助中心",
     icon: (
-      <AntDesign name="question-circle" size={20} color="#4b7bec" />
+      <AntDesign name="question-circle" size={20} color="#4a9aff" />
     ) as React.ReactNode,
     link: "/help" as RelativePathString,
   },
@@ -99,105 +111,149 @@ export default function MineScreen() {
 
   const handleLogout = async () => {
     await logout();
+    hideDialog();
+  };
+
+  // 格式化积分显示
+  const formatPoints = (points: number) => {
+    return points.toLocaleString();
   };
 
   return (
-    <ScrollView
-      style={globalStyles.globalContainer}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* 顶部渐变头部区域 */}
-      <LinearGradient
-        colors={["#8B5CF6", "#3B82F6"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        style={styles.headerGradient}
+    <>
+      <ScrollView
+        style={globalStyles.globalContainer}
+        showsVerticalScrollIndicator={false}
       >
-        <View style={styles.headerContent}>
-          {/* 用户信息区 */}
-          {/* 原有的 Avatar/用户名块，用 ThemedText 替代 Text 部分 */}
-          {isAuthenticated ? (
-            <View style={styles.loggedInHeader}>
-              <Avatar.Text
-                size={64}
-                label={userInfo?.mobilePhone?.slice(-2) || "用户"}
-                style={styles.avatar}
-                labelStyle={styles.avatarLabel}
-              />
-              <View style={styles.userDetails}>
-                <ThemedText style={styles.userName}>
-                  {userInfo?.mobilePhone || "用户"}
-                </ThemedText>
-                <ThemedText style={styles.userStatus}>
-                  ID: {userInfo?.id || "123456789"}
-                </ThemedText>
-              </View>
-              <TouchableOpacity onPress={showDialog} style={styles.logoutBtn}>
-                <ThemedText style={styles.logoutText}>退出登录</ThemedText>
-              </TouchableOpacity>
+        {/* 用户信息卡片 - 蓝色背景 */}
+        <View style={styles.userCard}>
+          {/* 用户基本信息行 */}
+          <View style={styles.userInfoRow}>
+            <Avatar.Text
+              size={64}
+              label={userInfo?.mobilePhone?.slice(-2) || "用户"}
+              style={styles.avatar}
+              labelStyle={styles.avatarLabel}
+            />
+            <View style={styles.userDetails}>
+              <ThemedText style={styles.userName}>
+                {isAuthenticated ? userInfo?.name || "张晓明" : "*****"}
+              </ThemedText>
+              <ThemedText style={styles.userId}>
+                ID: {isAuthenticated ? userInfo?.id || "88652147" : "*****"}
+              </ThemedText>
             </View>
-          ) : (
-            <View style={styles.notLoggedInHeader}>
-              <Avatar.Icon size={64} icon="account" style={styles.avatar} />
-              <View style={styles.userDetails}>
-                <ThemedText style={styles.userName}>欢迎使用快融呗</ThemedText>
-                <ThemedText style={styles.userStatus}>
-                  请登录以享受更多服务
-                </ThemedText>
-              </View>
-              <Link href="/login" asChild>
-                <TouchableOpacity style={styles.loginBtn}>
-                  <ThemedText style={styles.loginText}>登录</ThemedText>
+            {isAuthenticated && (
+              <View style={styles.userActions}>
+                <TouchableOpacity
+                  style={styles.notificationButton}
+                  activeOpacity={0.8}
+                >
+                  <AntDesign name="edit" size={16} color="#ffffff" />
                 </TouchableOpacity>
-              </Link>
+                <TouchableOpacity
+                  style={styles.notificationButton}
+                  activeOpacity={0.8}
+                >
+                  <AntDesign name="bell" size={18} color="#ffffff" />
+                  <View style={styles.notificationBadge}>
+                    <ThemedText style={styles.notificationBadgeText}>
+                      3
+                    </ThemedText>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+
+          {/* 积分信息行 */}
+          <View style={styles.pointsRow}>
+            <View style={styles.pointSection}>
+              <ThemedText style={styles.pointSectionLabel}>我的积分</ThemedText>
+              <ThemedText style={styles.pointSectionValue}>
+                {isAuthenticated
+                  ? formatPoints(userInfo?.points || 12500)
+                  : "*****"}
+                分
+              </ThemedText>
             </View>
+            <View style={styles.pointDivider} />
+            <View style={styles.pointSection}>
+              <ThemedText style={styles.pointSectionLabel}>可用积分</ThemedText>
+              <ThemedText style={styles.pointSectionValue}>
+                {isAuthenticated
+                  ? formatPoints(userInfo?.availablePoints || 8350)
+                  : "*****"}
+                分
+              </ThemedText>
+            </View>
+          </View>
+
+          {/* 立即提现按钮 */}
+          {isAuthenticated ? (
+            <TouchableOpacity style={styles.withdrawButton} activeOpacity={0.8}>
+              <AntDesign name="wallet" size={18} color="#ffffff" />
+              <ThemedText style={styles.withdrawText}>立即提现</ThemedText>
+            </TouchableOpacity>
+          ) : (
+            <Link href="/login" asChild>
+              <TouchableOpacity
+                style={styles.withdrawButton}
+                activeOpacity={0.8}
+              >
+                <AntDesign name="login" size={18} color="#ffffff" />
+                <ThemedText style={styles.withdrawText}>立即登录</ThemedText>
+              </TouchableOpacity>
+            </Link>
           )}
         </View>
-      </LinearGradient>
+        {/* 功能服务区域 */}
+        <ThemedCard>
+          <View style={styles.functionGrid}>
+            {functionServices.map((item: MenuItem, idx) => (
+              <Link href={item.link} asChild key={item.title}>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  style={styles.functionItem}
+                >
+                  <View style={styles.functionIconContainer}>{item.icon}</View>
+                  <ThemedText style={styles.functionText}>
+                    {item.title}
+                  </ThemedText>
+                </TouchableOpacity>
+              </Link>
+            ))}
+          </View>
+        </ThemedCard>
 
-      {/* 积分展示区域 - 用 ThemedCard 包裹，并用 ThemedText 替代 */}
-      <ThemedCard>
-        <View style={styles.pointsContainer}>
-          <View style={styles.pointItem}>
-            <ThemedText style={styles.pointLabel}>可用积分</ThemedText>
-            <ThemedText style={styles.pointValue}>
-              {userInfo?.points ?? 0}
-            </ThemedText>
-          </View>
-          <View style={styles.pointItem}>
-            <ThemedText style={styles.pointLabel}>总积分</ThemedText>
-            <ThemedText style={styles.pointValue}>
-              {userInfo?.availablePoints ?? 0}
-            </ThemedText>
-          </View>
-          <View style={styles.pointItem}>
-            <ThemedText style={styles.pointLabel}>推荐积分</ThemedText>
-            <ThemedText style={styles.pointValue}>
-              {userInfo?.recommendPoints ?? 0}
-            </ThemedText>
-          </View>
-        </View>
-      </ThemedCard>
+        {/* 设置链接区域 */}
+        <ThemedCard>
+          {settingsItems.map((item: MenuItem, idx) => (
+            <Link href={item.link} asChild key={item.title}>
+              <TouchableOpacity activeOpacity={0.8} style={styles.settingsItem}>
+                <View style={styles.settingsItemContent}>
+                  <View style={styles.settingsIconContainer}>{item.icon}</View>
+                  <ThemedText style={styles.settingsItemText}>
+                    {item.title}
+                  </ThemedText>
+                </View>
+                <AntDesign name="right" size={18} color="#9CA3AF" />
+              </TouchableOpacity>
+            </Link>
+          ))}
+        </ThemedCard>
 
-      {/* 菜单项 - 快融呗风格 */}
-      <ThemedCard style={{ marginTop: 0 }}>
-        {menuItems.map((item: MenuItem, idx) => (
-          <Link href={item.link} asChild key={item.title}>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.menuItemContainer}
-            >
-              <View style={styles.menuItemContent}>
-                <View style={styles.menuItemIconContainer}>{item.icon}</View>
-                <ThemedText style={styles.menuItemText}>
-                  {item.title}
-                </ThemedText>
-              </View>
-              <AntDesign name="right" size={20} color="#9CA3AF" />
-            </TouchableOpacity>
-          </Link>
-        ))}
-      </ThemedCard>
+        {/* 退出登录按钮 */}
+        <TouchableOpacity
+          onPress={showDialog}
+          style={styles.logoutButton}
+          activeOpacity={0.8}
+        >
+          <AntDesign name="logout" size={18} color="#ff6b6b" />
+          <ThemedText style={styles.logoutText}>退出登录</ThemedText>
+        </TouchableOpacity>
+      </ScrollView>
+      {/* 退出确认对话框 */}
       <Portal>
         <Dialog
           visible={visible}
@@ -214,133 +270,201 @@ export default function MineScreen() {
           </Dialog.Actions>
         </Dialog>
       </Portal>
-    </ScrollView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  // 头部渐变区域
-  headerGradient: {
-    paddingTop: 50,
-    paddingBottom: 50,
+  // 用户信息卡片
+  userCard: {
+    paddingVertical: 30,
     paddingHorizontal: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    backgroundColor: "#2B56F6",
   },
-  headerContent: {
+  userInfoRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "transparent",
-  },
-  userInfoSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "transparent",
-  },
-  loggedInHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  notLoggedInHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
+    marginBottom: 24,
   },
   avatar: {
     backgroundColor: "rgba(255,255,255,0.2)",
-    marginRight: 16,
+    marginRight: 12,
   },
   avatarLabel: {
     color: "#FFFFFF",
-    fontWeight: "bold",
+    fontSize: 22,
   },
   userDetails: {
     flex: 1,
   },
   userName: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
     color: "#FFFFFF",
     marginBottom: 4,
   },
-  userStatus: {
+  userId: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.8)",
-  },
-  logoutBtn: {
-    backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  logoutText: {
     color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "500",
+    opacity: 0.9,
   },
-  loginBtn: {
-    backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-  loginText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  pointsSection: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    marginHorizontal: 16,
-    marginTop: -32,
-    padding: 20,
+  userActions: {
     flexDirection: "row",
     alignItems: "center",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
+    gap: 10,
   },
-  pointsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingVertical: 16,
-  },
-  pointItem: {
+  notificationButton: {
+    position: "relative",
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.25)",
     alignItems: "center",
+    justifyContent: "center",
   },
-  pointLabel: {
-    fontSize: 14,
-    marginBottom: 4,
+  notificationBadge: {
+    position: "absolute",
+    top: -2,
+    right: -2,
+    backgroundColor: "#ff6b6b",
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: "#2B56F6",
   },
-  pointValue: {
-    fontSize: 24,
+  notificationBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 10,
     fontWeight: "bold",
   },
 
-  // 菜单项样式
-  menuItemContainer: {
+  editText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  // 积分信息行
+  pointsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.2)",
+  },
+  pointSection: {
+    flex: 1,
+    alignItems: "center",
+  },
+  pointSectionLabel: {
+    fontSize: 14,
+    color: "#FFFFFF",
+    opacity: 0.9,
+    marginBottom: 8,
+  },
+  pointSectionValue: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+  },
+  pointDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    marginHorizontal: 16,
+  },
+  // 立即提现按钮
+  withdrawButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.25)",
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 8,
+  },
+  withdrawText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 10,
+  },
+  functionGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  functionItem: {
+    width: "33%",
+    aspectRatio: 1,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  functionIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(74, 154, 255, 0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  functionText: {
+    fontSize: 12,
+    textAlign: "center",
+    fontWeight: "500",
+  },
+  settingsItem: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 16,
+    paddingVertical: 15,
   },
-  menuItemContent: {
+  settingsItemContent: {
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
   },
-  menuItemIconContainer: {
+  settingsIconContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
     backgroundColor: "rgba(74, 154, 255, 0.1)",
-    justifyContent: "center",
     alignItems: "center",
-    marginRight: 16,
+    justifyContent: "center",
+    marginRight: 14,
   },
-  menuItemText: {
+  settingsItemText: {
+    fontSize: 16,
+    fontWeight: "500",
+    flex: 1,
+  },
+  // 退出登录按钮
+  logoutButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#ff6b6b",
+    borderRadius: 12,
+    paddingVertical: 14,
+    marginHorizontal: 16,
+    marginBottom: 32,
+    gap: 8,
+  },
+  logoutText: {
     fontSize: 16,
     fontWeight: "500",
   },
