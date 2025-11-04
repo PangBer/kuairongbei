@@ -33,7 +33,7 @@ export default () => {
       />
 
       <Tabs.Screen
-        name="demand"
+        name="demand/index"
         options={{
           title: "有需求",
           tabBarIcon: ({ color }) => (
