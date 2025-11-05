@@ -1,14 +1,9 @@
 import React from "react";
 import { Modal, ScrollView, TouchableOpacity, View } from "react-native";
-import {
-  Divider,
-  HelperText,
-  TextInput,
-  Text as TextPaper,
-} from "react-native-paper";
+import { HelperText, TextInput } from "react-native-paper";
 import { useSelectModal } from "./hooks/useSelectModal";
 import { selectStyles } from "./styles/selectStyles";
-import { ThemedCard } from "./ui";
+import { ThemedText, ThemedView } from "./ui";
 
 /**
  * 下拉选择选项接口
@@ -31,6 +26,7 @@ interface SelectDropdownProps {
   error?: boolean; // 是否显示错误状态
   errorMessage?: string; // 错误提示信息
   required?: boolean; // 是否必填
+  showClear?: boolean; // 是否显示清除按钮，默认为 true
 }
 
 /**
@@ -47,6 +43,7 @@ export default function SelectDropdown({
   error = false,
   errorMessage,
   required = false,
+  showClear = true,
 }: SelectDropdownProps) {
   // 弹窗状态管理
   const { visible, showModal, hideModal } = useSelectModal();
@@ -60,6 +57,14 @@ export default function SelectDropdown({
    */
   const handleSelect = (optionValue: string) => {
     onSelect(optionValue);
+    hideModal();
+  };
+
+  /**
+   * 处理清除选项
+   */
+  const handleClear = () => {
+    onSelect("");
     hideModal();
   };
 
@@ -95,45 +100,67 @@ export default function SelectDropdown({
       <Modal
         visible={visible}
         transparent
-        animationType="none"
+        animationType="slide"
         onRequestClose={hideModal}
       >
-        <TouchableOpacity
-          style={selectStyles.modalOverlay}
-          onPress={hideModal}
-          activeOpacity={1}
-        >
-          <ThemedCard style={selectStyles.modalContent}>
-            <ScrollView style={selectStyles.optionsList}>
-              {options.map((option, index) => {
+        <View style={selectStyles.modalOverlay}>
+          <TouchableOpacity
+            style={selectStyles.modalOverlayTouchable}
+            onPress={hideModal}
+            activeOpacity={1}
+          />
+          <ThemedView style={selectStyles.modalContent}>
+            <View style={selectStyles.modalHeader}>
+              <View style={selectStyles.modalHeaderLeft}>
+                {showClear && (
+                  <TouchableOpacity onPress={handleClear}>
+                    <ThemedText style={selectStyles.modalClearText}>
+                      清除
+                    </ThemedText>
+                  </TouchableOpacity>
+                )}
+              </View>
+              <View style={selectStyles.modalTitleContainer}>
+                <ThemedText style={selectStyles.modalTitle}>{label}</ThemedText>
+              </View>
+              <View style={selectStyles.modalHeaderRight}>
+                <TouchableOpacity onPress={hideModal}>
+                  <ThemedText style={selectStyles.modalCloseText}>
+                    关闭
+                  </ThemedText>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <ScrollView style={selectStyles.modalOptions}>
+              {options.map((option) => {
                 const isSelected = value === option.value;
                 return (
-                  <View key={option.value}>
-                    <TouchableOpacity
-                      style={selectStyles.optionItem}
-                      onPress={() => handleSelect(option.value)}
-                      activeOpacity={1}
+                  <TouchableOpacity
+                    key={option.value}
+                    style={selectStyles.modalOptionItem}
+                    onPress={() => handleSelect(option.value)}
+                    activeOpacity={1}
+                  >
+                    <ThemedText
+                      style={[
+                        selectStyles.modalOptionText,
+                        isSelected && selectStyles.modalOptionTextActive,
+                      ]}
                     >
-                      <TextPaper
-                        style={[
-                          selectStyles.optionText,
-                          isSelected && selectStyles.selectedOptionText,
-                        ]}
-                      >
-                        {option.label}
-                      </TextPaper>
-                      {/* 选中标记 */}
-                      {isSelected && (
-                        <TextPaper style={selectStyles.checkmark}>✓</TextPaper>
-                      )}
-                    </TouchableOpacity>
-                    {index < options.length - 1 && <Divider />}
-                  </View>
+                      {option.label}
+                    </ThemedText>
+                    {/* 选中标记 */}
+                    {isSelected && (
+                      <ThemedText style={selectStyles.modalCheckmark}>
+                        ✓
+                      </ThemedText>
+                    )}
+                  </TouchableOpacity>
                 );
               })}
             </ScrollView>
-          </ThemedCard>
-        </TouchableOpacity>
+          </ThemedView>
+        </View>
       </Modal>
     </>
   );

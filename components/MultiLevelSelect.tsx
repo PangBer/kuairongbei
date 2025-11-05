@@ -1,16 +1,10 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React, { useEffect, useRef, useState } from "react";
 import { Modal, ScrollView, TouchableOpacity, View } from "react-native";
-import {
-  Button,
-  Divider,
-  HelperText,
-  TextInput,
-  Text as TextPaper,
-} from "react-native-paper";
+import { HelperText, TextInput } from "react-native-paper";
 import { useSelectModal } from "./hooks/useSelectModal";
 import { selectStyles } from "./styles/selectStyles";
-import { ThemedCard } from "./ui";
+import { ThemedText, ThemedView } from "./ui";
 import { buildOptionPath, getPathDisplayText } from "./utils/selectUtils";
 /**
  * 选择选项接口
@@ -40,6 +34,7 @@ interface MultiLevelSelectProps {
   errorMessage?: string; // 错误提示信息
   required?: boolean; // 是否必填
   maxLevels?: number; // 最大层级数，默认为3
+  showClear?: boolean; // 是否显示清除按钮，默认为 true
 }
 
 /**
@@ -57,6 +52,7 @@ export default function MultiLevelSelect({
   errorMessage,
   required = false,
   maxLevels = 3,
+  showClear = true,
 }: MultiLevelSelectProps) {
   // 弹窗状态管理
   const { visible, showModal, hideModal } = useSelectModal();
@@ -211,6 +207,22 @@ export default function MultiLevelSelect({
     setTimeout(() => scrollToTop(), 100);
   };
 
+  /**
+   * 处理清除选项
+   */
+  const handleClear = () => {
+    onSelect("", "");
+    hideModal();
+    // 重置状态
+    setTimeout(() => {
+      setCurrentLevel(0);
+      setSelectedPath([]);
+      setCurrentOptions(options);
+      setDisplayValue("");
+      setSelectedValue("");
+    }, 300);
+  };
+
   return (
     <>
       {/* 输入框（显示选中值） */}
@@ -243,19 +255,29 @@ export default function MultiLevelSelect({
       <Modal
         visible={visible}
         transparent
-        animationType="none"
+        animationType="slide"
         onRequestClose={hideModal}
       >
-        <TouchableOpacity
-          style={selectStyles.modalOverlay}
-          onPress={hideModal}
-          activeOpacity={1}
-        >
-          <ThemedCard style={selectStyles.modalContent}>
-            {/* 面包屑导航 */}
-            {currentLevel > 0 && (
-              <View>
-                <View style={selectStyles.breadcrumbContainer}>
+        <View style={selectStyles.modalOverlay}>
+          <TouchableOpacity
+            style={selectStyles.modalOverlayTouchable}
+            onPress={hideModal}
+            activeOpacity={1}
+          />
+          <ThemedView style={selectStyles.modalContent}>
+            <View style={selectStyles.modalHeader}>
+              <View style={selectStyles.modalHeaderLeft}>
+                {showClear && (
+                  <TouchableOpacity onPress={handleClear}>
+                    <ThemedText style={selectStyles.modalClearText}>
+                      清除
+                    </ThemedText>
+                  </TouchableOpacity>
+                )}
+              </View>
+              <View style={selectStyles.modalTitleContainer}>
+                {/* 面包屑导航 */}
+                {currentLevel > 0 ? (
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                     <View style={selectStyles.breadcrumb}>
                       {selectedPath
@@ -263,70 +285,96 @@ export default function MultiLevelSelect({
                         .map((option, index) => (
                           <View key={option.id || option.dictCode || index}>
                             <TouchableOpacity
-                              style={selectStyles.breadcrumbItem}
                               onPress={() => handleBreadcrumbClick(index)}
                             >
-                              <TextPaper style={selectStyles.breadcrumbText}>
+                              <ThemedText style={selectStyles.breadcrumbText}>
                                 {option.name || option.dictLabel}
-                              </TextPaper>
+                              </ThemedText>
                             </TouchableOpacity>
                             {index < currentLevel - 1 && (
-                              <TextPaper
+                              <ThemedText
                                 style={selectStyles.breadcrumbSeparator}
                               >
                                 &gt;
-                              </TextPaper>
+                              </ThemedText>
                             )}
                           </View>
                         ))}
                     </View>
                   </ScrollView>
-                  {/* 返回上级按钮 */}
-                  <Button
-                    mode="text"
-                    onPress={goBack}
-                    compact
-                    style={selectStyles.actionButton}
-                  >
-                    返回上级
-                  </Button>
-                </View>
-                <Divider />
+                ) : (
+                  <ThemedText style={selectStyles.modalTitle}>
+                    {label}
+                  </ThemedText>
+                )}
               </View>
-            )}
+              <View style={selectStyles.modalHeaderRight}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 20,
+                  }}
+                >
+                  {currentLevel > 0 && (
+                    <TouchableOpacity onPress={goBack}>
+                      <ThemedText style={selectStyles.modalCloseText}>
+                        上一级
+                      </ThemedText>
+                    </TouchableOpacity>
+                  )}
+                  <TouchableOpacity onPress={hideModal}>
+                    <ThemedText style={selectStyles.modalCloseText}>
+                      关闭
+                    </ThemedText>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
 
             {/* 选项列表 */}
-            <ScrollView ref={scrollViewRef} style={selectStyles.optionsList}>
-              {currentOptions.map((option, index) => {
+            <ScrollView ref={scrollViewRef} style={selectStyles.modalOptions}>
+              {currentOptions.map((option) => {
                 const isSelected = option.value === selectedValue;
                 return (
-                  <View key={option.id || option.dictCode || index}>
-                    <TouchableOpacity
-                      style={selectStyles.optionItem}
-                      onPress={() => handleOptionSelect(option)}
+                  <TouchableOpacity
+                    key={option.id || option.dictCode || option.value}
+                    style={selectStyles.modalOptionItem}
+                    onPress={() => handleOptionSelect(option)}
+                    activeOpacity={1}
+                  >
+                    <ThemedText
+                      style={[
+                        selectStyles.modalOptionText,
+                        isSelected && selectStyles.modalOptionTextActive,
+                      ]}
                     >
-                      <View style={selectStyles.optionText}>
-                        <TextPaper
-                          style={[
-                            selectStyles.optionText,
-                            isSelected && selectStyles.selectedOptionText,
-                          ]}
-                        >
-                          {option.name || option.dictLabel}
-                        </TextPaper>
-                        {/* 如果有子级，显示右箭头 */}
-                        {option.children?.length && (
-                          <AntDesign name="right" size={16} color="#4a9aff" />
-                        )}
-                      </View>
-                    </TouchableOpacity>
-                    {index < currentOptions.length - 1 && <Divider />}
-                  </View>
+                      {option.name || option.dictLabel}
+                    </ThemedText>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 8,
+                      }}
+                    >
+                      {/* 如果有子级，显示右箭头 */}
+                      {option.children?.length && (
+                        <AntDesign name="right" size={16} color="#4a9aff" />
+                      )}
+                      {/* 选中标记 */}
+                      {isSelected && (
+                        <ThemedText style={selectStyles.modalCheckmark}>
+                          ✓
+                        </ThemedText>
+                      )}
+                    </View>
+                  </TouchableOpacity>
                 );
               })}
             </ScrollView>
-          </ThemedCard>
-        </TouchableOpacity>
+          </ThemedView>
+        </View>
       </Modal>
     </>
   );

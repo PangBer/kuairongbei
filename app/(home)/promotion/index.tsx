@@ -60,10 +60,6 @@ const MilestoneItem = ({
 );
 
 export default () => {
-  const steps = [
-    { title: "注册通过", reward: "10元" },
-    { title: "资料通过", reward: "40元" },
-  ];
   const milestones = [
     { label: "达1人", amount: "20" },
     { label: "达5人", amount: "100" },
@@ -99,18 +95,23 @@ export default () => {
       <ThemedCard style={styles.ruleCard}>
         <ThemedText style={styles.ruleTitle}>50元现金如何得到</ThemedText>
         <View style={styles.ruleStepsRow}>
-          {steps.map((s, i) => (
-            <View key={s.title}>
-              {i === 1 && <ThemedText style={styles.plus}>＋</ThemedText>}
-              <View style={styles.ruleStep}>
-                <View style={styles.ruleBadge}>
-                  <ThemedText style={styles.ruleStepMain}>{s.title}</ThemedText>
-                  <View style={styles.dashedLine} />
-                  <ThemedText style={styles.ruleStepSub}>{s.reward}</ThemedText>
-                </View>
-              </View>
+          <View style={styles.ruleStep}>
+            <View style={styles.ruleBadge}>
+              <ThemedText style={styles.ruleStepMain}>注册通过</ThemedText>
+              <View style={styles.dashedLine} />
+              <ThemedText style={styles.ruleStepSub}>10元</ThemedText>
             </View>
-          ))}
+          </View>
+          <View>
+            <ThemedText style={styles.plus}>＋</ThemedText>
+          </View>
+          <View style={styles.ruleStep}>
+            <View style={styles.ruleBadge}>
+              <ThemedText style={styles.ruleStepMain}>资料通过</ThemedText>
+              <View style={styles.dashedLine} />
+              <ThemedText style={styles.ruleStepSub}>40元</ThemedText>
+            </View>
+          </View>
         </View>
         <View style={styles.ruleMilestoneContainer}>
           <ThemedText style={styles.ruleTitleSmall}>
@@ -305,7 +306,7 @@ const styles = StyleSheet.create({
     borderColor: "#fff",
     alignSelf: "center",
     opacity: 0.5,
-    marginVertical: 4,
+    marginTop: 4,
   },
   plus: {
     fontSize: 28,

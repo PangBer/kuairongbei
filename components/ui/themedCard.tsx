@@ -6,7 +6,7 @@ export function ThemedCard({
   style,
 }: {
   children: React.ReactNode;
-  style?: ViewStyle;
+  style?: ViewStyle | ViewStyle[];
 }) {
   const colorScheme = useColorScheme();
   return (

@@ -18,7 +18,6 @@ const { width } = Dimensions.get("window");
 interface Product {
   id: string;
   name: string;
-  tag: string;
   yieldLabel: string;
   yieldValue: string;
   info: string;
@@ -32,17 +31,15 @@ const productsData: Product[] = [
   {
     id: "1",
     name: "安心理财90天",
-    tag: "稳健型",
     yieldLabel: "七日年化收益率",
     yieldValue: "4.25%",
     info: "期限:90天起购:1,000元",
-    remainingQuota: "剩余额度: 86.5万",
+    riskLevel: "剩余额度: 86.5万",
     buttonText: "购买",
   },
   {
     id: "2",
     name: "科技成长基金",
-    tag: "进取型",
     yieldLabel: "近一年收益率",
     yieldValue: "18.6%",
     info: "开放申购起购:100元",
@@ -52,7 +49,6 @@ const productsData: Product[] = [
   {
     id: "3",
     name: "科技成长基金",
-    tag: "进取型",
     yieldLabel: "近一年收益率",
     yieldValue: "18.6%",
     info: "开放申购起购:100元",
@@ -62,7 +58,6 @@ const productsData: Product[] = [
   {
     id: "4",
     name: "科技成长基金",
-    tag: "进取型",
     yieldLabel: "近一年收益率",
     yieldValue: "18.6%",
     info: "开放申购起购:100元",
@@ -211,14 +206,7 @@ export default () => {
       {/* 推荐产品区域 */}
       <View style={styles.productsContainer}>
         {productsData.map((product) => (
-          <View key={product.id} style={styles.productCard}>
-            <View style={styles.productHeader}>
-              <View style={styles.productTag}>
-                <ThemedText style={styles.productTagText}>
-                  {product.tag}
-                </ThemedText>
-              </View>
-            </View>
+          <ThemedCard key={product.id} style={styles.productCard}>
             <ThemedText style={styles.productName}>{product.name}</ThemedText>
             <ThemedText style={styles.yieldLabel}>
               {product.yieldLabel}
@@ -227,22 +215,17 @@ export default () => {
               {product.yieldValue}
             </ThemedText>
             <ThemedText style={styles.productInfo}>{product.info}</ThemedText>
-            {product.remainingQuota && (
-              <ThemedText style={styles.remainingQuota}>
-                {product.remainingQuota}
-              </ThemedText>
-            )}
-            {product.riskLevel && (
-              <ThemedText style={styles.riskLevel}>
-                {product.riskLevel}
-              </ThemedText>
-            )}
+
+            <ThemedText style={styles.riskLevel}>
+              {product.riskLevel}
+            </ThemedText>
+
             <TouchableOpacity style={styles.purchaseButton} activeOpacity={0.8}>
               <ThemedText style={styles.purchaseButtonText}>
                 {product.buttonText}
               </ThemedText>
             </TouchableOpacity>
-          </View>
+          </ThemedCard>
         ))}
       </View>
     </ScrollView>
@@ -353,47 +336,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    margin: 10,
   },
   productCard: {
     width: (width - 40) / 2,
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#f0f0f0",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-    marginBottom: 20,
   },
-  productHeader: {
-    alignItems: "flex-end",
-    marginBottom: 8,
-    marginTop: -30,
-  },
-  productTag: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    backgroundColor: "#4a9aff",
-  },
-  productTagText: {
-    color: "white",
-    fontSize: 10,
-    fontWeight: "bold",
-  },
+
   productName: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#1a1a1a",
     marginBottom: 8,
   },
   yieldLabel: {
     fontSize: 12,
-    color: "#666666",
     marginBottom: 4,
   },
   yieldValue: {
@@ -404,17 +358,14 @@ const styles = StyleSheet.create({
   },
   productInfo: {
     fontSize: 12,
-    color: "#666666",
     marginBottom: 4,
   },
   remainingQuota: {
     fontSize: 12,
-    color: "#666666",
     marginBottom: 12,
   },
   riskLevel: {
     fontSize: 12,
-    color: "#666666",
     marginBottom: 12,
   },
   purchaseButton: {
