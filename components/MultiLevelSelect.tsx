@@ -10,8 +10,8 @@ import {
 } from "react-native-paper";
 import { useSelectModal } from "./hooks/useSelectModal";
 import { selectStyles } from "./styles/selectStyles";
+import { ThemedCard } from "./ui";
 import { buildOptionPath, getPathDisplayText } from "./utils/selectUtils";
-
 /**
  * 选择选项接口
  */
@@ -226,7 +226,13 @@ export default function MultiLevelSelect({
           disabled={disabled}
           mode="outlined"
           error={!!error}
-          right={<TextInput.Icon icon="chevron-down" />}
+          right={
+            <TextInput.Icon
+              icon="chevron-down"
+              onPress={() => !disabled && showModal()}
+              forceTextInputFocus={false}
+            />
+          }
         />
         <HelperText type="error" visible={!!error}>
           {errorMessage as string}
@@ -237,23 +243,25 @@ export default function MultiLevelSelect({
       <Modal
         visible={visible}
         transparent
-        animationType="fade"
+        animationType="none"
         onRequestClose={hideModal}
       >
-        <TouchableOpacity style={selectStyles.modalOverlay} onPress={hideModal}>
-          <TouchableOpacity style={selectStyles.modalContent} activeOpacity={1}>
+        <TouchableOpacity
+          style={selectStyles.modalOverlay}
+          onPress={hideModal}
+          activeOpacity={1}
+        >
+          <ThemedCard style={selectStyles.modalContent}>
             {/* 面包屑导航 */}
             {currentLevel > 0 && (
-              <>
+              <View>
                 <View style={selectStyles.breadcrumbContainer}>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                     <View style={selectStyles.breadcrumb}>
                       {selectedPath
                         .slice(0, currentLevel)
                         .map((option, index) => (
-                          <React.Fragment
-                            key={option.id || option.dictCode || index}
-                          >
+                          <View key={option.id || option.dictCode || index}>
                             <TouchableOpacity
                               style={selectStyles.breadcrumbItem}
                               onPress={() => handleBreadcrumbClick(index)}
@@ -269,7 +277,7 @@ export default function MultiLevelSelect({
                                 &gt;
                               </TextPaper>
                             )}
-                          </React.Fragment>
+                          </View>
                         ))}
                     </View>
                   </ScrollView>
@@ -284,7 +292,7 @@ export default function MultiLevelSelect({
                   </Button>
                 </View>
                 <Divider />
-              </>
+              </View>
             )}
 
             {/* 选项列表 */}
@@ -292,12 +300,9 @@ export default function MultiLevelSelect({
               {currentOptions.map((option, index) => {
                 const isSelected = option.value === selectedValue;
                 return (
-                  <React.Fragment key={option.id || option.dictCode || index}>
+                  <View key={option.id || option.dictCode || index}>
                     <TouchableOpacity
-                      style={[
-                        selectStyles.optionItem,
-                        isSelected && selectStyles.selectedOptionItem,
-                      ]}
+                      style={selectStyles.optionItem}
                       onPress={() => handleOptionSelect(option)}
                     >
                       <View style={selectStyles.optionText}>
@@ -316,11 +321,11 @@ export default function MultiLevelSelect({
                       </View>
                     </TouchableOpacity>
                     {index < currentOptions.length - 1 && <Divider />}
-                  </React.Fragment>
+                  </View>
                 );
               })}
             </ScrollView>
-          </TouchableOpacity>
+          </ThemedCard>
         </TouchableOpacity>
       </Modal>
     </>

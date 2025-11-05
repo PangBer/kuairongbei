@@ -8,6 +8,7 @@ import {
 } from "react-native-paper";
 import { useSelectModal } from "./hooks/useSelectModal";
 import { selectStyles } from "./styles/selectStyles";
+import { ThemedCard } from "./ui";
 
 /**
  * 下拉选择选项接口
@@ -77,7 +78,13 @@ export default function SelectDropdown({
           disabled={disabled}
           mode="outlined"
           error={!!error}
-          right={<TextInput.Icon icon="chevron-down" />}
+          right={
+            <TextInput.Icon
+              icon="chevron-down"
+              onPress={() => !disabled && showModal()}
+              forceTextInputFocus={false}
+            />
+          }
         />
         <HelperText type="error" visible={!!error}>
           {errorMessage as string}
@@ -88,22 +95,24 @@ export default function SelectDropdown({
       <Modal
         visible={visible}
         transparent
-        animationType="fade"
+        animationType="none"
         onRequestClose={hideModal}
       >
-        <TouchableOpacity style={selectStyles.modalOverlay} onPress={hideModal}>
-          <View style={selectStyles.modalContent}>
+        <TouchableOpacity
+          style={selectStyles.modalOverlay}
+          onPress={hideModal}
+          activeOpacity={1}
+        >
+          <ThemedCard style={selectStyles.modalContent}>
             <ScrollView style={selectStyles.optionsList}>
               {options.map((option, index) => {
                 const isSelected = value === option.value;
                 return (
-                  <React.Fragment key={option.value}>
+                  <View key={option.value}>
                     <TouchableOpacity
-                      style={[
-                        selectStyles.optionItem,
-                        isSelected && selectStyles.selectedOptionItem,
-                      ]}
+                      style={selectStyles.optionItem}
                       onPress={() => handleSelect(option.value)}
+                      activeOpacity={1}
                     >
                       <TextPaper
                         style={[
@@ -119,11 +128,11 @@ export default function SelectDropdown({
                       )}
                     </TouchableOpacity>
                     {index < options.length - 1 && <Divider />}
-                  </React.Fragment>
+                  </View>
                 );
               })}
             </ScrollView>
-          </View>
+          </ThemedCard>
         </TouchableOpacity>
       </Modal>
     </>

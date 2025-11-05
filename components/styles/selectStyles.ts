@@ -3,15 +3,13 @@ import { StyleSheet } from "react-native";
 export const selectStyles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.65)",
     justifyContent: "center",
     alignItems: "center",
   },
   modalContent: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
     maxWidth: 300,
-    width: "90%",
+    width: "100%",
     maxHeight: "60%",
     elevation: 8,
     shadowColor: "#000",
@@ -29,12 +27,9 @@ export const selectStyles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  selectedOptionItem: {
-    backgroundColor: "#E3F2FD",
-  },
+
   optionText: {
     fontSize: 16,
-    color: "#333",
     flex: 1,
     display: "flex",
     flexDirection: "row",
@@ -57,7 +52,6 @@ export const selectStyles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: "#F8F9FA",
   },
   breadcrumb: {
     flexDirection: "row",

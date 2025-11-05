@@ -100,7 +100,7 @@ export default () => {
         <ThemedText style={styles.ruleTitle}>50元现金如何得到</ThemedText>
         <View style={styles.ruleStepsRow}>
           {steps.map((s, i) => (
-            <React.Fragment key={s.title}>
+            <View key={s.title}>
               {i === 1 && <ThemedText style={styles.plus}>＋</ThemedText>}
               <View style={styles.ruleStep}>
                 <View style={styles.ruleBadge}>
@@ -109,7 +109,7 @@ export default () => {
                   <ThemedText style={styles.ruleStepSub}>{s.reward}</ThemedText>
                 </View>
               </View>
-            </React.Fragment>
+            </View>
           ))}
         </View>
         <View style={styles.ruleMilestoneContainer}>

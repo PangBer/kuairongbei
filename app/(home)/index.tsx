@@ -1,6 +1,7 @@
 import { ThemedCard, ThemedText } from "@/components/ui";
 import globalStyles from "@/styles/globalStyles";
 import { Ionicons } from "@expo/vector-icons";
+import { Link } from "expo-router";
 import { useState } from "react";
 import {
   Dimensions,
@@ -12,6 +13,63 @@ import {
 } from "react-native";
 
 const { width } = Dimensions.get("window");
+
+// 产品数据类型定义
+interface Product {
+  id: string;
+  name: string;
+  tag: string;
+  yieldLabel: string;
+  yieldValue: string;
+  info: string;
+  remainingQuota?: string;
+  riskLevel?: string;
+  buttonText: string;
+}
+
+// 示例产品数据
+const productsData: Product[] = [
+  {
+    id: "1",
+    name: "安心理财90天",
+    tag: "稳健型",
+    yieldLabel: "七日年化收益率",
+    yieldValue: "4.25%",
+    info: "期限:90天起购:1,000元",
+    remainingQuota: "剩余额度: 86.5万",
+    buttonText: "购买",
+  },
+  {
+    id: "2",
+    name: "科技成长基金",
+    tag: "进取型",
+    yieldLabel: "近一年收益率",
+    yieldValue: "18.6%",
+    info: "开放申购起购:100元",
+    riskLevel: "风险等级:R4",
+    buttonText: "定投",
+  },
+  {
+    id: "3",
+    name: "科技成长基金",
+    tag: "进取型",
+    yieldLabel: "近一年收益率",
+    yieldValue: "18.6%",
+    info: "开放申购起购:100元",
+    riskLevel: "风险等级:R4",
+    buttonText: "定投",
+  },
+  {
+    id: "4",
+    name: "科技成长基金",
+    tag: "进取型",
+    yieldLabel: "近一年收益率",
+    yieldValue: "18.6%",
+    info: "开放申购起购:100元",
+    riskLevel: "风险等级:R4",
+    buttonText: "定投",
+  },
+];
 
 export default () => {
   const [refreshing, setRefreshing] = useState(false);
@@ -68,80 +126,124 @@ export default () => {
           快捷功能
         </ThemedText>
         <View style={styles.functionsGrid}>
-          <TouchableOpacity style={styles.functionItem} activeOpacity={0.8}>
-            <View style={[styles.functionIcon, { backgroundColor: "#C5DEFE" }]}>
-              <Ionicons name="swap-horizontal" size={20} color="#2C74FF" />
-            </View>
-            <ThemedText style={styles.functionLabel}>抵押贷</ThemedText>
-          </TouchableOpacity>
+          <Link
+            href={{
+              pathname: "/product",
+              params: {
+                type: "mortgage",
+              },
+            }}
+            asChild
+          >
+            <TouchableOpacity style={styles.functionItem} activeOpacity={0.8}>
+              <View
+                style={[styles.functionIcon, { backgroundColor: "#C5DEFE" }]}
+              >
+                <Ionicons name="swap-horizontal" size={20} color="#2C74FF" />
+              </View>
+              <ThemedText style={styles.functionLabel}>抵押贷</ThemedText>
+            </TouchableOpacity>
+          </Link>
+          <Link
+            href={{
+              pathname: "/product",
+              params: {
+                type: "credit",
+              },
+            }}
+            asChild
+          >
+            <TouchableOpacity style={styles.functionItem} activeOpacity={0.8}>
+              <View
+                style={[styles.functionIcon, { backgroundColor: "#D2FEE0" }]}
+              >
+                <Ionicons name="wallet" size={20} color="#22C55E" />
+              </View>
+              <ThemedText style={styles.functionLabel}>信用贷</ThemedText>
+            </TouchableOpacity>
+          </Link>
 
-          <TouchableOpacity style={styles.functionItem} activeOpacity={0.8}>
-            <View style={[styles.functionIcon, { backgroundColor: "#D2FEE0" }]}>
-              <Ionicons name="wallet" size={20} color="#22C55E" />
-            </View>
-            <ThemedText style={styles.functionLabel}>信用贷</ThemedText>
-          </TouchableOpacity>
+          <Link
+            href={{
+              pathname: "/product",
+              params: {
+                type: "small",
+              },
+            }}
+            asChild
+          >
+            <TouchableOpacity style={styles.functionItem} activeOpacity={0.8}>
+              <View
+                style={[styles.functionIcon, { backgroundColor: "#F7E3E3" }]}
+              >
+                <Ionicons name="card" size={20} color="#EF4544" />
+              </View>
+              <ThemedText style={styles.functionLabel}>小额贷</ThemedText>
+            </TouchableOpacity>
+          </Link>
 
-          <TouchableOpacity style={styles.functionItem} activeOpacity={0.8}>
-            <View style={[styles.functionIcon, { backgroundColor: "#F7E3E3" }]}>
-              <Ionicons name="card" size={20} color="#EF4544" />
-            </View>
-            <ThemedText style={styles.functionLabel}>小额贷</ThemedText>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.functionItem} activeOpacity={0.8}>
-            <View style={[styles.functionIcon, { backgroundColor: "#FCF6DB" }]}>
-              <Ionicons name="bar-chart" size={20} color="#F59E0C" />
-            </View>
-            <ThemedText style={styles.functionLabel}>企业贷</ThemedText>
-          </TouchableOpacity>
+          <Link
+            href={{
+              pathname: "/product",
+              params: {
+                type: "enterprise",
+              },
+            }}
+            asChild
+          >
+            <TouchableOpacity style={styles.functionItem} activeOpacity={0.8}>
+              <View
+                style={[styles.functionIcon, { backgroundColor: "#FCF6DB" }]}
+              >
+                <Ionicons name="bar-chart" size={20} color="#F59E0C" />
+              </View>
+              <ThemedText style={styles.functionLabel}>企业贷</ThemedText>
+            </TouchableOpacity>
+          </Link>
         </View>
       </ThemedCard>
       <View style={styles.sectionHeader}>
-        <ThemedText style={styles.sectionTitle}>推荐产品</ThemedText>
+        <ThemedText style={styles.sectionTitle}>热门推荐</ThemedText>
         <TouchableOpacity activeOpacity={0.8}>
           <ThemedText style={styles.viewMoreText}>查看更多 {">"}</ThemedText>
         </TouchableOpacity>
       </View>
       {/* 推荐产品区域 */}
       <View style={styles.productsContainer}>
-        {/* 稳健型产品 */}
-        <View style={styles.productCard}>
-          <View style={styles.productHeader}>
-            <View style={[styles.productTag, { backgroundColor: "#4a9aff" }]}>
-              <ThemedText style={styles.productTagText}>稳健型</ThemedText>
+        {productsData.map((product) => (
+          <View key={product.id} style={styles.productCard}>
+            <View style={styles.productHeader}>
+              <View style={styles.productTag}>
+                <ThemedText style={styles.productTagText}>
+                  {product.tag}
+                </ThemedText>
+              </View>
             </View>
+            <ThemedText style={styles.productName}>{product.name}</ThemedText>
+            <ThemedText style={styles.yieldLabel}>
+              {product.yieldLabel}
+            </ThemedText>
+            <ThemedText style={styles.yieldValue}>
+              {product.yieldValue}
+            </ThemedText>
+            <ThemedText style={styles.productInfo}>{product.info}</ThemedText>
+            {product.remainingQuota && (
+              <ThemedText style={styles.remainingQuota}>
+                {product.remainingQuota}
+              </ThemedText>
+            )}
+            {product.riskLevel && (
+              <ThemedText style={styles.riskLevel}>
+                {product.riskLevel}
+              </ThemedText>
+            )}
+            <TouchableOpacity style={styles.purchaseButton} activeOpacity={0.8}>
+              <ThemedText style={styles.purchaseButtonText}>
+                {product.buttonText}
+              </ThemedText>
+            </TouchableOpacity>
           </View>
-          <ThemedText style={styles.productName}>安心理财90天</ThemedText>
-          <ThemedText style={styles.yieldLabel}>七日年化收益率</ThemedText>
-          <ThemedText style={styles.yieldValue}>4.25%</ThemedText>
-          <ThemedText style={styles.productInfo}>
-            期限:90天起购:1,000元
-          </ThemedText>
-          <ThemedText style={styles.remainingQuota}>
-            剩余额度: 86.5万
-          </ThemedText>
-          <TouchableOpacity style={styles.purchaseButton} activeOpacity={0.8}>
-            <ThemedText style={styles.purchaseButtonText}>购买</ThemedText>
-          </TouchableOpacity>
-        </View>
-
-        {/* 进取型产品 */}
-        <View style={styles.productCard}>
-          <View style={styles.productHeader}>
-            <View style={[styles.productTag, { backgroundColor: "#4a9aff" }]}>
-              <ThemedText style={styles.productTagText}>进取型</ThemedText>
-            </View>
-          </View>
-          <ThemedText style={styles.productName}>科技成长基金</ThemedText>
-          <ThemedText style={styles.yieldLabel}>近一年收益率</ThemedText>
-          <ThemedText style={styles.yieldValue}>18.6%</ThemedText>
-          <ThemedText style={styles.productInfo}>开放申购起购:100元</ThemedText>
-          <ThemedText style={styles.riskLevel}>风险等级:R4</ThemedText>
-          <TouchableOpacity style={styles.purchaseButton} activeOpacity={0.8}>
-            <ThemedText style={styles.purchaseButtonText}>定投</ThemedText>
-          </TouchableOpacity>
-        </View>
+        ))}
       </View>
     </ScrollView>
   );
@@ -276,6 +378,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
+    backgroundColor: "#4a9aff",
   },
   productTagText: {
     color: "white",
