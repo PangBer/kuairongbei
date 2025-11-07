@@ -1,22 +1,91 @@
+import { customColors } from "@/constants/theme";
 import { StyleSheet } from "react-native";
 
 export const selectStyles = StyleSheet.create({
+  // 底部 Modal 样式
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.65)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "flex-end",
+  },
+  modalOverlayTouchable: {
+    flex: 1,
   },
   modalContent: {
-    maxWidth: 300,
-    width: "100%",
-    maxHeight: "60%",
-    elevation: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 20,
+    maxHeight: "50%",
   },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#d3d3d3",
+    position: "relative",
+  },
+  modalHeaderLeft: {
+    flex: 1,
+    alignItems: "flex-start",
+    zIndex: 1,
+  },
+  modalHeaderRight: {
+    flex: 1,
+    alignItems: "flex-end",
+    zIndex: 1,
+  },
+  modalTitleContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "absolute",
+    left: 0,
+    right: 0,
+    zIndex: 0,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  modalClearText: {
+    fontSize: 16,
+    color: customColors.error,
+  },
+  modalCloseText: {
+    fontSize: 16,
+    color: customColors.primary,
+  },
+  modalOptions: {
+    paddingVertical: 8,
+    maxHeight: 400,
+  },
+  modalOptionItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#d3d3d3",
+  },
+  modalOptionText: {
+    fontSize: 16,
+    flex: 1,
+  },
+  modalOptionTextActive: {
+    color: customColors.primary,
+    fontWeight: "600",
+  },
+  modalCheckmark: {
+    fontSize: 18,
+    color: customColors.primary,
+    fontWeight: "bold",
+  },
+  // 保留旧样式以兼容（如果需要）
   optionsList: {
     maxHeight: 500,
   },
@@ -27,7 +96,6 @@ export const selectStyles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-
   optionText: {
     fontSize: 16,
     flex: 1,
@@ -57,17 +125,11 @@ export const selectStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  breadcrumbItem: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    backgroundColor: "#E3F2FD",
-    borderRadius: 8,
-    marginRight: 4,
-  },
+
   breadcrumbText: {
-    fontSize: 12,
-    color: "#4a9aff",
-    fontWeight: "500",
+    fontSize: 18,
+    fontWeight: "600",
+    textAlign: "center",
   },
   breadcrumbSeparator: {
     marginHorizontal: 4,

@@ -33,9 +33,9 @@ export default () => {
       />
 
       <Tabs.Screen
-        name="demand/index"
+        name="demand"
         options={{
-          title: "有需求",
+          title: "我要申请",
           tabBarIcon: ({ color }) => (
             <ThemedView
               style={{
