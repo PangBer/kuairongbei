@@ -73,7 +73,7 @@ export default function LoginScreen() {
   });
   useEffect(() => {
     if (redirect !== "/demand") {
-      return () => {};
+      return () => { };
     }
     // 拦截物理返回键
     const backHandler = BackHandler.addEventListener(
@@ -186,21 +186,20 @@ export default function LoginScreen() {
   });
 
   return (
-    <ScrollView style={globalStyles.globalContainer}>
+    <ScrollView style={[globalStyles.globalContainer, styles.page]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         {/* 标题区域 */}
-        <ThemedCard>
+        <View >
           <View style={styles.headerContainer}>
-            <ThemedText type="title" style={styles.title}>
+            <View style={styles.logo}>快融呗</View>
+            {/* <ThemedText type="title" style={styles.title}>
               容羿融
             </ThemedText>
-            <ThemedText type="subtitle">手机号账号登录</ThemedText>
+            <ThemedText type="subtitle">手机号账号登录</ThemedText> */}
           </View>
-        </ThemedCard>
 
-        <ThemedCard>
           {/* 登录账号 */}
           <View style={styles.inputContainer}>
             <Controller
@@ -333,15 +332,31 @@ export default function LoginScreen() {
               <ThemedText style={styles.linkText}>《隐私政策》</ThemedText>
             </ThemedText>
           </View>
-        </ThemedCard>
+        </View>
       </KeyboardAvoidingView>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  page: {
+    backgroundColor: "rgb(245, 247, 250)",
+    flex: 1,
+    paddingVertical: 100,
+    paddingHorizontal: 50
+
+  },
+  logo: {
+    width: 60, height: 60,
+    backgroundColor: "#0f40f5",
+    color: "#fff",
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center"
+  },
   headerContainer: {
     alignItems: "center",
+    marginBottom: 40
   },
   title: {
     fontWeight: "bold",

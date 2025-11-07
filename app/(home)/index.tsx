@@ -375,8 +375,7 @@ const styles = StyleSheet.create({
     marginTop: -30,
   },
   productTag: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: 12,
     borderRadius: 12,
     backgroundColor: "#4a9aff",
   },
