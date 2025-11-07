@@ -1,5 +1,6 @@
+import PageHeader from "@/components/PageHeader";
+import globalStyles from "@/components/styles/globalStyles";
 import { ThemedCard, ThemedText } from "@/components/ui";
-import globalStyles from "@/styles/globalStyles";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -15,19 +16,23 @@ export default function ContactUsScreen() {
   const faqData = [
     {
       question: "如何提高我的贷款额度？",
-      answer: "您可以通过以下方式提高贷款额度：1. 保持良好的信用记录，按时还款；2. 增加账户活跃度，多使用平台服务；3. 完善个人信息，提供更多资产证明；4. 联系客服申请额度提升。",
+      answer:
+        "您可以通过以下方式提高贷款额度：1. 保持良好的信用记录，按时还款；2. 增加账户活跃度，多使用平台服务；3. 完善个人信息，提供更多资产证明；4. 联系客服申请额度提升。",
     },
     {
       question: "提现后多久可以到账？",
-      answer: "提现到账时间根据银行不同而有所差异，一般情况下：1. 工作日提现：1-3个工作日到账；2. 节假日提现：顺延至下一个工作日；3. 具体到账时间以银行处理为准。",
+      answer:
+        "提现到账时间根据银行不同而有所差异，一般情况下：1. 工作日提现：1-3个工作日到账；2. 节假日提现：顺延至下一个工作日；3. 具体到账时间以银行处理为准。",
     },
     {
       question: "积分有什么用？",
-      answer: "积分可以在平台内兑换各种优惠和服务：1. 兑换现金红包；2. 兑换平台优惠券；3. 参与积分抽奖活动；4. 兑换会员权益；5. 抵扣部分服务费用。",
+      answer:
+        "积分可以在平台内兑换各种优惠和服务：1. 兑换现金红包；2. 兑换平台优惠券；3. 参与积分抽奖活动；4. 兑换会员权益；5. 抵扣部分服务费用。",
     },
     {
       question: "逾期有什么风险？",
-      answer: "逾期会产生以下影响：1. 产生逾期费用和罚息；2. 影响个人信用记录；3. 可能被列入失信名单；4. 影响后续贷款申请；5. 可能面临法律诉讼。请务必按时还款。",
+      answer:
+        "逾期会产生以下影响：1. 产生逾期费用和罚息；2. 影响个人信用记录；3. 可能被列入失信名单；4. 影响后续贷款申请；5. 可能面临法律诉讼。请务必按时还款。",
     },
   ];
 
@@ -42,6 +47,7 @@ export default function ContactUsScreen() {
 
   return (
     <>
+      <PageHeader title="联系我们" />
       <ScrollView
         style={globalStyles.globalContainer}
         showsVerticalScrollIndicator={false}
@@ -55,14 +61,18 @@ export default function ContactUsScreen() {
                 <AntDesign name="wechat" size={32} color="#2B56F6" />
               </View>
               <ThemedText style={styles.serviceTitle}>企业微信客服</ThemedText>
-              <ThemedText style={styles.serviceText}>添加企业微信获取一对一服务</ThemedText>
+              <ThemedText style={styles.serviceText}>
+                添加企业微信获取一对一服务
+              </ThemedText>
               <TouchableOpacity
                 style={styles.serviceButton}
                 activeOpacity={0.8}
-                onPress={() => router.push("./contactUs/addWeixin")}
+                onPress={() => router.push("/contactUs/addWeixin")}
               >
                 <AntDesign name="plus-circle" size={16} color="#FFFFFF" />
-                <ThemedText style={styles.serviceButtonText}>立即添加</ThemedText>
+                <ThemedText style={styles.serviceButtonText}>
+                  立即添加
+                </ThemedText>
               </TouchableOpacity>
             </View>
           </ThemedCard>
@@ -73,10 +83,17 @@ export default function ContactUsScreen() {
                 <AntDesign name="message" size={32} color="#2B56F6" />
               </View>
               <ThemedText style={styles.serviceTitle}>在线客服</ThemedText>
-              <ThemedText style={styles.serviceText}>实时在线咨询，快速解决问题</ThemedText>
-              <TouchableOpacity style={styles.serviceButton} activeOpacity={0.8}>
+              <ThemedText style={styles.serviceText}>
+                实时在线咨询，快速解决问题
+              </ThemedText>
+              <TouchableOpacity
+                style={styles.serviceButton}
+                activeOpacity={0.8}
+              >
                 <AntDesign name="customer-service" size={16} color="#FFFFFF" />
-                <ThemedText style={styles.serviceButtonText}>开始咨询</ThemedText>
+                <ThemedText style={styles.serviceButtonText}>
+                  开始咨询
+                </ThemedText>
               </TouchableOpacity>
             </View>
           </ThemedCard>
@@ -102,8 +119,12 @@ export default function ContactUsScreen() {
 
           {/* 底部提示文字 */}
           <View style={styles.qrCodeTipsContainer}>
-            <ThemedText style={styles.qrCodeTipText}>保存图片到手机，打开微信扫码添加</ThemedText>
-            <ThemedText style={styles.qrCodeTipText}>工作时间：9：00-18：00（节假日除外）</ThemedText>
+            <ThemedText style={styles.qrCodeTipText}>
+              保存图片到手机，打开微信扫码添加
+            </ThemedText>
+            <ThemedText style={styles.qrCodeTipText}>
+              工作时间：9：00-18：00（节假日除外）
+            </ThemedText>
           </View>
         </ThemedCard>
 
@@ -124,7 +145,9 @@ export default function ContactUsScreen() {
                   onPress={() => handleQuestionToggle(index)}
                   activeOpacity={0.7}
                 >
-                  <ThemedText style={styles.faqQuestion}>{item.question}</ThemedText>
+                  <ThemedText style={styles.faqQuestion}>
+                    {item.question}
+                  </ThemedText>
                   <AntDesign
                     name={expandedQuestion === index ? "up" : "down"}
                     size={16}
@@ -133,10 +156,14 @@ export default function ContactUsScreen() {
                 </TouchableOpacity>
                 {expandedQuestion === index && (
                   <View style={styles.faqAnswerContainer}>
-                    <ThemedText style={styles.faqAnswer}>{item.answer}</ThemedText>
+                    <ThemedText style={styles.faqAnswer}>
+                      {item.answer}
+                    </ThemedText>
                   </View>
                 )}
-                {index < faqData.length - 1 && <View style={styles.faqDivider} />}
+                {index < faqData.length - 1 && (
+                  <View style={styles.faqDivider} />
+                )}
               </View>
             ))}
           </View>
@@ -159,7 +186,9 @@ export default function ContactUsScreen() {
               </View>
               <View style={styles.contactInfo}>
                 <ThemedText style={styles.contactLabel}>客服热线</ThemedText>
-                <ThemedText style={styles.contactValue}>400-888-9999</ThemedText>
+                <ThemedText style={styles.contactValue}>
+                  400-888-9999
+                </ThemedText>
               </View>
             </View>
 
@@ -170,7 +199,9 @@ export default function ContactUsScreen() {
               </View>
               <View style={styles.contactInfo}>
                 <ThemedText style={styles.contactLabel}>工作时间</ThemedText>
-                <ThemedText style={styles.contactValue}>周一至周五9：00-18：00</ThemedText>
+                <ThemedText style={styles.contactValue}>
+                  周一至周五9：00-18：00
+                </ThemedText>
               </View>
             </View>
 
@@ -181,14 +212,14 @@ export default function ContactUsScreen() {
               </View>
               <View style={styles.contactInfo}>
                 <ThemedText style={styles.contactLabel}>官方邮箱</ThemedText>
-                <ThemedText style={styles.contactValue}>xxxx@model.com</ThemedText>
+                <ThemedText style={styles.contactValue}>
+                  xxxx@model.com
+                </ThemedText>
               </View>
             </View>
           </View>
         </ThemedCard>
-
-      </ScrollView >
-
+      </ScrollView>
     </>
   );
 }
@@ -372,5 +403,4 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#333333",
   },
-
 });

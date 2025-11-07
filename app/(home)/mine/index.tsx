@@ -35,21 +35,21 @@ const functionServices: MenuItem[] = [
     icon: (
       <AntDesign name="reload" size={24} color="#4a9aff" />
     ) as React.ReactNode,
-    link: "/withdrawal-record" as RelativePathString,
+    link: "/withdrawalRecord" as RelativePathString,
   },
   {
     title: "邀请助力",
     icon: (
       <AntDesign name="team" size={24} color="#4a9aff" />
     ) as React.ReactNode,
-    link: "/invite" as RelativePathString,
+    link: "/promotion" as RelativePathString,
   },
   {
     title: "成为推荐官",
     icon: (
       <AntDesign name="trophy" size={24} color="#4a9aff" />
     ) as React.ReactNode,
-    link: "/promotion" as RelativePathString,
+    link: "" as RelativePathString,
   },
 
   {
@@ -57,7 +57,7 @@ const functionServices: MenuItem[] = [
     icon: (
       <AntDesign name="qrcode" size={24} color="#4a9aff" />
     ) as React.ReactNode,
-    link: "/team-qrcode" as RelativePathString,
+    link: "" as RelativePathString,
   },
 
   {
@@ -65,39 +65,32 @@ const functionServices: MenuItem[] = [
     icon: (
       <AntDesign name="phone" size={24} color="#4a9aff" />
     ) as React.ReactNode,
-    link: "/contact" as RelativePathString,
+    link: "/contactUs" as RelativePathString,
   },
 ];
 
 // 设置链接项数组 - 根据图片设计
 const settingsItems: MenuItem[] = [
   {
-    title: "关注公众号",
-    icon: (
-      <AntDesign name="message" size={20} color="#4a9aff" />
-    ) as React.ReactNode,
-    link: "/loans" as RelativePathString,
-  },
-  {
     title: "账户安全",
     icon: (
       <AntDesign name="safety" size={20} color="#4a9aff" />
     ) as React.ReactNode,
-    link: "/security" as RelativePathString,
+    link: "" as RelativePathString,
   },
   {
     title: "隐私政策",
     icon: (
       <AntDesign name="eye" size={20} color="#4a9aff" />
     ) as React.ReactNode,
-    link: "/privacy-policy" as RelativePathString,
+    link: "" as RelativePathString,
   },
   {
     title: "帮助中心",
     icon: (
       <AntDesign name="question-circle" size={20} color="#4a9aff" />
     ) as React.ReactNode,
-    link: "/help" as RelativePathString,
+    link: "" as RelativePathString,
   },
 ];
 
@@ -146,21 +139,25 @@ export default function MineScreen() {
             </View>
             {isAuthenticated && (
               <View style={styles.userActions}>
-                <TouchableOpacity
-                  style={styles.notificationButton}
-                  activeOpacity={0.8}
-                >
-                  <AntDesign name="edit" size={16} color="#ffffff" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.notificationButton}
-                  activeOpacity={0.8}
-                >
-                  <AntDesign name="bell" size={18} color="#ffffff" />
-                  <Badge style={{ position: "absolute", top: -6, right: -6 }}>
-                    3
-                  </Badge>
-                </TouchableOpacity>
+                <Link href="/info" asChild>
+                  <TouchableOpacity
+                    style={styles.notificationButton}
+                    activeOpacity={0.8}
+                  >
+                    <AntDesign name="edit" size={16} color="#ffffff" />
+                  </TouchableOpacity>
+                </Link>
+                <Link href="/message" asChild>
+                  <TouchableOpacity
+                    style={styles.notificationButton}
+                    activeOpacity={0.8}
+                  >
+                    <AntDesign name="bell" size={18} color="#ffffff" />
+                    <Badge style={{ position: "absolute", top: -6, right: -6 }}>
+                      3
+                    </Badge>
+                  </TouchableOpacity>
+                </Link>
               </View>
             )}
           </View>
@@ -190,10 +187,15 @@ export default function MineScreen() {
 
           {/* 立即提现按钮 */}
           {isAuthenticated ? (
-            <TouchableOpacity style={styles.withdrawButton} activeOpacity={0.8}>
-              <AntDesign name="wallet" size={18} color="#ffffff" />
-              <ThemedText style={styles.withdrawText}>立即提现</ThemedText>
-            </TouchableOpacity>
+            <Link href="/withdrawal" asChild>
+              <TouchableOpacity
+                style={styles.withdrawButton}
+                activeOpacity={0.8}
+              >
+                <AntDesign name="wallet" size={18} color="#ffffff" />
+                <ThemedText style={styles.withdrawText}>立即提现</ThemedText>
+              </TouchableOpacity>
+            </Link>
           ) : (
             <Link href="/login" asChild>
               <TouchableOpacity
@@ -349,7 +351,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(79, 137, 255,0.5)",
     paddingVertical: 20,
     paddingHorizontal: 20,
-    borderRadius: 20
+    borderRadius: 20,
   },
   pointSectionLabel: {
     fontSize: 14,

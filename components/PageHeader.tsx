@@ -10,7 +10,7 @@ export default ({
   onRightPress?: () => void;
 }) => {
   return (
-    <Appbar.Header>
+    <Appbar.Header style={{ height: 40 }} statusBarHeight={0}>
       <Appbar.BackAction onPress={() => router.back()} />
       <Appbar.Content title={title} />
       {children}

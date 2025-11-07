@@ -1,9 +1,16 @@
+import PageHeader from "@/components/PageHeader";
+import globalStyles from "@/components/styles/globalStyles";
 import { ThemedCard, ThemedText } from "@/components/ui";
-import globalStyles from "@/styles/globalStyles";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
 import React from "react";
-import { ScrollView, StyleSheet, TouchableOpacity, View, ViewStyle } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from "react-native";
 
 // 消息类型
 type MessageType = "match_success" | "match_fail" | "system" | "points";
@@ -96,7 +103,8 @@ const messageList: MessageItem[] = [
     id: "1",
     type: "match_success",
     title: "匹配成功通知",
-    content: "恭喜您！您的贷款需求已成功匹配到合适的产品，请尽快前往匹配页查看详情并进行下一步操作。",
+    content:
+      "恭喜您！您的贷款需求已成功匹配到合适的产品，请尽快前往匹配页查看详情并进行下一步操作。",
     time: new Date(Date.now() - 10 * 60 * 1000), // 10分钟前
     buttonText: "前往匹配页面",
   },
@@ -104,7 +112,8 @@ const messageList: MessageItem[] = [
     id: "2",
     type: "match_fail",
     title: "匹配失败通知",
-    content: "很抱歉，目前没有匹配到适合您的贷款产品。您可以点击查看详情，了解具体原因及后续建议。",
+    content:
+      "很抱歉，目前没有匹配到适合您的贷款产品。您可以点击查看详情，了解具体原因及后续建议。",
     time: new Date(Date.now() - 25 * 60 * 1000), // 25分钟前
     buttonText: "查看详情",
   },
@@ -128,70 +137,92 @@ export default function MessageScreen() {
   const router = useRouter();
 
   // 处理按钮点击
-  const handleButtonPress = () => {
-    router.push("/(home)/demand");
+  const handleButtonPress = (type: string) => {
+    // router.push("/(home)/demand");
+    if (type === "match_fail") {
+      router.push("/result/fail");
+    } else {
+      router.push("/result/success");
+    }
   };
 
   return (
-    <ScrollView
-      style={globalStyles.globalContainer}
-      showsVerticalScrollIndicator={false}
-    >
-      {messageList.map((message, index) => {
-        const cardStyles: ViewStyle = {
-          ...(index > 0 ? styles.cardMargin : {}),
-          ...(message.type === "match_success" ? styles.greenBorder : {}),
-          ...(message.type === "match_fail" ? styles.orangeBorder : {}),
-        };
+    <>
+      <PageHeader title="消息通知" />
+      <ScrollView
+        style={globalStyles.globalContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {messageList.map((message, index) => {
+          const cardStyles: ViewStyle = {
+            ...(index > 0 ? styles.cardMargin : {}),
+            ...(message.type === "match_success" ? styles.greenBorder : {}),
+            ...(message.type === "match_fail" ? styles.orangeBorder : {}),
+          };
 
-        return (
-          <ThemedCard key={message.id} style={cardStyles}>
-            <View style={styles.messageContainer}>
-              {/* 左侧图标 */}
-              <View style={[styles.iconContainer, { backgroundColor: getIconBackgroundColor(message.type) }]}>
-                <AntDesign
-                  name={getMessageIcon(message.type) as any}
-                  size={24}
-                  color={getIconColor(message.type)}
-                />
-              </View>
-
-              {/* 右侧内容 */}
-              <View style={styles.contentContainer}>
-                {/* 标题和时间行 */}
-                <View style={styles.titleRow}>
-                  <ThemedText style={styles.messageTitle}>{message.title}</ThemedText>
-                  <ThemedText style={styles.messageTime}>
-                    {formatTime(message.time)}
-                  </ThemedText>
+          return (
+            <ThemedCard key={message.id} style={cardStyles}>
+              <View style={styles.messageContainer}>
+                {/* 左侧图标 */}
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: getIconBackgroundColor(message.type) },
+                  ]}
+                >
+                  <AntDesign
+                    name={getMessageIcon(message.type) as any}
+                    size={24}
+                    color={getIconColor(message.type)}
+                  />
                 </View>
 
-                {/* 消息内容 */}
-                <ThemedText style={styles.messageContent}>{message.content}</ThemedText>
-
-                {/* 匹配成功/失败时的按钮 */}
-                {(message.type === "match_success" || message.type === "match_fail") && (
-                  <TouchableOpacity
-                    style={styles.actionButton}
-                    activeOpacity={0.8}
-                    onPress={handleButtonPress}
-                  >
-                    <AntDesign
-                      name={message.type === "match_success" ? "arrow-right" : "eye"}
-                      size={14}
-                      color="#2B56F6"
-                    />
-                    <ThemedText style={styles.actionButtonText}>
-                      {message.buttonText}
+                {/* 右侧内容 */}
+                <View style={styles.contentContainer}>
+                  {/* 标题和时间行 */}
+                  <View style={styles.titleRow}>
+                    <ThemedText style={styles.messageTitle}>
+                      {message.title}
                     </ThemedText>
-                  </TouchableOpacity>
-                )}
+                    <ThemedText style={styles.messageTime}>
+                      {formatTime(message.time)}
+                    </ThemedText>
+                  </View>
+
+                  {/* 消息内容 */}
+                  <ThemedText style={styles.messageContent}>
+                    {message.content}
+                  </ThemedText>
+
+                  {/* 匹配成功/失败时的按钮 */}
+                  {(message.type === "match_success" ||
+                    message.type === "match_fail") && (
+                    <TouchableOpacity
+                      style={styles.actionButton}
+                      activeOpacity={0.8}
+                      onPress={() => handleButtonPress(message.type)}
+                    >
+                      <AntDesign
+                        name={
+                          message.type === "match_success"
+                            ? "arrow-right"
+                            : "eye"
+                        }
+                        size={14}
+                        color="#2B56F6"
+                      />
+                      <ThemedText style={styles.actionButtonText}>
+                        {message.buttonText}
+                      </ThemedText>
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
-            </View>
-          </ThemedCard>
-        );
-      })}
-    </ScrollView>
+            </ThemedCard>
+          );
+        })}
+      </ScrollView>
+    </>
   );
 }
 

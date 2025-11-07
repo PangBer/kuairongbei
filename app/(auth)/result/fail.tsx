@@ -1,5 +1,6 @@
+import PageHeader from "@/components/PageHeader";
+import globalStyles from "@/components/styles/globalStyles";
 import { ThemedCard, ThemedText } from "@/components/ui";
-import globalStyles from "@/styles/globalStyles";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -14,7 +15,8 @@ const failReasons = [
   {
     icon: "bank",
     title: "收入证明不足",
-    description: "未提供收入证明或收入水平暂不符合要求，请补充相关工资或公积金证明。",
+    description:
+      "未提供收入证明或收入水平暂不符合要求，请补充相关工资或公积金证明。",
   },
   {
     icon: "credit-card",
@@ -51,10 +53,10 @@ export default function FailMessageScreen() {
 
   return (
     <View style={styles.container}>
+      <PageHeader title="审核结果" />
       <ScrollView
-        style={[globalStyles.globalContainer, { backgroundColor: '#f8fafc' }]}
+        style={[globalStyles.globalContainer, { backgroundColor: "#f8fafc" }]}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.contentContainer}
       >
         {/* 顶部提示 */}
         <View style={styles.heroCard}>
@@ -63,7 +65,9 @@ export default function FailMessageScreen() {
               <AntDesign name="close-circle" size={42} color="#F56C6C" />
             </View>
           </View>
-          <ThemedText style={styles.heroTitle}>很抱歉，您的申请未通过</ThemedText>
+          <ThemedText style={styles.heroTitle}>
+            很抱歉，您的申请未通过
+          </ThemedText>
           <ThemedText style={styles.heroDescription}>
             根据您提交的信审评估，目前暂时无法为您提供贷款服务。请查看下方原因并准备相关材料后重新申请。
           </ThemedText>
@@ -77,13 +81,21 @@ export default function FailMessageScreen() {
           </View>
           <View style={styles.divider} />
           {failReasons.map((item, index) => (
-            <View key={item.title} style={[styles.listItem, index !== failReasons.length - 1 && styles.listDivider]}>
+            <View
+              key={item.title}
+              style={[
+                styles.listItem,
+                index !== failReasons.length - 1 && styles.listDivider,
+              ]}
+            >
               <View style={[styles.listIcon, styles.failIconBackground]}>
                 <AntDesign name={item.icon as any} size={18} color="#F56C6C" />
               </View>
               <View style={styles.listContent}>
                 <ThemedText style={styles.listTitle}>{item.title}</ThemedText>
-                <ThemedText style={styles.listDescription}>{item.description}</ThemedText>
+                <ThemedText style={styles.listDescription}>
+                  {item.description}
+                </ThemedText>
               </View>
             </View>
           ))}
@@ -92,14 +104,20 @@ export default function FailMessageScreen() {
         {/* 重新申请建议 */}
         <ThemedCard style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
-            <AntDesign name='bulb' size={18} color="#2B56F6" />
+            <AntDesign name="bulb" size={18} color="#2B56F6" />
             <ThemedText style={styles.sectionTitle}>重新申请建议</ThemedText>
           </View>
           <View style={styles.divider} />
           {suggestions.map((item, index) => (
-            <View key={item.text} style={[styles.listItem, index !== suggestions.length - 1 && styles.listDivider]}>
+            <View
+              key={item.text}
+              style={[
+                styles.listItem,
+                index !== suggestions.length - 1 && styles.listDivider,
+              ]}
+            >
               <View style={[styles.listIcon, styles.suggestionIconBackground]}>
-                <AntDesign name='check-circle' size={18} color={item.color} />
+                <AntDesign name="check-circle" size={18} color={item.color} />
               </View>
               <ThemedText style={styles.listSuggestion}>{item.text}</ThemedText>
             </View>
@@ -110,7 +128,7 @@ export default function FailMessageScreen() {
         <ThemedCard style={styles.helpCard}>
           <View style={styles.sectionHeader}>
             <View style={[styles.listIcon, styles.suggestionIconBackground]}>
-              <AntDesign name='customer-service' size={18} color="#2B56F6" />
+              <AntDesign name="customer-service" size={18} color="#2B56F6" />
             </View>
             <ThemedText style={styles.sectionTitle}>需要帮助？</ThemedText>
           </View>
@@ -122,8 +140,8 @@ export default function FailMessageScreen() {
             activeOpacity={0.8}
             onPress={() => router.push("/contactUs")}
           >
-            <ThemedText style={styles.helpButtonText}>立即联系客服</ThemedText>  
-            <AntDesign name='arrow-right' size={16} color="#2B56F6" />
+            <ThemedText style={styles.helpButtonText}>立即联系客服</ThemedText>
+            <AntDesign name="arrow-right" size={16} color="#2B56F6" />
           </TouchableOpacity>
         </ThemedCard>
       </ScrollView>
@@ -132,14 +150,18 @@ export default function FailMessageScreen() {
         <TouchableOpacity
           style={[styles.footerButton, styles.footerButtonSecondary]}
           activeOpacity={0.8}
-          onPress={() => router.push('/(home)')}
+          onPress={() => router.push("/(home)")}
         >
-          <ThemedText style={[styles.footerButtonText, styles.footerButtonSecondaryText]}>返回首页</ThemedText>
+          <ThemedText
+            style={[styles.footerButtonText, styles.footerButtonSecondaryText]}
+          >
+            返回首页
+          </ThemedText>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.footerButton, styles.footerButtonPrimary]}
           activeOpacity={0.8}
-          onPress={() => router.push('/(home)/demand')}
+          onPress={() => router.push("/(home)/demand")}
         >
           <ThemedText style={styles.footerButtonText}>重新申请</ThemedText>
         </TouchableOpacity>
@@ -151,10 +173,7 @@ export default function FailMessageScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
-  },
-  contentContainer: {
-    paddingBottom: 120,
+    backgroundColor: "#f8fafc",
   },
   heroCard: {
     alignItems: "center",
@@ -254,10 +273,10 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 16,
     gap: 12,
-    borderColor: '#2B56F6',
+    borderColor: "#2B56F6",
     borderWidth: 1,
     borderRadius: 12,
-    backgroundColor: '#F0F7FF'
+    backgroundColor: "#F0F7FF",
   },
   helpDescription: {
     fontSize: 13,
@@ -272,7 +291,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 10,
     // borderRadius: 22,
-
   },
   helpButtonText: {
     fontSize: 14,

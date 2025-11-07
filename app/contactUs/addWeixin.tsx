@@ -1,8 +1,9 @@
+import PageHeader from "@/components/PageHeader";
+import globalStyles from "@/components/styles/globalStyles";
 import { ThemedCard, ThemedText } from "@/components/ui";
-import globalStyles from "@/styles/globalStyles";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import React from "react";
 import { useRouter } from "expo-router";
+import React from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 
 export default function AddWeixinScreen() {
@@ -15,11 +16,11 @@ export default function AddWeixinScreen() {
 
   return (
     <>
+      <PageHeader title="企业微信客服" />
       <ScrollView
         style={globalStyles.globalContainer}
         showsVerticalScrollIndicator={false}
       >
-
         {/* 企微内容 */}
         <ThemedCard>
           {/* 头像姓名 */}
@@ -29,7 +30,9 @@ export default function AddWeixinScreen() {
             </View>
             <View style={styles.profileInfo}>
               <ThemedText style={styles.profileName}>贷款服务助手</ThemedText>
-              <ThemedText style={styles.profileSubtitle}>企业微信认证客服</ThemedText>
+              <ThemedText style={styles.profileSubtitle}>
+                企业微信认证客服
+              </ThemedText>
               <View style={styles.verifiedBadge}>
                 <AntDesign name="check-circle" size={14} color="#2B56F6" />
                 <ThemedText style={styles.verifiedText}>官方认证</ThemedText>
@@ -38,7 +41,12 @@ export default function AddWeixinScreen() {
           </View>
 
           {/* 联系方式 */}
-          <View style={[styles.sectionContainer, { backgroundColor: '#f8f8f8', padding: 10, borderRadius: 10 }]}>
+          <View
+            style={[
+              styles.sectionContainer,
+              { backgroundColor: "#f8f8f8", padding: 10, borderRadius: 10 },
+            ]}
+          >
             <View style={styles.sectionTitleRow}>
               <AntDesign name="phone" size={18} color="#2B56F6" />
               <ThemedText style={styles.sectionTitle}>联系方式</ThemedText>
@@ -46,16 +54,22 @@ export default function AddWeixinScreen() {
             <View style={styles.contactInfoRow}>
               <View style={styles.contactInfoLeft}>
                 <ThemedText style={styles.contactLabel}>企业微信号</ThemedText>
-
               </View>
-              <ThemedText style={[styles.contactValue, { marginRight: 10 }]}>xxxxx</ThemedText>
-              <TouchableOpacity style={styles.copyButton} onPress={handleCopyWeixin}>
+              <ThemedText style={[styles.contactValue, { marginRight: 10 }]}>
+                xxxxx
+              </ThemedText>
+              <TouchableOpacity
+                style={styles.copyButton}
+                onPress={handleCopyWeixin}
+              >
                 <ThemedText style={styles.copyButtonText}>复制</ThemedText>
               </TouchableOpacity>
             </View>
             <View style={styles.contactInfoRow}>
               <ThemedText style={styles.contactLabel}>工作时间</ThemedText>
-              <ThemedText style={styles.contactValue}>周一至周五9：00-18：00</ThemedText>
+              <ThemedText style={styles.contactValue}>
+                周一至周五9：00-18：00
+              </ThemedText>
             </View>
           </View>
 
@@ -68,19 +82,27 @@ export default function AddWeixinScreen() {
             <View style={styles.serviceList}>
               <View style={styles.serviceItem}>
                 <AntDesign name="check-circle" size={16} color="#2B56F6" />
-                <ThemedText style={styles.serviceText}>一对一专属客服服务</ThemedText>
+                <ThemedText style={styles.serviceText}>
+                  一对一专属客服服务
+                </ThemedText>
               </View>
               <View style={styles.serviceItem}>
                 <AntDesign name="check-circle" size={16} color="#2B56F6" />
-                <ThemedText style={styles.serviceText}>快速响应贷款咨询</ThemedText>
+                <ThemedText style={styles.serviceText}>
+                  快速响应贷款咨询
+                </ThemedText>
               </View>
               <View style={styles.serviceItem}>
                 <AntDesign name="check-circle" size={16} color="#2B56F6" />
-                <ThemedText style={styles.serviceText}>专业贷款方案定制</ThemedText>
+                <ThemedText style={styles.serviceText}>
+                  专业贷款方案定制
+                </ThemedText>
               </View>
               <View style={styles.serviceItem}>
                 <AntDesign name="check-circle" size={16} color="#2B56F6" />
-                <ThemedText style={styles.serviceText}>24小时在线支持</ThemedText>
+                <ThemedText style={styles.serviceText}>
+                  24小时在线支持
+                </ThemedText>
               </View>
             </View>
           </View>
@@ -113,7 +135,9 @@ export default function AddWeixinScreen() {
               <View style={styles.stepNumber}>
                 <ThemedText style={styles.stepNumberText}>1</ThemedText>
               </View>
-              <ThemedText style={styles.stepText}>打开微信，点击右上角+号</ThemedText>
+              <ThemedText style={styles.stepText}>
+                打开微信，点击右上角+号
+              </ThemedText>
             </View>
             <View style={styles.stepItem}>
               <View style={styles.stepNumber}>
@@ -125,20 +149,21 @@ export default function AddWeixinScreen() {
               <View style={styles.stepNumber}>
                 <ThemedText style={styles.stepNumberText}>3</ThemedText>
               </View>
-              <ThemedText style={styles.stepText}>点击搜索输入企业微信号</ThemedText>
+              <ThemedText style={styles.stepText}>
+                点击搜索输入企业微信号
+              </ThemedText>
             </View>
             <View style={styles.stepItem}>
               <View style={styles.stepNumber}>
                 <ThemedText style={styles.stepNumberText}>4</ThemedText>
               </View>
-              <ThemedText style={styles.stepText}>点击添加到通讯录完成添加</ThemedText>
+              <ThemedText style={styles.stepText}>
+                点击添加到通讯录完成添加
+              </ThemedText>
             </View>
           </View>
         </ThemedCard>
-
-
-      </ScrollView >
-
+      </ScrollView>
     </>
   );
 }

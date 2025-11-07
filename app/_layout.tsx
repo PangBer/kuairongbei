@@ -9,6 +9,7 @@ import {
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, useColorScheme } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Provider as PaperProvider } from "react-native-paper";
 import "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -44,22 +45,24 @@ export default function RootLayout() {
                 }
           }
         >
-          <PaperProvider theme={paperTheme}>
-            <StatusBar style={isDark ? "light" : "dark"} />
-            <SafeAreaView
-              style={[
-                styles.container,
-                {
-                  backgroundColor: paperTheme.colors.foreground,
-                },
-              ]}
-            >
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="(home)" />
-              </Stack>
-              <ToastContainer />
-            </SafeAreaView>
-          </PaperProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <PaperProvider theme={paperTheme}>
+              <StatusBar style={isDark ? "light" : "dark"} />
+              <SafeAreaView
+                style={[
+                  styles.container,
+                  {
+                    backgroundColor: paperTheme.colors.foreground,
+                  },
+                ]}
+              >
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="(home)" />
+                </Stack>
+                <ToastContainer />
+              </SafeAreaView>
+            </PaperProvider>
+          </GestureHandlerRootView>
         </ThemeProvider>
       </PersistGate>
     </Provider>

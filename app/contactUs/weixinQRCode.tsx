@@ -1,5 +1,5 @@
+import globalStyles from "@/components/styles/globalStyles";
 import { ThemedText } from "@/components/ui";
-import globalStyles from "@/styles/globalStyles";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
@@ -13,9 +13,9 @@ export default function WeixinQRCodeScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.cardBox}>
-        <View style={styles.qrCodeCard}>  {/* 顶部标题 */}
+        <View style={styles.qrCodeCard}>
+          {/* 顶部标题 */}
           <ThemedText style={styles.cardTitle}>请加我的企业微信</ThemedText>
-
           {/* 二维码气泡容器 */}
           <View style={styles.qrCodeBubble}>
             <View style={styles.qrCodeWrapper}>
@@ -32,13 +32,12 @@ export default function WeixinQRCodeScreen() {
               </View>
             </View>
           </View>
-
           {/* 联系人信息 */}
           <View style={styles.contactInfo}>
             <ThemedText style={styles.contactName}>李咏宸</ThemedText>
             <ThemedText style={styles.contactCompany}>壹元鑫科</ThemedText>
-          </View></View>
-
+          </View>
+        </View>
 
         {/* 底部Footer */}
         <View style={styles.footer}>
@@ -60,7 +59,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
     backgroundColor: "#F5F5F5",
-
   },
   cardBox: {
     width: "100%",
@@ -128,7 +126,7 @@ const styles = StyleSheet.create({
   contactInfo: {
     alignItems: "center",
     marginBottom: 20,
-    marginTop: 30
+    marginTop: 30,
   },
   contactName: {
     fontSize: 20,
@@ -164,5 +162,5 @@ const styles = StyleSheet.create({
     color: "#666",
     textAlign: "center",
     marginBottom: 20,
-  }
+  },
 });

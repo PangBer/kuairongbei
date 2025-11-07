@@ -1,9 +1,12 @@
+import PageHeader from "@/components/PageHeader";
+import globalStyles from "@/components/styles/globalStyles";
+import { ThemedCard, ThemedText } from "@/components/ui";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React, { useRef, useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
-import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
-import { ThemedCard, ThemedText } from "@/components/ui";
-import globalStyles from "@/styles/globalStyles";
+import Swipeable, {
+  SwipeableMethods,
+} from "react-native-gesture-handler/ReanimatedSwipeable";
 
 interface firstcardItem {
   title: string;
@@ -23,7 +26,8 @@ const firstCardList: firstcardItem[] = [
     subTitle: "邀请好友获得的奖励积分",
     num: 3200,
     text: "分",
-  }, {
+  },
+  {
     title: "不可用积分",
     subTitle: "为满足提现条件的积分",
     num: 677,
@@ -75,7 +79,7 @@ export default function WithdrawalRecordScreen() {
   const amountOptions = [50, 100, 200, 500];
 
   // 保存每个 Swipeable 的引用
-  const swipeableRefs = useRef<{ [key: string]: Swipeable | null }>({});
+  const swipeableRefs = useRef<{ [key: string]: SwipeableMethods | null }>({});
 
   // 当某个 Swipeable 即将打开时，关闭其他所有的
   const handleSwipeableWillOpen = (cardId: string) => {
@@ -122,6 +126,7 @@ export default function WithdrawalRecordScreen() {
 
   return (
     <>
+      <PageHeader title="立即提现" />
       <ScrollView
         style={globalStyles.globalContainer}
         showsVerticalScrollIndicator={false}
@@ -129,9 +134,7 @@ export default function WithdrawalRecordScreen() {
         {/* 积分明细卡片 */}
         <ThemedCard>
           <View style={styles.cardContainer}>
-            <ThemedText style={styles.cardTitle}>
-              积分明细
-            </ThemedText>
+            <ThemedText style={styles.cardTitle}>积分明细</ThemedText>
 
             {firstCardList.map((item, index) => (
               <View key={index} style={styles.cardItem}>
@@ -158,9 +161,7 @@ export default function WithdrawalRecordScreen() {
         {/* 提现金额卡片 */}
         <ThemedCard>
           <View style={styles.cardContainer}>
-            <ThemedText style={styles.cardTitle}>
-              提现金额
-            </ThemedText>
+            <ThemedText style={styles.cardTitle}>提现金额</ThemedText>
             <View style={styles.amountDisplay}>
               <ThemedText style={styles.amountSymbol}>￥</ThemedText>
               <ThemedText style={styles.amountValue}>
@@ -182,7 +183,8 @@ export default function WithdrawalRecordScreen() {
                   <ThemedText
                     style={[
                       styles.amountButtonText,
-                      selectedAmount === amount && styles.amountButtonTextActive,
+                      selectedAmount === amount &&
+                        styles.amountButtonTextActive,
                     ]}
                   >
                     ￥{amount}
@@ -199,13 +201,12 @@ export default function WithdrawalRecordScreen() {
         {/* 提现方式卡片 */}
         <ThemedCard>
           <View style={styles.cardContainer}>
-            <ThemedText style={styles.cardTitle}>
-              提现方式
-            </ThemedText>
+            <ThemedText style={styles.cardTitle}>提现方式</ThemedText>
 
             {bankCards.map((card) => (
               <Swipeable
                 key={card.id}
+                // @ts-ignore
                 ref={(ref) => {
                   swipeableRefs.current[card.id] = ref;
                 }}
@@ -252,15 +253,11 @@ export default function WithdrawalRecordScreen() {
         </ThemedCard>
 
         {/* 提现按钮 */}
-        <TouchableOpacity
-          style={styles.submitButton}
-          activeOpacity={0.8}
-        >
+        <TouchableOpacity style={styles.submitButton} activeOpacity={0.8}>
           <AntDesign name="swap" size={18} color="#ffffff" />
           <ThemedText style={styles.submitButtonText}>确认提现</ThemedText>
         </TouchableOpacity>
-      </ScrollView >
-
+      </ScrollView>
     </>
   );
 }
@@ -326,11 +323,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#2B56F6",
     marginRight: 4,
+    lineHeight: 48,
   },
   amountValue: {
     fontSize: 36,
     fontWeight: "bold",
     color: "#2B56F6",
+    lineHeight: 48,
   },
   amountButtons: {
     flexDirection: "row",
@@ -341,7 +340,7 @@ const styles = StyleSheet.create({
   amountButton: {
     flex: 1,
     paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: 10,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#E5E7EB",

@@ -1,5 +1,5 @@
 import globalStyles from "@/components/styles/globalStyles";
-import { ThemedCard, ThemedText } from "@/components/ui";
+import { ThemedText } from "@/components/ui";
 import { customColors } from "@/constants/theme";
 import { imageCodeApi, sendLoginAPi, smsCodeApi, userInfoApi } from "@/service";
 import { useAuthActions, useToastActions } from "@/store/hooks";
@@ -19,6 +19,7 @@ import {
 } from "react-native";
 import {
   ActivityIndicator,
+  Avatar,
   Button,
   HelperText,
   TextInput,
@@ -73,7 +74,7 @@ export default function LoginScreen() {
   });
   useEffect(() => {
     if (redirect !== "/demand") {
-      return () => { };
+      return () => {};
     }
     // 拦截物理返回键
     const backHandler = BackHandler.addEventListener(
@@ -191,13 +192,9 @@ export default function LoginScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         {/* 标题区域 */}
-        <View >
+        <View>
           <View style={styles.headerContainer}>
-            <View style={styles.logo}>快融呗</View>
-            {/* <ThemedText type="title" style={styles.title}>
-              容羿融
-            </ThemedText>
-            <ThemedText type="subtitle">手机号账号登录</ThemedText> */}
+            <Avatar.Text size={96} label="融" />
           </View>
 
           {/* 登录账号 */}
@@ -343,20 +340,20 @@ const styles = StyleSheet.create({
     backgroundColor: "rgb(245, 247, 250)",
     flex: 1,
     paddingVertical: 100,
-    paddingHorizontal: 50
-
+    paddingHorizontal: 20,
   },
   logo: {
-    width: 60, height: 60,
+    width: 60,
+    height: 60,
     backgroundColor: "#0f40f5",
     color: "#fff",
     borderRadius: 10,
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   headerContainer: {
     alignItems: "center",
-    marginBottom: 40
+    marginBottom: 40,
   },
   title: {
     fontWeight: "bold",
