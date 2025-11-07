@@ -339,6 +339,32 @@ const styles = StyleSheet.create({
   },
   productCard: {
     width: (width - 40) / 2,
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+    marginBottom: 20,
+  },
+  productHeader: {
+    alignItems: "flex-end",
+    marginBottom: 8,
+    marginTop: -30,
+  },
+  productTag: {
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: "#4a9aff",
+  },
+  productTagText: {
+    color: "white",
+    fontSize: 10,
+    fontWeight: "bold",
   },
 
   productName: {

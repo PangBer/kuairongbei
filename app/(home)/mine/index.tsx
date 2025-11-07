@@ -345,7 +345,11 @@ const styles = StyleSheet.create({
   },
   pointSection: {
     flex: 1,
-    alignItems: "center",
+    // alignItems: "left",
+    backgroundColor: "rgba(79, 137, 255,0.5)",
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    borderRadius: 20
   },
   pointSectionLabel: {
     fontSize: 14,
