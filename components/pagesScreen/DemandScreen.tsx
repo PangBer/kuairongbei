@@ -66,7 +66,12 @@ export default function DemandScreen() {
   const { fetchMultipleDicts } = useDictsActions();
   const pathname = usePathname();
   useEffect(() => {
-    fetchMultipleDicts(["crm_social_house", "citys_collect"]);
+    fetchMultipleDicts([
+      "crm_social_house",
+      "alipay_sesame_seed",
+      "crm_credit",
+      "citys_collect",
+    ]);
   }, [fetchMultipleDicts]);
 
   const submitDemand = handleSubmit(async (data) => {

@@ -28,7 +28,7 @@ const functionServices: MenuItem[] = [
     icon: (
       <AntDesign name="user" size={24} color="#4a9aff" />
     ) as React.ReactNode,
-    link: "/gather" as RelativePathString,
+    link: "/info" as RelativePathString,
   },
   {
     title: "提现记录",
