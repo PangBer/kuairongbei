@@ -14,7 +14,6 @@ export const selectStyles = StyleSheet.create({
   modalContent: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    paddingBottom: 20,
     maxHeight: "50%",
   },
   modalHeader: {
@@ -113,7 +112,7 @@ export const selectStyles = StyleSheet.create({
     color: "#4a9aff",
     fontWeight: "bold",
   },
-  // MultiLevelSelect 专用样式
+  // LevelSelect 专用样式
   breadcrumbContainer: {
     flexDirection: "row",
     alignItems: "center",

@@ -1,6 +1,6 @@
+import globalStyles from "@/components/styles/globalStyles";
 import { ThemedText } from "@/components/ui";
 import { ThemedCard } from "@/components/ui/themedCard";
-import globalStyles from "@/styles/globalStyles";
 import { AntDesign } from "@expo/vector-icons";
 import React from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";

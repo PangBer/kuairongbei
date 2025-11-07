@@ -41,7 +41,7 @@ interface MultiLevelSelectProps {
  * 多级选择组件
  * 支持多级联动选择，通过面包屑导航展示层级结构
  */
-export default function MultiLevelSelect({
+export default function LevelSelect({
   label,
   value,
   options,

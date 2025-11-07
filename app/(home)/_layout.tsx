@@ -1,16 +1,22 @@
 import { ThemedView } from "@/components/ui";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { Tabs } from "expo-router";
+import { Tabs, usePathname } from "expo-router";
 import React from "react";
+
 export default () => {
+  const pathname = usePathname();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          height: 65,
-          paddingVertical: 5,
-        },
+        tabBarStyle:
+          pathname === "/demand"
+            ? { display: "none" }
+            : {
+                height: 65,
+                paddingVertical: 5,
+              },
       }}
     >
       <Tabs.Screen

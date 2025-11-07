@@ -1,4 +1,5 @@
 import ExpandItem from "@/components/ExpandItem";
+import PageHeader from "@/components/PageHeader";
 import { ThemedCard, ThemedText, ThemedView } from "@/components/ui";
 import {
   customColors,
@@ -20,7 +21,7 @@ import {
   View,
   useColorScheme,
 } from "react-native";
-import { TextInput as PaperTextInput } from "react-native-paper";
+import { Appbar, TextInput as PaperTextInput } from "react-native-paper";
 interface ProductFeature {
   icon: string;
   title: string;
@@ -135,16 +136,12 @@ export default function ProductDetailScreen() {
     totalRepayment: "¥51,863.28",
   };
 
-  const handleBack = () => {
-    router.back();
-  };
-
   const handleShare = () => {
     Alert.alert("分享", "分享功能待实现");
   };
 
   const handleViewApplicationMethod = () => {
-    Alert.alert("申请方式", "申请方式详情待实现");
+    router.push("/subdemand");
   };
 
   const handleAmountChange = (text: string) => {
@@ -170,31 +167,18 @@ export default function ProductDetailScreen() {
     >
       <View style={styles.container}>
         {/* 头部导航 */}
-        <ThemedView style={styles.header}>
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={handleBack}
-            activeOpacity={0.7}
-          >
-            <AntDesign
-              name="left"
-              size={24}
-              color={isDark ? "#ffffff" : "#1a1a1a"}
-            />
-          </TouchableOpacity>
-          <ThemedText style={styles.headerTitle}>产品详情</ThemedText>
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={handleShare}
-            activeOpacity={0.7}
-          >
-            <AntDesign
-              name="export"
-              size={24}
-              color={isDark ? "#ffffff" : "#1a1a1a"}
-            />
-          </TouchableOpacity>
-        </ThemedView>
+        <PageHeader title="产品详情" onRightPress={handleShare}>
+          <Appbar.Action
+            icon={() => (
+              <AntDesign
+                name="export"
+                size={24}
+                color={isDark ? "#ffffff" : "#1a1a1a"}
+              />
+            )}
+            onPress={() => {}}
+          />
+        </PageHeader>
 
         <ScrollView
           style={[
@@ -480,7 +464,6 @@ export default function ProductDetailScreen() {
           </ThemedCard>
 
           {/* 底部间距 */}
-          <View style={styles.bottomSpacer} />
         </ScrollView>
 
         {/* 底部按钮 */}
@@ -495,12 +478,9 @@ export default function ProductDetailScreen() {
             <SimpleLineIcons name="heart" size={18} color={"#666666"} />
           </TouchableOpacity>
           <TouchableOpacity
-            style={[
-              styles.applyButton,
-              { backgroundColor: customColors.primary },
-            ]}
-            onPress={handleViewApplicationMethod}
+            style={styles.applyButton}
             activeOpacity={0.8}
+            onPress={handleViewApplicationMethod}
           >
             <ThemedText style={styles.applyButtonText}>立即申请</ThemedText>
           </TouchableOpacity>
@@ -514,25 +494,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingTop: Platform.OS === "ios" ? 50 : 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-  },
   headerButton: {
     width: 40,
     height: 40,
     alignItems: "center",
     justifyContent: "center",
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
   },
   scrollView: {
     flex: 1,
@@ -771,9 +737,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: "center",
   },
-  bottomSpacer: {
-    height: 20,
-  },
   footer: {
     position: "absolute",
     bottom: 0,
@@ -793,8 +756,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: customColors.primary,
+    backgroundColor: customColors.primary,
   },
   favoriteButton: {
     width: 44,

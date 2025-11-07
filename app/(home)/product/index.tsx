@@ -1,9 +1,9 @@
 import { ProductCard, ProductCardProps } from "@/components/ProductCard";
 import SelectDropdown from "@/components/SelectDropdown";
 import SortModal from "@/components/SortModal";
+import globalStyles from "@/components/styles/globalStyles";
 import { ThemedText, ThemedView } from "@/components/ui";
 import { customColors } from "@/constants/theme";
-import globalStyles from "@/styles/globalStyles";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";

@@ -1,8 +1,8 @@
+import globalStyles from "@/components/styles/globalStyles";
 import { ThemedCard, ThemedText } from "@/components/ui";
 import { customColors } from "@/constants/theme";
 import { imageCodeApi, sendLoginAPi, smsCodeApi, userInfoApi } from "@/service";
 import { useAuthActions, useToastActions } from "@/store/hooks";
-import globalStyles from "@/styles/globalStyles";
 import { setToken } from "@/utils/token";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";

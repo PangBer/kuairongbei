@@ -1,5 +1,5 @@
+import globalStyles from "@/components/styles/globalStyles";
 import { ThemedText, ThemedView } from "@/components/ui";
-import globalStyles from "@/styles/globalStyles";
 
 export default () => {
   return (

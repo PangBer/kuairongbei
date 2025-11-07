@@ -3,15 +3,16 @@ import React, { useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import {
   Avatar,
+  Badge,
   Button,
   Dialog,
   Portal,
   Text as TextPaper,
 } from "react-native-paper";
 
+import globalStyles from "@/components/styles/globalStyles";
 import { ThemedCard, ThemedText } from "@/components/ui";
 import { useAuth, useAuthActions } from "@/store/hooks";
-import globalStyles from "@/styles/globalStyles";
 import { Link, RelativePathString } from "expo-router";
 
 interface MenuItem {
@@ -156,11 +157,9 @@ export default function MineScreen() {
                   activeOpacity={0.8}
                 >
                   <AntDesign name="bell" size={18} color="#ffffff" />
-                  <View style={styles.notificationBadge}>
-                    <ThemedText style={styles.notificationBadgeText}>
-                      3
-                    </ThemedText>
-                  </View>
+                  <Badge style={{ position: "absolute", top: -6, right: -6 }}>
+                    3
+                  </Badge>
                 </TouchableOpacity>
               </View>
             )}
@@ -323,18 +322,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.25)",
     alignItems: "center",
     justifyContent: "center",
-  },
-  notificationBadge: {
-    backgroundColor: "#ff6b6b",
-    minWidth: 24,
-    borderRadius: 12,
-    position: "absolute",
-    top: -6,
-    right: -6,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "#2B56F6",
   },
   notificationBadgeText: {
     color: "#FFFFFF",
