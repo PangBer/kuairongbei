@@ -26,7 +26,7 @@
       }
     },
     "android": {
-      "package": "com.andriod.rongyirong",
+      "package": "com.rongyirong.app",
       "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
