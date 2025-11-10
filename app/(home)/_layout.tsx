@@ -1,11 +1,20 @@
 import { ThemedView } from "@/components/ui";
+import { useAuth, useAuthActions } from "@/store/hooks";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Tabs, usePathname } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 
 export default () => {
   const pathname = usePathname();
-
+  const { isAuthenticated, isLoading } = useAuth();
+  const { checkAuth } = useAuthActions();
+  // 初始化时检查认证状态，只在组件挂载时执行一次
+  useEffect(() => {
+    // 只有在未初始化时才检查认证状态
+    if (!isAuthenticated && !isLoading) {
+      checkAuth();
+    }
+  }, []); // 空依赖数组，只在组件挂载时执行
   return (
     <Tabs
       screenOptions={{
@@ -39,7 +48,7 @@ export default () => {
       />
 
       <Tabs.Screen
-        name="demand"
+        name="demand/index"
         options={{
           title: "我要申请",
           tabBarIcon: ({ color }) => (

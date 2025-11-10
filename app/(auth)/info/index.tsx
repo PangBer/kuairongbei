@@ -307,6 +307,7 @@ export default function InfoScreen() {
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={globalStyles.globalPaddingBottom}
       >
         {/* 基本信息 */}
         <ThemedCard>

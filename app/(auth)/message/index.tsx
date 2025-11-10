@@ -152,6 +152,7 @@ export default function MessageScreen() {
       <ScrollView
         style={globalStyles.globalContainer}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={globalStyles.globalPaddingBottom}
       >
         {messageList.map((message, index) => {
           const cardStyles: ViewStyle = {

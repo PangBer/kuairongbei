@@ -1,4 +1,5 @@
 import PageHeader from "@/components/PageHeader";
+import globalStyles from "@/components/styles/globalStyles";
 import { ThemedCard, ThemedText } from "@/components/ui";
 import {
   customColors,
@@ -106,14 +107,15 @@ export default function ResultScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={globalStyles.globalContainer}>
       <PageHeader title="审核结果" />
       <ScrollView
         style={[
-          styles.scrollView,
+          globalStyles.globalContainer,
           { backgroundColor: paperTheme.colors.foreground },
         ]}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={globalStyles.globalPaddingBottom}
       >
         <ThemedCard style={styles.resultCard}>
           <View style={{ alignItems: "center" }}>
@@ -277,12 +279,6 @@ export default function ResultScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
   resultCard: {
     alignItems: "center",
     paddingVertical: 32,

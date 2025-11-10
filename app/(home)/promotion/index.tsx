@@ -2,6 +2,7 @@ import globalStyles from "@/components/styles/globalStyles";
 import { ThemedText } from "@/components/ui";
 import { ThemedCard } from "@/components/ui/themedCard";
 import { AntDesign } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 
@@ -27,10 +28,21 @@ const COLORS = {
 };
 
 // Small presentational atoms
-const SectionButton = ({ title, color }: { title: string; color: string }) => (
+const SectionButton = ({
+  title,
+  color,
+  herf,
+}: {
+  title: string;
+  color: string;
+  herf?: any;
+}) => (
   <TouchableOpacity
     activeOpacity={0.8}
     style={[styles.btn, { backgroundColor: color }]}
+    onPress={() => {
+      herf && router.push(herf);
+    }}
   >
     <ThemedText style={styles.btnText}>{title}</ThemedText>
   </TouchableOpacity>
@@ -143,8 +155,11 @@ export default () => {
             <KPIItem main="150元" sub="累计收益" />
             <KPIItem main="100元" sub="可提现" />
           </View>
-
-          <SectionButton title="去提现" color={COLORS.accentRed} />
+          <SectionButton
+            title="去提现"
+            color={COLORS.accentRed}
+            herf="/withdrawal"
+          />
 
           <ThemedText style={styles.tips}>
             每日最多可提现X次，最多不超过X元

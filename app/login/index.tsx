@@ -51,7 +51,7 @@ const validationRules = {
     },
   },
 };
-export default function LoginScreen() {
+export default function LoginScreen({ path }: { path?: any }) {
   const router = useRouter();
   const { redirect } = useLocalSearchParams<{ redirect?: string }>();
   const { login } = useAuthActions();
@@ -177,8 +177,12 @@ export default function LoginScreen() {
       const res = await userInfoApi();
       await login(res.data);
       // 登录成功后跳转到指定页面或首页
-      const redirectPath = redirect || "/";
-      router.replace(redirectPath as any);
+      const redirectPath =  redirect || "/";
+      if(path) {
+        router.push(path)
+      } else {
+        router.replace(redirectPath as any);
+      }
     } catch (error) {
       getImageCaptcha();
     } finally {

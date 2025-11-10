@@ -1,11 +1,17 @@
 import PageHeader from "@/components/PageHeader";
 import globalStyles from "@/components/styles/globalStyles";
 import { ThemedCard, ThemedText } from "@/components/ui";
+import { customDarkTheme, customLightTheme } from "@/constants/theme";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
 import React from "react";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
-
+import {
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  useColorScheme,
+} from "react-native";
 const failReasons = [
   {
     icon: "idcard",
@@ -49,14 +55,21 @@ const suggestions = [
 ];
 
 export default function FailMessageScreen() {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const paperTheme = isDark ? customDarkTheme : customLightTheme;
   const router = useRouter();
 
   return (
     <View style={styles.container}>
       <PageHeader title="审核结果" />
       <ScrollView
-        style={[globalStyles.globalContainer, { backgroundColor: "#f8fafc" }]}
+        style={[
+          globalStyles.globalContainer,
+          { backgroundColor: paperTheme.colors.foreground },
+        ]}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={globalStyles.globalPaddingBottom}
       >
         {/* 顶部提示 */}
         <View style={styles.heroCard}>
