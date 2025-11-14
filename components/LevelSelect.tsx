@@ -1,8 +1,10 @@
+import { customColors } from "@/constants/theme";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React, { useEffect, useRef, useState } from "react";
 import { Modal, ScrollView, TouchableOpacity, View } from "react-native";
 import { HelperText, TextInput } from "react-native-paper";
 import { useSelectModal } from "./hooks/useSelectModal";
+import globalStyles from "./styles/globalStyles";
 import { selectStyles } from "./styles/selectStyles";
 import { ThemedText, ThemedView } from "./ui";
 import { buildOptionPath, getPathDisplayText } from "./utils/selectUtils";
@@ -44,7 +46,7 @@ interface MultiLevelSelectProps {
 export default function LevelSelect({
   label,
   value,
-  options,
+  options = [],
   onSelect,
   placeholder = "请选择",
   disabled = false,
@@ -264,7 +266,12 @@ export default function LevelSelect({
             onPress={hideModal}
             activeOpacity={1}
           />
-          <ThemedView style={selectStyles.modalContent}>
+          <ThemedView
+            style={[
+              selectStyles.modalContent,
+              globalStyles.globalPaddingBottom,
+            ]}
+          >
             <View style={selectStyles.modalHeader}>
               <View style={selectStyles.modalHeaderLeft}>
                 {showClear && (
@@ -333,7 +340,12 @@ export default function LevelSelect({
             </View>
 
             {/* 选项列表 */}
-            <ScrollView ref={scrollViewRef} style={selectStyles.modalOptions}>
+            <ScrollView
+              ref={scrollViewRef}
+              style={selectStyles.modalOptions}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={globalStyles.globalPaddingBottom}
+            >
               {currentOptions.map((option) => {
                 const isSelected = option.value === selectedValue;
                 return (
@@ -360,7 +372,11 @@ export default function LevelSelect({
                     >
                       {/* 如果有子级，显示右箭头 */}
                       {option.children?.length && (
-                        <AntDesign name="right" size={16} color="#4a9aff" />
+                        <AntDesign
+                          name="right"
+                          size={16}
+                          color={customColors.primary}
+                        />
                       )}
                       {/* 选中标记 */}
                       {isSelected && (

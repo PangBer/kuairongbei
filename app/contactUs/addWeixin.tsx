@@ -1,6 +1,7 @@
 import PageHeader from "@/components/PageHeader";
 import globalStyles from "@/components/styles/globalStyles";
 import { ThemedCard, ThemedText } from "@/components/ui";
+import { customColors } from "@/constants/theme";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -20,13 +21,14 @@ export default function AddWeixinScreen() {
       <ScrollView
         style={globalStyles.globalContainer}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={globalStyles.globalPaddingBottom}
       >
         {/* 企微内容 */}
         <ThemedCard>
           {/* 头像姓名 */}
           <View style={styles.profileContainer}>
             <View style={styles.avatarContainer}>
-              <AntDesign name="user" size={40} color="#2B56F6" />
+              <AntDesign name="user" size={40} color={customColors.primary} />
             </View>
             <View style={styles.profileInfo}>
               <ThemedText style={styles.profileName}>贷款服务助手</ThemedText>
@@ -34,7 +36,11 @@ export default function AddWeixinScreen() {
                 企业微信认证客服
               </ThemedText>
               <View style={styles.verifiedBadge}>
-                <AntDesign name="check-circle" size={14} color="#2B56F6" />
+                <AntDesign
+                  name="check-circle"
+                  size={14}
+                  color={customColors.primary}
+                />
                 <ThemedText style={styles.verifiedText}>官方认证</ThemedText>
               </View>
             </View>
@@ -42,10 +48,7 @@ export default function AddWeixinScreen() {
 
           {/* 联系方式 */}
           <View
-            style={[
-              styles.sectionContainer,
-              { backgroundColor: "#f8f8f8", padding: 10, borderRadius: 10 },
-            ]}
+            style={[styles.sectionContainer, { padding: 10, borderRadius: 10 }]}
           >
             <View style={styles.sectionTitleRow}>
               <AntDesign name="phone" size={18} color="#2B56F6" />
@@ -59,9 +62,10 @@ export default function AddWeixinScreen() {
                 xxxxx
               </ThemedText>
               <TouchableOpacity
-                style={styles.copyButton}
+                style={{ alignItems: "center", flexDirection: "row", gap: 4 }}
                 onPress={handleCopyWeixin}
               >
+                <AntDesign name="copy" size={16} color={customColors.primary} />
                 <ThemedText style={styles.copyButtonText}>复制</ThemedText>
               </TouchableOpacity>
             </View>
@@ -76,30 +80,50 @@ export default function AddWeixinScreen() {
           {/* 服务内容 */}
           <View style={styles.sectionContainer}>
             <View style={styles.sectionTitleRow}>
-              <AntDesign name="customer-service" size={18} color="#2B56F6" />
+              <AntDesign
+                name="customer-service"
+                size={18}
+                color={customColors.primary}
+              />
               <ThemedText style={styles.sectionTitle}>服务内容</ThemedText>
             </View>
             <View style={styles.serviceList}>
               <View style={styles.serviceItem}>
-                <AntDesign name="check-circle" size={16} color="#2B56F6" />
+                <AntDesign
+                  name="check-circle"
+                  size={16}
+                  color={customColors.primary}
+                />
                 <ThemedText style={styles.serviceText}>
                   一对一专属客服服务
                 </ThemedText>
               </View>
               <View style={styles.serviceItem}>
-                <AntDesign name="check-circle" size={16} color="#2B56F6" />
+                <AntDesign
+                  name="check-circle"
+                  size={16}
+                  color={customColors.primary}
+                />
                 <ThemedText style={styles.serviceText}>
                   快速响应贷款咨询
                 </ThemedText>
               </View>
               <View style={styles.serviceItem}>
-                <AntDesign name="check-circle" size={16} color="#2B56F6" />
+                <AntDesign
+                  name="check-circle"
+                  size={16}
+                  color={customColors.primary}
+                />
                 <ThemedText style={styles.serviceText}>
                   专业贷款方案定制
                 </ThemedText>
               </View>
               <View style={styles.serviceItem}>
-                <AntDesign name="check-circle" size={16} color="#2B56F6" />
+                <AntDesign
+                  name="check-circle"
+                  size={16}
+                  color={customColors.primary}
+                />
                 <ThemedText style={styles.serviceText}>
                   24小时在线支持
                 </ThemedText>
@@ -114,7 +138,7 @@ export default function AddWeixinScreen() {
               activeOpacity={0.8}
               onPress={() => router.push("./weixinQRCode")}
             >
-              <AntDesign name="qrcode" size={18} color="#2B56F6" />
+              <AntDesign name="qrcode" size={18} color={customColors.primary} />
               <ThemedText style={styles.buttonWhiteText}>显示二维码</ThemedText>
             </TouchableOpacity>
             <TouchableOpacity style={styles.buttonBlue} activeOpacity={0.8}>
@@ -127,7 +151,11 @@ export default function AddWeixinScreen() {
         {/* 添加步骤 */}
         <ThemedCard>
           <View style={styles.sectionTitleRow}>
-            <AntDesign name="step-forward" size={18} color="#2B56F6" />
+            <AntDesign
+              name="step-forward"
+              size={18}
+              color={customColors.primary}
+            />
             <ThemedText style={styles.sectionTitle}>添加步骤</ThemedText>
           </View>
           <View style={styles.stepsContainer}>
@@ -191,11 +219,9 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#333333",
   },
   profileSubtitle: {
     fontSize: 12,
-    color: "#666666",
   },
   verifiedBadge: {
     flexDirection: "row",
@@ -209,7 +235,7 @@ const styles = StyleSheet.create({
   },
   verifiedText: {
     fontSize: 12,
-    color: "#2B56F6",
+    color: customColors.primary,
     fontWeight: "500",
   },
   // 通用区块容器
@@ -225,7 +251,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#333333",
   },
   // 联系方式样式
   contactInfoRow: {
@@ -241,24 +266,14 @@ const styles = StyleSheet.create({
   contactLabel: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#333",
     marginBottom: 4,
   },
   contactValue: {
     fontSize: 12,
-    color: "#666",
-  },
-  copyButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: "#2B56F6",
-    backgroundColor: "#FFFFFF",
   },
   copyButtonText: {
     fontSize: 12,
-    color: "#2B56F6",
+    color: customColors.primary,
     fontWeight: "500",
   },
   // 服务内容样式
@@ -272,7 +287,6 @@ const styles = StyleSheet.create({
   },
   serviceText: {
     fontSize: 14,
-    color: "#333333",
     flex: 1,
   },
   // 按钮容器
@@ -288,7 +302,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#2B56F6",
+    borderColor: customColors.primary,
     paddingVertical: 12,
     borderRadius: 8,
     gap: 6,
@@ -303,7 +317,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#2B56F6",
+    backgroundColor: customColors.primary,
     paddingVertical: 12,
     borderRadius: 8,
     gap: 6,
@@ -326,7 +340,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#2B56F6",
+    backgroundColor: customColors.primary,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -338,7 +352,6 @@ const styles = StyleSheet.create({
   stepText: {
     flex: 1,
     fontSize: 14,
-    color: "#333333",
     lineHeight: 20,
   },
 });

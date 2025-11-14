@@ -20,7 +20,7 @@ export interface UploadedFile {
   name: string;
   type: string;
   size: number;
-  mimeType?: string;
+  mimeType: string;
 }
 
 /**
@@ -37,8 +37,11 @@ const defaultConfig: FileUploadConfig = {
   allowedTypes: [
     "image/*",
     "application/pdf",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/msword", // Word (.doc)
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // Word (.docx)
+    "application/vnd.ms-excel", // Excel (.xls)
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // Excel (.xlsx)
+    "text/plain",
   ],
   quality: 0.8,
   allowsEditing: false,
@@ -76,7 +79,7 @@ const validateFile = (
   config: FileUploadConfig
 ): boolean => {
   // 检查文件大小
-  if (file.size > config.maxFileSize!) {
+  if (file.size && file.size > config.maxFileSize!) {
     Alert.alert(
       "文件过大",
       `文件大小不能超过 ${Math.round(config.maxFileSize! / 1024 / 1024)}MB`
@@ -232,7 +235,7 @@ export const pickDocument = async (
 ): Promise<UploadedFile | UploadedFile[] | null> => {
   try {
     const result = await DocumentPicker.getDocumentAsync({
-      type: config.allowedTypes?.join(",") || "*/*",
+      type: config.allowedTypes || "*/*",
       copyToCacheDirectory: true,
       multiple: multiple,
     });
@@ -250,7 +253,7 @@ export const pickDocument = async (
           name: asset.name,
           type: asset.mimeType || "application/octet-stream",
           size: asset.size || 0,
-          mimeType: asset.mimeType,
+          mimeType: asset.mimeType || "application/octet-stream",
         };
 
         if (validateFile(file, config)) {
@@ -266,7 +269,7 @@ export const pickDocument = async (
         name: asset.name,
         type: asset.mimeType || "application/octet-stream",
         size: asset.size || 0,
-        mimeType: asset.mimeType,
+        mimeType: asset.mimeType || "application/octet-stream",
       };
 
       if (!validateFile(file, config)) {

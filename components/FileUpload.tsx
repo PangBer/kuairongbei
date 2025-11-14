@@ -1,11 +1,20 @@
-import { ThemedText } from "@/components/ui";
-import { Colors } from "@/constants/theme";
-import { useThemeColor } from "@/hooks/useThemeColor";
+import Preview from "@/components/preview";
+import { ThemedText, ThemedView } from "@/components/ui";
+import { customColors } from "@/constants/theme";
+import useOnceWhenValueReady from "@/hooks/useOnceWhenValueReady";
 import { useToastActions } from "@/store/hooks";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
-import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
-import { Button, Modal, Portal, Text } from "react-native-paper";
+import {
+  Modal,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Button, Text } from "react-native-paper";
+import { selectStyles } from "./styles/selectStyles";
 
 import {
   BatchUploadResponse,
@@ -21,6 +30,7 @@ import {
   pickImageFromGallery,
   UploadedFile,
 } from "@/utils/fileUpload";
+import globalStyles from "./styles/globalStyles";
 
 /**
  * 根据文件 MIME 类型返回对应的 AntDesign 图标名称
@@ -48,6 +58,7 @@ const getFileTypeIconName = (
 };
 
 interface FileUploadProps {
+  initialValue?: UploadResponse[]; // 初始值
   config?: FileUploadConfig; // 文件上传配置
   onFileSelect?: (files: UploadResponse[]) => void; // 文件选择回调
   onUploadSuccess?: (response: UploadResponse | BatchUploadResponse) => void; // 上传成功回调
@@ -67,6 +78,7 @@ interface FileUploadProps {
  * 支持单文件/多文件上传，支持相机、相册、文档选择
  */
 export default function FileUpload({
+  initialValue,
   config,
   onFileSelect,
   onUploadSuccess,
@@ -85,12 +97,10 @@ export default function FileUpload({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadResults, setUploadResults] = useState<UploadResponse[]>([]);
   const [sourceSheetVisible, setSourceSheetVisible] = useState(false);
+  const [previewFile, setPreviewFile] = useState<any>(null);
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const router = useRouter();
 
-  // 主题和工具
-  const backgroundColor = useThemeColor(
-    { light: Colors.light.background, dark: Colors.dark.background },
-    "background"
-  );
   const { showError, showInfo } = useToastActions();
 
   // 计算有效的文件来源（根据平台和配置）
@@ -104,6 +114,23 @@ export default function FileUpload({
     [allowedSources]
   );
 
+  useOnceWhenValueReady(initialValue, (value) => {
+    if (value && value.length > 0) {
+      const getInit = value.map((item: any) => ({
+        uri: item.data?.url!,
+        name: item.data?.name!,
+        type: item.data?.type!,
+        mimeType: item.data?.type!,
+        size: item.data?.size || 0,
+      }));
+      setSelectedFiles(getInit);
+      setUploadResults(value);
+    }
+  });
+
+  const uploadDisabled = useMemo(() => {
+    return disabled || isUploading || selectedFiles.length >= maxFiles;
+  }, [disabled, isUploading, selectedFiles]);
   /**
    * 处理文件选择
    * @param source - 文件来源（相机/相册/文档）
@@ -174,10 +201,10 @@ export default function FileUpload({
     const uploadResult = uploadResults[index];
 
     // 如果文件已上传成功，调用删除接口
-    if (uploadResult?.success && uploadResult.data?.fileId) {
+    if (uploadResult?.success && uploadResult.data?.ossId) {
       try {
-        await fileUploadService.deleteFile(uploadResult.data.fileId);
-        console.log("文件删除成功:", uploadResult.data.fileId);
+        await fileUploadService.deleteFile(uploadResult.data.ossId);
+        console.log("文件删除成功:", uploadResult.data.ossId);
       } catch (error) {
         console.error("文件删除失败:", error);
         showError("系统错误", "文件删除失败");
@@ -199,10 +226,10 @@ export default function FileUpload({
   const clearAllFiles = async () => {
     // 批量删除已上传成功的文件
     const deletePromises = uploadResults
-      .filter((result) => result.success && result.data?.fileId)
+      .filter((result) => result.success && result.data?.ossId)
       .map((result) =>
-        fileUploadService.deleteFile(result.data!.fileId).catch((error) => {
-          console.error("文件删除失败:", result.data!.fileId, error);
+        fileUploadService.deleteFile(result.data!.ossId).catch((error) => {
+          console.error("文件删除失败:", result.data!.ossId, error);
           return { success: false, error };
         })
       );
@@ -304,10 +331,11 @@ export default function FileUpload({
           success: true,
           message: "上传成功",
           data: {
-            fileId: f.fileId,
-            fileName: f.fileName,
-            fileUrl: f.fileUrl,
-            uploadTime: f.uploadTime,
+            ossId: f.ossId,
+            name: f.name,
+            url: f.url,
+            type: file.mimeType || file.type,
+            size: file.size || 0,
           },
         });
       } else {
@@ -353,97 +381,156 @@ export default function FileUpload({
     }
   };
 
+  const onPreView = (uploadResult: any) => {
+    if (showPreview) {
+      if (uploadResult.type?.startsWith("image/")) {
+        setPreviewFile(uploadResult);
+        setPreviewVisible(true);
+      } else if (uploadResult.type?.includes("pdf")) {
+        router.push({
+          pathname: "/doc",
+          params: {
+            url: uploadResult.uri || uploadResult.data.fileUrl,
+            name: uploadResult.name || uploadResult.data.fileName,
+          },
+        });
+      }
+    }
+  };
+
+  const hideModal = () => {
+    setSourceSheetVisible(false);
+  };
+
   return (
     <View>
       {/* 上传触发按钮 */}
       <Button
-        mode="contained"
+        mode="outlined"
         onPress={() => setSourceSheetVisible(true)}
-        disabled={disabled || isUploading}
-        icon={() => <AntDesign name="upload" size={20} color="#FFFFFF" />}
+        disabled={uploadDisabled}
+        icon={() => (
+          <AntDesign
+            name="upload"
+            size={18}
+            color={uploadDisabled ? "#c0c0c0" : customColors.primary}
+          />
+        )}
       >
         {isUploading ? "上传中..." : buttonTitle}
       </Button>
 
       {/* 文件来源选择弹窗 */}
-      <Portal>
-        <Modal
-          visible={sourceSheetVisible}
-          onDismiss={() => setSourceSheetVisible(false)}
-          contentContainerStyle={[
-            styles.bottomSheet,
-            { backgroundColor: backgroundColor },
-          ]}
-        >
-          <View style={styles.sheetHandle} />
-          <ThemedText style={styles.sheetTitle}>选择上传来源</ThemedText>
-          <View style={styles.sheetOptions}>
-            {effectiveSources.includes("document") && (
-              <Button
-                mode="outlined"
-                icon={() => <AntDesign name="file" size={20} color="#4a9aff" />}
-                style={styles.sheetOptionButton}
-                onPress={async () => {
-                  setSourceSheetVisible(false);
-                  await handleFileSelect("document");
-                }}
-              >
-                文件
-              </Button>
-            )}
-            {effectiveSources.includes("gallery") && (
-              <Button
-                mode="outlined"
-                icon={() => (
-                  <AntDesign name="picture" size={20} color="#4a9aff" />
-                )}
-                style={styles.sheetOptionButton}
-                onPress={async () => {
-                  setSourceSheetVisible(false);
-                  await handleFileSelect("gallery");
-                }}
-              >
-                相册
-              </Button>
-            )}
-            {effectiveSources.includes("camera") && Platform.OS !== "web" && (
-              <Button
-                mode="outlined"
-                icon={() => (
-                  <AntDesign name="camera" size={20} color="#4a9aff" />
-                )}
-                style={styles.sheetOptionButton}
-                onPress={async () => {
-                  setSourceSheetVisible(false);
-                  await handleFileSelect("camera");
-                }}
-              >
-                拍照
-              </Button>
-            )}
-          </View>
-          <Button
-            mode="text"
-            onPress={() => setSourceSheetVisible(false)}
-            textColor="#4a9aff"
+
+      <Modal
+        visible={sourceSheetVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={hideModal}
+      >
+        <View style={selectStyles.modalOverlay}>
+          <TouchableOpacity
+            style={selectStyles.modalOverlayTouchable}
+            onPress={hideModal}
+            activeOpacity={1}
+          />
+          <ThemedView
+            style={[
+              selectStyles.modalContent,
+              globalStyles.globalPaddingBottom,
+            ]}
           >
-            取消
-          </Button>
-        </Modal>
-      </Portal>
+            <View style={selectStyles.modalHeader}>
+              <View style={selectStyles.modalHeaderLeft}></View>
+              <View style={selectStyles.modalTitleContainer}>
+                <ThemedText style={selectStyles.modalTitle}>
+                  选择上传来源
+                </ThemedText>
+              </View>
+              <View style={selectStyles.modalHeaderRight}>
+                <TouchableOpacity onPress={hideModal}>
+                  <ThemedText style={selectStyles.modalCloseText}>
+                    关闭
+                  </ThemedText>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={styles.sheetOptions}>
+              {effectiveSources.includes("document") && (
+                <Button
+                  mode="outlined"
+                  icon={() => (
+                    <AntDesign
+                      name="file"
+                      size={20}
+                      color={customColors.primary}
+                    />
+                  )}
+                  style={styles.sheetOptionButton}
+                  onPress={async () => {
+                    setSourceSheetVisible(false);
+                    await handleFileSelect("document");
+                  }}
+                >
+                  文件
+                </Button>
+              )}
+              {effectiveSources.includes("gallery") && (
+                <Button
+                  mode="outlined"
+                  icon={() => (
+                    <AntDesign
+                      name="picture"
+                      size={20}
+                      color={customColors.primary}
+                    />
+                  )}
+                  style={styles.sheetOptionButton}
+                  onPress={async () => {
+                    setSourceSheetVisible(false);
+                    await handleFileSelect("gallery");
+                  }}
+                >
+                  相册
+                </Button>
+              )}
+              {effectiveSources.includes("camera") && Platform.OS !== "web" && (
+                <Button
+                  mode="outlined"
+                  icon={() => (
+                    <AntDesign
+                      name="camera"
+                      size={20}
+                      color={customColors.primary}
+                    />
+                  )}
+                  style={styles.sheetOptionButton}
+                  onPress={async () => {
+                    setSourceSheetVisible(false);
+                    await handleFileSelect("camera");
+                  }}
+                >
+                  拍照
+                </Button>
+              )}
+            </View>
+          </ThemedView>
+        </View>
+      </Modal>
 
       {/* 已选择文件列表 */}
       {selectedFiles.length > 0 && (
         <View style={styles.filesContainer}>
           <View style={styles.filesHeader}>
             <ThemedText style={styles.filesTitle}>
-              已选择文件 ({selectedFiles.length}
+              已上传文件 ({selectedFiles.length}
               {multiple ? `/${maxFiles}` : ""})
             </ThemedText>
             {selectedFiles.length > 0 && !isUploading && (
               <Button
                 mode="text"
                 onPress={clearAllFiles}
+                disabled={disabled}
                 textColor="#ff6b6b"
                 compact
               >
@@ -457,13 +544,22 @@ export default function FileUpload({
             return (
               <View key={index} style={styles.fileItem}>
                 <View style={styles.fileInfo}>
-                  <View style={styles.fileIconContainer}>
+                  <TouchableOpacity
+                    style={styles.fileIconContainer}
+                    activeOpacity={0.8}
+                    onPress={() =>
+                      onPreView({
+                        ...uploadResult,
+                        ...file,
+                      })
+                    }
+                  >
                     <AntDesign
                       name={getFileTypeIconName(file.mimeType || file.type)}
                       size={24}
-                      color="#4a9aff"
+                      color={customColors.primary}
                     />
-                  </View>
+                  </TouchableOpacity>
                   <View style={styles.fileDetails}>
                     <ThemedText style={styles.fileName} numberOfLines={1}>
                       {file.name}
@@ -491,7 +587,7 @@ export default function FileUpload({
                     </View>
                   </View>
                 </View>
-                {!isUploading && (
+                {!isUploading && !disabled && (
                   <TouchableOpacity
                     onPress={() => removeFile(index)}
                     style={styles.closeIcon}
@@ -505,59 +601,34 @@ export default function FileUpload({
           })}
         </View>
       )}
+      <Preview
+        visible={previewVisible}
+        onClose={() => {
+          setPreviewVisible(false);
+          setPreviewFile(null);
+        }}
+        uri={previewFile?.uri || previewFile?.data?.fileUrl}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  bottomSheet: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    padding: 20,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 8,
-  },
-  sheetHandle: {
-    width: 40,
-    height: 4,
-    backgroundColor: "#e0e0e0",
-    alignSelf: "center",
-    borderRadius: 2,
-    marginBottom: 16,
-  },
-  sheetTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    textAlign: "center",
-    marginBottom: 16,
-  },
   sheetOptions: {
     flexDirection: "column",
-    gap: 8,
-    marginBottom: 8,
+    gap: 16,
     flexWrap: "wrap",
     justifyContent: "center",
     alignItems: "center",
+    padding: 16,
   },
   sheetOptionButton: {
-    flex: 1,
     minWidth: "100%",
-    marginBottom: 12,
     borderRadius: 12,
-    borderColor: "#4a9aff",
+    borderColor: customColors.primary,
   },
   filesContainer: {
-    marginTop: 16,
     paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#e0e0e0",
   },
   filesHeader: {
     flexDirection: "row",
@@ -566,7 +637,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   filesTitle: {
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: "600",
   },
   fileItem: {

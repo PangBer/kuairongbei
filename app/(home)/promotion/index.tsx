@@ -88,6 +88,7 @@ export default () => {
     <ScrollView
       style={[globalStyles.globalContainer, { backgroundColor: COLORS.blue }]}
       showsVerticalScrollIndicator={false}
+      contentContainerStyle={globalStyles.globalPaddingBottom}
     >
       {/* Header */}
       <View style={styles.headerContainer}>

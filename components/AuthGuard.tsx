@@ -1,7 +1,7 @@
 import { useAuth, useAuthActions } from "@/store/hooks";
 import { usePathname, useRouter } from "expo-router";
 import React, { useEffect } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -32,14 +32,14 @@ export function AuthGuard({ children, requireAuth = true }: AuthGuardProps) {
   }, [requireAuth, isAuthenticated, isLoading, pathname]);
 
   // 加载中状态
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4a9aff" />
-        <Text style={styles.loadingText}>加载中...</Text>
-      </View>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <View style={styles.loadingContainer}>
+  //       <ActivityIndicator size="large" color={customColors.primary} />
+  //       <Text style={styles.loadingText}>加载中...</Text>
+  //     </View>
+  //   );
+  // }
 
   // 需要登录但未登录
   if (requireAuth && !isAuthenticated) {

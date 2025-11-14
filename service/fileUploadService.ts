@@ -10,10 +10,11 @@ export interface UploadResponse {
   success: boolean;
   message: string;
   data?: {
-    fileId: string;
-    fileName: string;
-    fileUrl: string;
-    uploadTime: string;
+    ossId: string;
+    name: string;
+    url: string;
+    type: string;
+    size: number;
   };
   error?: string;
 }
@@ -28,10 +29,10 @@ export interface BatchUploadResponse {
     successCount: number;
     failCount: number;
     files: Array<{
-      fileId: string;
-      fileName: string;
-      fileUrl: string;
-      uploadTime: string;
+      ossId: string;
+      name: string;
+      url: string;
+      type: string;
       success: boolean;
       error?: string;
     }>;
@@ -177,10 +178,11 @@ export class FileUploadService {
         success: true,
         message: "文件上传成功",
         data: {
-          fileId: result.data?.ossId,
-          fileName: result.data?.fileName,
-          fileUrl: result.data?.url,
-          uploadTime: result.data?.uploadTime || new Date().toISOString(),
+          ossId: result.data?.ossId,
+          name: result.data?.fileName,
+          url: result.data?.url,
+          type: file.mimeType || file.type,
+          size: file.size || 0,
         },
       };
     } catch (error) {
@@ -211,10 +213,10 @@ export class FileUploadService {
         const result = await this.uploadFile(file, additionalData);
 
         results.push({
-          fileId: result.data?.fileId || "",
-          fileName: result.data?.fileName || "",
-          fileUrl: result.data?.fileUrl || "",
-          uploadTime: result.data?.uploadTime || "",
+          ossId: result.data?.ossId || "",
+          name: result.data?.name || "",
+          url: result.data?.url || "",
+          type: file.mimeType || file.type,
           success: result.success,
           error: result.error,
         });
@@ -226,10 +228,10 @@ export class FileUploadService {
         }
       } catch (error) {
         results.push({
-          fileId: "",
-          fileName: file.name,
-          fileUrl: "",
-          uploadTime: new Date().toISOString(),
+          ossId: "",
+          name: file.name,
+          url: "",
+          type: file.mimeType || file.type,
           success: false,
           error: error instanceof Error ? error.message : "上传失败",
         });

@@ -7,23 +7,23 @@ import {
   customLightTheme,
 } from "@/constants/theme";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { Link } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef } from "react";
 import {
   Animated,
   Easing,
-  Platform,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
   useColorScheme,
   View,
 } from "react-native";
+import { Button } from "react-native-paper";
 
 export default function MatchScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const paperTheme = isDark ? customDarkTheme : customLightTheme;
+  const { totalScore }: { totalScore: string } = useLocalSearchParams();
 
   // 旋转动画
   const rotateAnim = useRef(new Animated.Value(0)).current;
@@ -51,232 +51,178 @@ export default function MatchScreen() {
     outputRange: ["0deg", "360deg"],
   });
 
-  const handleGoToPersonalCenter = () => {
-    // TODO: 跳转到个人中心
-    console.log("前往个人中心");
-  };
-
   return (
-    <View style={styles.container}>
+    <>
       {/* 头部导航 */}
       <PageHeader title="正在匹配" />
-
-      <ScrollView
-        style={[
-          styles.scrollView,
-          { backgroundColor: paperTheme.colors.foreground },
-        ]}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {/* 匹配中区域 */}
-        <View style={styles.matchingSection}>
-          {/* 匹配图标 */}
-          <Animated.View
-            style={[styles.matchingIconContainer, { transform: [{ rotate }] }]}
-          >
-            <View
+      <View style={globalStyles.globalContainer}>
+        <ScrollView
+          style={[
+            globalStyles.globalContainer,
+            { backgroundColor: paperTheme.colors.foreground },
+          ]}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={globalStyles.globalPaddingBottom}
+        >
+          {/* 匹配中区域 */}
+          <View style={styles.matchingSection}>
+            {/* 匹配图标 */}
+            <Animated.View
               style={[
-                styles.matchingIconCircle,
-                { backgroundColor: customColors.primaryContainer },
+                styles.matchingIconContainer,
+                { transform: [{ rotate }] },
               ]}
             >
+              <View
+                style={[
+                  styles.matchingIconCircle,
+                  { backgroundColor: customColors.primaryContainer },
+                ]}
+              >
+                <AntDesign
+                  name="loading-3-quarters"
+                  size={48}
+                  color={customColors.primary}
+                />
+              </View>
+            </Animated.View>
+
+            {/* 匹配标题 */}
+            <ThemedText style={styles.matchingTitle}>
+              正在为您匹配最佳方案
+            </ThemedText>
+
+            {/* 描述文本 */}
+            <ThemedText style={styles.matchingDescription}>
+              我们正在根据您提交的资质信息,为您匹配最合适的贷款产品,请保持电话畅通,将有专员与您联系
+            </ThemedText>
+
+            {/* 预计时间 */}
+            <ThemedView style={styles.timeEstimateContainer}>
               <AntDesign
-                name="loading-3-quarters"
-                size={48}
-                color={customColors.primary}
+                name="clock-circle"
+                size={16}
+                color={customColors.onSurfaceVariant}
               />
-            </View>
-          </Animated.View>
-
-          {/* 匹配标题 */}
-          <ThemedText style={styles.matchingTitle}>
-            正在为您匹配最佳方案
-          </ThemedText>
-
-          {/* 描述文本 */}
-          <ThemedText style={styles.matchingDescription}>
-            我们正在根据您提交的资质信息,为您匹配最合适的贷款产品,请保持电话畅通,将有专员与您联系
-          </ThemedText>
-
-          {/* 预计时间 */}
-          <ThemedView style={styles.timeEstimateContainer}>
-            <AntDesign
-              name="clock-circle"
-              size={16}
-              color={customColors.onSurfaceVariant}
-            />
-            <ThemedText style={styles.timeEstimateText}>
-              预计匹配时间: 1-3个工作日
-            </ThemedText>
-          </ThemedView>
-        </View>
-
-        {/* 积分奖励卡片 */}
-        <ThemedCard style={styles.pointsCard}>
-          <View style={styles.pointsCardContent}>
-            <View
-              style={[
-                styles.pointsIconContainer,
-                { backgroundColor: "#E8F5E9" },
-              ]}
-            >
-              <AntDesign name="star" size={24} color="#66BB6A" />
-            </View>
-            <View style={styles.pointsTextContainer}>
-              <ThemedText style={styles.pointsTitle}>
-                您获得了120积分
+              <ThemedText style={styles.timeEstimateText}>
+                预计匹配时间: 1-3个工作日
               </ThemedText>
-              <ThemedText style={styles.pointsDescription}>
-                可兑换12元现金
-              </ThemedText>
-            </View>
+            </ThemedView>
           </View>
-          <TouchableOpacity
-            style={styles.pointsLink}
-            onPress={handleGoToPersonalCenter}
-            activeOpacity={0.8}
-          >
-            <ThemedText
-              style={[styles.pointsLinkText, { color: customColors.primary }]}
-            >
-              前往个人中心提取 →
-            </ThemedText>
-          </TouchableOpacity>
-        </ThemedCard>
 
-        {/* 后续步骤 */}
-        <View style={styles.stepsSection}>
-          <ThemedText style={styles.stepsTitle}>后续步骤</ThemedText>
-
-          {/* 步骤1 */}
-          <View style={styles.stepItem}>
-            <View
-              style={[
-                styles.stepNumberContainer,
-                { backgroundColor: customColors.primaryContainer },
-              ]}
-            >
-              <ThemedText
-                style={[styles.stepNumber, { color: customColors.primary }]}
+          {/* 积分奖励卡片 */}
+          <ThemedCard style={styles.pointsCard}>
+            <View style={styles.pointsCardContent}>
+              <View
+                style={[
+                  styles.pointsIconContainer,
+                  { backgroundColor: "#E8F5E9" },
+                ]}
               >
-                1
-              </ThemedText>
+                <AntDesign name="star" size={24} color="#66BB6A" />
+              </View>
+              <View style={styles.pointsTextContainer}>
+                <ThemedText style={styles.pointsTitle}>
+                  您获得了{totalScore}积分
+                </ThemedText>
+                <ThemedText style={styles.pointsDescription}>
+                  可兑换{Number(totalScore) / 10}元现金
+                </ThemedText>
+              </View>
             </View>
-            <View style={styles.stepContent}>
-              <ThemedText style={styles.stepTitle}>电话核实信息</ThemedText>
-              <ThemedText style={styles.stepDescription}>
-                工作人员将在1-3个工作日内与您联系
-              </ThemedText>
-            </View>
-          </View>
+            <Link href="/mine" asChild>
+              <Button mode="text" style={styles.pointsLink}>
+                前往个人中心提取 →
+              </Button>
+            </Link>
+          </ThemedCard>
 
-          {/* 步骤2 */}
-          <View style={styles.stepItem}>
-            <View
-              style={[
-                styles.stepNumberContainer,
-                { backgroundColor: customColors.primaryContainer },
-              ]}
-            >
-              <ThemedText
-                style={[styles.stepNumber, { color: customColors.primary }]}
+          {/* 后续步骤 */}
+          <View style={styles.stepsSection}>
+            <ThemedText style={styles.stepsTitle}>后续步骤</ThemedText>
+
+            {/* 步骤1 */}
+            <View style={styles.stepItem}>
+              <View
+                style={[
+                  styles.stepNumberContainer,
+                  { backgroundColor: customColors.primaryContainer },
+                ]}
               >
-                2
-              </ThemedText>
+                <ThemedText
+                  style={[styles.stepNumber, { color: customColors.primary }]}
+                >
+                  1
+                </ThemedText>
+              </View>
+              <View style={styles.stepContent}>
+                <ThemedText style={styles.stepTitle}>电话核实信息</ThemedText>
+                <ThemedText style={styles.stepDescription}>
+                  工作人员将在1-3个工作日内与您联系
+                </ThemedText>
+              </View>
             </View>
-            <View style={styles.stepContent}>
-              <ThemedText style={styles.stepTitle}>审批结果通知</ThemedText>
-              <ThemedText style={styles.stepDescription}>
-                审批通过后将通过短信发送贷款方案
-              </ThemedText>
-            </View>
-          </View>
 
-          {/* 步骤3 */}
-          <View style={styles.stepItem}>
-            <View
-              style={[
-                styles.stepNumberContainer,
-                { backgroundColor: customColors.primaryContainer },
-              ]}
-            >
-              <ThemedText
-                style={[styles.stepNumber, { color: customColors.primary }]}
+            {/* 步骤2 */}
+            <View style={styles.stepItem}>
+              <View
+                style={[
+                  styles.stepNumberContainer,
+                  { backgroundColor: customColors.primaryContainer },
+                ]}
               >
-                3
-              </ThemedText>
+                <ThemedText
+                  style={[styles.stepNumber, { color: customColors.primary }]}
+                >
+                  2
+                </ThemedText>
+              </View>
+              <View style={styles.stepContent}>
+                <ThemedText style={styles.stepTitle}>审批结果通知</ThemedText>
+                <ThemedText style={styles.stepDescription}>
+                  审批通过后将通过短信发送贷款方案
+                </ThemedText>
+              </View>
             </View>
-            <View style={styles.stepContent}>
-              <ThemedText style={styles.stepTitle}>确认方案</ThemedText>
-              <ThemedText style={styles.stepDescription}>
-                确认方案后,将立即进入放款流程
-              </ThemedText>
+
+            {/* 步骤3 */}
+            <View style={styles.stepItem}>
+              <View
+                style={[
+                  styles.stepNumberContainer,
+                  { backgroundColor: customColors.primaryContainer },
+                ]}
+              >
+                <ThemedText
+                  style={[styles.stepNumber, { color: customColors.primary }]}
+                >
+                  3
+                </ThemedText>
+              </View>
+              <View style={styles.stepContent}>
+                <ThemedText style={styles.stepTitle}>确认方案</ThemedText>
+                <ThemedText style={styles.stepDescription}>
+                  确认方案后,将立即进入放款流程
+                </ThemedText>
+              </View>
             </View>
           </View>
-        </View>
-
-        {/* 底部间距 */}
-        <View style={styles.bottomSpacer} />
-      </ScrollView>
+        </ScrollView>
+      </View>
 
       {/* 底部按钮 */}
       <ThemedView style={styles.footer}>
-        <TouchableOpacity
-          style={[
-            styles.progressButton,
-            {
-              borderColor: customColors.primary,
-            },
-          ]}
-          activeOpacity={0.8}
-        >
-          <Link href="/review" replace style={globalStyles.fullWidthHeight}>
-            <ThemedText
-              style={[
-                styles.progressButtonText,
-                { color: customColors.primary },
-              ]}
-            >
-              查看我的申请进度
-            </ThemedText>
-          </Link>
-        </TouchableOpacity>
+        <Link href="/review" asChild>
+          <Button mode="contained" style={styles.progressButton}>
+            查看我的申请进度
+          </Button>
+        </Link>
       </ThemedView>
-    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingTop: Platform.OS === "ios" ? 50 : 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-  },
-  headerButton: {
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 60,
-  },
   matchingSection: {
     alignItems: "center",
     paddingVertical: 40,
@@ -356,7 +302,6 @@ const styles = StyleSheet.create({
   },
   stepsSection: {
     paddingHorizontal: 16,
-    marginBottom: 24,
   },
   stepsTitle: {
     fontSize: 18,
@@ -391,28 +336,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
-  bottomSpacer: {
-    height: 20,
-  },
   footer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 16,
+    height: 70,
     borderTopWidth: 1,
+    paddingHorizontal: 16,
     borderTopColor: "#e0e0e0",
+    justifyContent: "center",
   },
   progressButton: {
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-  },
-  progressButtonText: {
-    fontSize: 16,
-    fontWeight: "500",
-    textAlign: "center",
+    borderColor: customColors.primary,
   },
 });

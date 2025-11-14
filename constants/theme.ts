@@ -3,6 +3,7 @@ import { MD3DarkTheme, MD3LightTheme } from "react-native-paper";
 // 自定义主题色调
 export const customColors = {
   primary: "#4a9aff",
+  customGreen: "#22C55E",
   primaryContainer: "#e3f2fd",
   secondary: "#4a9aff",
   secondaryContainer: "#e8f4fd",

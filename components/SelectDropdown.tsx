@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Modal, ScrollView, TouchableOpacity, View } from "react-native";
 import { HelperText, TextInput } from "react-native-paper";
 import { useSelectModal } from "./hooks/useSelectModal";
+import globalStyles from "./styles/globalStyles";
 import { selectStyles } from "./styles/selectStyles";
 import { ThemedText, ThemedView } from "./ui";
 
@@ -36,7 +37,7 @@ interface SelectDropdownProps {
 export default function SelectDropdown({
   label,
   value,
-  options,
+  options = [],
   onSelect,
   placeholder = "请选择",
   disabled = false,
@@ -49,7 +50,10 @@ export default function SelectDropdown({
   const { visible, showModal, hideModal } = useSelectModal();
 
   // 查找当前选中的选项
-  const selectedOption = options.find((option) => option.value === value);
+  const selectedOption = useMemo(
+    () => options.find((option) => option.value === value),
+    [value, options]
+  );
 
   /**
    * 处理选项选择
@@ -131,7 +135,11 @@ export default function SelectDropdown({
                 </TouchableOpacity>
               </View>
             </View>
-            <ScrollView style={selectStyles.modalOptions}>
+            <ScrollView
+              style={selectStyles.modalOptions}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={globalStyles.globalPaddingBottom}
+            >
               {options.map((option) => {
                 const isSelected = value === option.value;
                 return (

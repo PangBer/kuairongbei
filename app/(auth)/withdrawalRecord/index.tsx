@@ -1,6 +1,7 @@
 import PageHeader from "@/components/PageHeader";
 import globalStyles from "@/components/styles/globalStyles";
 import { ThemedCard, ThemedText } from "@/components/ui";
+import { customColors } from "@/constants/theme";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
@@ -46,6 +47,7 @@ export default function WithdrawalRecordScreen() {
       <ScrollView
         style={globalStyles.globalContainer}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={globalStyles.globalPaddingBottom}
       >
         {/* 筛选框 */}
         <ThemedCard>
@@ -201,7 +203,6 @@ const styles = StyleSheet.create({
   itemCardTitle: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#333333",
   },
   itemCardAmount: {
     fontSize: 20,
@@ -209,7 +210,6 @@ const styles = StyleSheet.create({
   },
   itemCardText: {
     fontSize: 12,
-    color: "#bcc2c8",
   },
   itemCardStatus: {
     fontSize: 10,
@@ -230,6 +230,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(245,108,108,0.2)",
   },
   blue: {
-    color: "#2B56F6",
+    color: customColors.primary,
   },
 });

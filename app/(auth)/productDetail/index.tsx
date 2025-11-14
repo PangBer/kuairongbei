@@ -1,5 +1,6 @@
 import ExpandItem from "@/components/ExpandItem";
 import PageHeader from "@/components/PageHeader";
+import globalStyles from "@/components/styles/globalStyles";
 import { ThemedCard, ThemedText, ThemedView } from "@/components/ui";
 import {
   customColors,
@@ -13,11 +14,13 @@ import { useState } from "react";
 import {
   Alert,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
   useColorScheme,
 } from "react-native";
@@ -160,351 +163,351 @@ export default function ProductDetailScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
-    >
-      <View style={styles.container}>
-        {/* 头部导航 */}
-        <PageHeader title="产品详情" onRightPress={handleShare}>
-          <Appbar.Action
-            icon={() => (
-              <AntDesign
-                name="export"
-                size={24}
-                color={isDark ? "#ffffff" : "#1a1a1a"}
-              />
-            )}
-            onPress={() => {}}
-          />
-        </PageHeader>
-
-        <ScrollView
-          style={[
-            styles.scrollView,
-            { backgroundColor: paperTheme.colors.foreground },
-          ]}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
+    <>
+      {/* 头部导航 */}
+      <PageHeader title="产品详情" onRightPress={handleShare}>
+        <Appbar.Action
+          icon={() => (
+            <AntDesign
+              name="export"
+              size={24}
+              color={isDark ? "#ffffff" : "#1a1a1a"}
+            />
+          )}
+          onPress={() => {}}
+        />
+      </PageHeader>
+      <KeyboardAvoidingView
+        style={globalStyles.globalContainer}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={45}
+      >
+        <TouchableWithoutFeedback
+          style={globalStyles.globalContainer}
+          onPress={Keyboard.dismiss}
         >
-          {/* 产品摘要区域 */}
-          <ThemedCard>
-            <View style={styles.productHeader}>
-              <View style={styles.productHeaderLeft}>
-                <View style={styles.iconContainer}>
-                  <Image
-                    source={productData.icon}
-                    style={styles.productIcon}
-                    resizeMode="cover"
-                  />
-                </View>
-                <View style={styles.productInfo}>
-                  <View style={styles.productTitleRow}>
-                    <ThemedText style={styles.productTitle}>
-                      {productData.title}
-                    </ThemedText>
-                    {productData.isPreferred && (
-                      <View style={styles.preferredBadge}>
-                        <ThemedText style={styles.preferredText}>
-                          优选
-                        </ThemedText>
-                      </View>
-                    )}
+          <ScrollView
+            style={[
+              globalStyles.globalContainer,
+              { backgroundColor: paperTheme.colors.foreground },
+            ]}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={globalStyles.globalPaddingBottom}
+          >
+            {/* 产品摘要区域 */}
+            <ThemedCard>
+              <View style={styles.productHeader}>
+                <View style={styles.productHeaderLeft}>
+                  <View style={styles.iconContainer}>
+                    <Image
+                      source={productData.icon}
+                      style={styles.productIcon}
+                      resizeMode="cover"
+                    />
                   </View>
-                  <ThemedText style={styles.productSubtitle}>
-                    {productData.subtitle}
-                  </ThemedText>
-                </View>
-              </View>
-            </View>
-
-            {/* 关键指标 */}
-            <View
-              style={[
-                styles.metricsContainer,
-                {
-                  borderTopColor: isDark ? "#333" : "#e0e0e0",
-                },
-              ]}
-            >
-              <View style={styles.metricItem}>
-                <ThemedText
-                  style={[styles.metricValue, { color: customColors.primary }]}
-                >
-                  {productData.annualRate}
-                </ThemedText>
-                <ThemedText style={styles.metricLabel}>参考年利率</ThemedText>
-              </View>
-              <View style={styles.metricItem}>
-                <ThemedText style={styles.metricValue}>
-                  {productData.loanAmount}
-                </ThemedText>
-                <ThemedText style={styles.metricLabel}>可贷额度</ThemedText>
-              </View>
-              <View style={styles.metricItem}>
-                <ThemedText style={styles.metricValue}>
-                  {productData.loanTerm}
-                </ThemedText>
-                <ThemedText style={styles.metricLabel}>贷款期限</ThemedText>
-              </View>
-              <View style={styles.metricItem}>
-                <ThemedText style={styles.metricValue}>
-                  {productData.approvalTime}
-                </ThemedText>
-                <ThemedText style={styles.metricLabel}>审批时效</ThemedText>
-              </View>
-            </View>
-          </ThemedCard>
-
-          {/* 贷款信息预览 */}
-          <ThemedCard>
-            <ThemedText style={styles.sectionTitle}>贷款信息预览</ThemedText>
-
-            <View style={styles.loanInputContainer}>
-              <View style={styles.inputGroup}>
-                <View style={styles.amountInputContainer}>
-                  <PaperTextInput
-                    mode="outlined"
-                    label="申请金额"
-                    value={applicationAmount}
-                    onChangeText={handleAmountChange}
-                    onBlur={handleAmountBlur}
-                    keyboardType="numeric"
-                    style={styles.amountInput}
-                    contentStyle={styles.amountInputContent}
-                    outlineColor={isDark ? "#444" : "#e0e0e0"}
-                    activeOutlineColor={customColors.primary}
-                    dense
-                  />
-                  <ThemedText style={styles.amountUnit}>元</ThemedText>
-                </View>
-                <View style={styles.amountRange}>
-                  <ThemedText style={styles.amountRangeText}>
-                    最低{productData.minAmount.toLocaleString()}元
-                  </ThemedText>
-                  <ThemedText style={styles.amountRangeText}>
-                    最高{productData.maxAmount.toLocaleString()}元
-                  </ThemedText>
+                  <View style={styles.productInfo}>
+                    <View style={styles.productTitleRow}>
+                      <ThemedText style={styles.productTitle}>
+                        {productData.title}
+                      </ThemedText>
+                      {productData.isPreferred && (
+                        <View style={styles.preferredBadge}>
+                          <ThemedText style={styles.preferredText}>
+                            优选
+                          </ThemedText>
+                        </View>
+                      )}
+                    </View>
+                    <ThemedText style={styles.productSubtitle}>
+                      {productData.subtitle}
+                    </ThemedText>
+                  </View>
                 </View>
               </View>
 
-              <View style={styles.inputGroup}>
-                <ThemedText style={styles.inputLabel}>贷款期限</ThemedText>
-                <View style={styles.termSelectContainer}>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.termScrollContent}
-                  >
-                    {productData.loanTerms.map((term, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        style={[
-                          styles.termOption,
-                          {
-                            borderColor: isDark ? "#444" : "#e0e0e0",
-                          },
-                          loanTerm === term && styles.termOptionActive,
-                        ]}
-                        onPress={() => setLoanTerm(term)}
-                        activeOpacity={0.7}
-                      >
-                        <ThemedText
-                          style={[
-                            styles.termOptionText,
-                            loanTerm === term && styles.termOptionTextActive,
-                          ]}
-                        >
-                          {term}
-                        </ThemedText>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </View>
-              </View>
-            </View>
-
-            {/* 还款计划预览 */}
-            <View
-              style={[
-                styles.repaymentPlanContainer,
-                {
-                  borderTopColor: isDark ? "#333" : "#e0e0e0",
-                },
-              ]}
-            >
-              <ThemedText style={styles.repaymentPlanTitle}>
-                还款计划预览
-              </ThemedText>
-              <View style={styles.repaymentPlanRow}>
-                <View style={styles.repaymentPlanItem}>
-                  <ThemedText style={styles.repaymentPlanLabel}>
-                    月供金额
-                  </ThemedText>
+              {/* 关键指标 */}
+              <View
+                style={[
+                  styles.metricsContainer,
+                  {
+                    borderTopColor: isDark ? "#333" : "#e0e0e0",
+                  },
+                ]}
+              >
+                <View style={styles.metricItem}>
                   <ThemedText
                     style={[
-                      styles.repaymentPlanValue,
+                      styles.metricValue,
                       { color: customColors.primary },
                     ]}
                   >
-                    {repaymentPlan.monthlyPayment}
+                    {productData.annualRate}
                   </ThemedText>
+                  <ThemedText style={styles.metricLabel}>参考年利率</ThemedText>
                 </View>
-                <View style={styles.repaymentPlanItem}>
-                  <ThemedText style={styles.repaymentPlanLabel}>
-                    总利息
+                <View style={styles.metricItem}>
+                  <ThemedText style={styles.metricValue}>
+                    {productData.loanAmount}
                   </ThemedText>
-                  <ThemedText style={styles.repaymentPlanValue}>
-                    {repaymentPlan.totalInterest}
-                  </ThemedText>
+                  <ThemedText style={styles.metricLabel}>可贷额度</ThemedText>
                 </View>
-                <View style={styles.repaymentPlanItem}>
-                  <ThemedText style={styles.repaymentPlanLabel}>
-                    还款总额
+                <View style={styles.metricItem}>
+                  <ThemedText style={styles.metricValue}>
+                    {productData.loanTerm}
                   </ThemedText>
-                  <ThemedText style={styles.repaymentPlanValue}>
-                    {repaymentPlan.totalRepayment}
+                  <ThemedText style={styles.metricLabel}>贷款期限</ThemedText>
+                </View>
+                <View style={styles.metricItem}>
+                  <ThemedText style={styles.metricValue}>
+                    {productData.approvalTime}
                   </ThemedText>
+                  <ThemedText style={styles.metricLabel}>审批时效</ThemedText>
                 </View>
               </View>
-              <TouchableOpacity
-                style={styles.viewPlanButton}
-                onPress={() => setShowRepaymentPlan(!showRepaymentPlan)}
-                activeOpacity={0.7}
+            </ThemedCard>
+
+            {/* 贷款信息预览 */}
+            <ThemedCard>
+              <ThemedText style={styles.sectionTitle}>贷款信息预览</ThemedText>
+
+              <View style={styles.loanInputContainer}>
+                <View style={styles.inputGroup}>
+                  <View style={styles.amountInputContainer}>
+                    <PaperTextInput
+                      mode="outlined"
+                      label="申请金额"
+                      value={applicationAmount}
+                      onChangeText={handleAmountChange}
+                      onBlur={handleAmountBlur}
+                      keyboardType="numeric"
+                      style={styles.amountInput}
+                      contentStyle={styles.amountInputContent}
+                      outlineColor={isDark ? "#444" : "#e0e0e0"}
+                      activeOutlineColor={customColors.primary}
+                      dense
+                    />
+                    <ThemedText style={styles.amountUnit}>元</ThemedText>
+                  </View>
+                  <View style={styles.amountRange}>
+                    <ThemedText style={styles.amountRangeText}>
+                      最低{productData.minAmount.toLocaleString()}元
+                    </ThemedText>
+                    <ThemedText style={styles.amountRangeText}>
+                      最高{productData.maxAmount.toLocaleString()}元
+                    </ThemedText>
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.inputLabel}>贷款期限</ThemedText>
+                  <View style={styles.termSelectContainer}>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={styles.termScrollContent}
+                    >
+                      {productData.loanTerms.map((term, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          style={[
+                            styles.termOption,
+                            {
+                              borderColor: isDark ? "#444" : "#e0e0e0",
+                            },
+                            loanTerm === term && styles.termOptionActive,
+                          ]}
+                          onPress={() => setLoanTerm(term)}
+                          activeOpacity={0.7}
+                        >
+                          <ThemedText
+                            style={[
+                              styles.termOptionText,
+                              loanTerm === term && styles.termOptionTextActive,
+                            ]}
+                          >
+                            {term}
+                          </ThemedText>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+                </View>
+              </View>
+
+              {/* 还款计划预览 */}
+              <View
+                style={[
+                  styles.repaymentPlanContainer,
+                  {
+                    borderTopColor: isDark ? "#333" : "#e0e0e0",
+                  },
+                ]}
               >
-                <ThemedText
-                  style={[styles.viewPlanText, { color: customColors.primary }]}
-                >
-                  查看详细还款计划
+                <ThemedText style={styles.repaymentPlanTitle}>
+                  还款计划预览
                 </ThemedText>
-              </TouchableOpacity>
-            </View>
-          </ThemedCard>
-
-          {/* 产品特点 */}
-          <ThemedCard>
-            <ThemedText style={styles.sectionTitle}>产品特点</ThemedText>
-            {features.map((feature, index) => (
-              <View key={index} style={styles.featureItem}>
-                <View
-                  style={[
-                    styles.featureIconContainer,
-                    { backgroundColor: customColors.primaryContainer },
-                  ]}
+                <View style={styles.repaymentPlanRow}>
+                  <View style={styles.repaymentPlanItem}>
+                    <ThemedText style={styles.repaymentPlanLabel}>
+                      月供金额
+                    </ThemedText>
+                    <ThemedText
+                      style={[
+                        styles.repaymentPlanValue,
+                        { color: customColors.primary },
+                      ]}
+                    >
+                      {repaymentPlan.monthlyPayment}
+                    </ThemedText>
+                  </View>
+                  <View style={styles.repaymentPlanItem}>
+                    <ThemedText style={styles.repaymentPlanLabel}>
+                      总利息
+                    </ThemedText>
+                    <ThemedText style={styles.repaymentPlanValue}>
+                      {repaymentPlan.totalInterest}
+                    </ThemedText>
+                  </View>
+                  <View style={styles.repaymentPlanItem}>
+                    <ThemedText style={styles.repaymentPlanLabel}>
+                      还款总额
+                    </ThemedText>
+                    <ThemedText style={styles.repaymentPlanValue}>
+                      {repaymentPlan.totalRepayment}
+                    </ThemedText>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  style={styles.viewPlanButton}
+                  onPress={() => setShowRepaymentPlan(!showRepaymentPlan)}
+                  activeOpacity={0.7}
                 >
-                  <AntDesign
-                    name={feature.icon as any}
-                    size={20}
-                    color={customColors.primary}
-                  />
-                </View>
-                <View style={styles.featureContent}>
-                  <ThemedText style={styles.featureTitle}>
-                    {feature.title}
+                  <ThemedText
+                    style={[
+                      styles.viewPlanText,
+                      { color: customColors.primary },
+                    ]}
+                  >
+                    查看详细还款计划
                   </ThemedText>
-                  <ThemedText style={styles.featureDescription}>
-                    {feature.description}
-                  </ThemedText>
-                </View>
+                </TouchableOpacity>
               </View>
-            ))}
-          </ThemedCard>
+            </ThemedCard>
 
-          {/* 申请条件 */}
-          <ThemedCard>
-            <ThemedText style={styles.sectionTitle}>申请条件</ThemedText>
-            {conditions.map((condition, index) => (
-              <View key={index} style={styles.conditionItem}>
-                <View style={styles.conditionDot} />
-                <ThemedText style={styles.conditionText}>
-                  {condition}
-                </ThemedText>
-              </View>
-            ))}
-          </ThemedCard>
-
-          {/* 所需材料 */}
-          <ThemedCard>
-            <ThemedText style={styles.sectionTitle}>所需材料</ThemedText>
-            <View style={styles.materialsGrid}>
-              {materials.map((material, index) => (
-                <View key={index} style={styles.materialItem}>
+            {/* 产品特点 */}
+            <ThemedCard>
+              <ThemedText style={styles.sectionTitle}>产品特点</ThemedText>
+              {features.map((feature, index) => (
+                <View key={index} style={styles.featureItem}>
                   <View
                     style={[
-                      styles.materialIconContainer,
+                      styles.featureIconContainer,
                       { backgroundColor: customColors.primaryContainer },
                     ]}
                   >
                     <AntDesign
-                      name={material.icon as any}
-                      size={24}
+                      name={feature.icon as any}
+                      size={20}
                       color={customColors.primary}
                     />
                   </View>
-                  <ThemedText style={styles.materialLabel}>
-                    {material.label}
+                  <View style={styles.featureContent}>
+                    <ThemedText style={styles.featureTitle}>
+                      {feature.title}
+                    </ThemedText>
+                    <ThemedText style={styles.featureDescription}>
+                      {feature.description}
+                    </ThemedText>
+                  </View>
+                </View>
+              ))}
+            </ThemedCard>
+
+            {/* 申请条件 */}
+            <ThemedCard>
+              <ThemedText style={styles.sectionTitle}>申请条件</ThemedText>
+              {conditions.map((condition, index) => (
+                <View key={index} style={styles.conditionItem}>
+                  <View style={styles.conditionDot} />
+                  <ThemedText style={styles.conditionText}>
+                    {condition}
                   </ThemedText>
                 </View>
               ))}
-            </View>
-          </ThemedCard>
+            </ThemedCard>
 
-          {/* 常见问题 */}
-          <ThemedCard>
-            <ThemedText style={styles.sectionTitle}>常见问题</ThemedText>
-            {faqs.map((faq, index) => (
-              <ExpandItem
-                key={index}
-                title={faq.question}
-                content={faq.answer}
-                defaultExpanded={index === 0}
-              />
-            ))}
-          </ThemedCard>
+            {/* 所需材料 */}
+            <ThemedCard>
+              <ThemedText style={styles.sectionTitle}>所需材料</ThemedText>
+              <View style={styles.materialsGrid}>
+                {materials.map((material, index) => (
+                  <View key={index} style={styles.materialItem}>
+                    <View
+                      style={[
+                        styles.materialIconContainer,
+                        { backgroundColor: customColors.primaryContainer },
+                      ]}
+                    >
+                      <AntDesign
+                        name={material.icon as any}
+                        size={24}
+                        color={customColors.primary}
+                      />
+                    </View>
+                    <ThemedText style={styles.materialLabel}>
+                      {material.label}
+                    </ThemedText>
+                  </View>
+                ))}
+              </View>
+            </ThemedCard>
 
-          {/* 底部间距 */}
-        </ScrollView>
+            {/* 常见问题 */}
+            <ThemedCard>
+              <ThemedText style={styles.sectionTitle}>常见问题</ThemedText>
+              {faqs.map((faq, index) => (
+                <ExpandItem
+                  key={index}
+                  title={faq.question}
+                  content={faq.answer}
+                  defaultExpanded={index === 0}
+                />
+              ))}
+            </ThemedCard>
 
-        {/* 底部按钮 */}
-        <ThemedView style={styles.footer}>
-          <TouchableOpacity
-            style={styles.favoriteButton}
-            onPress={() => {
-              console.log("收藏");
-            }}
-            activeOpacity={0.8}
-          >
-            <SimpleLineIcons name="heart" size={18} color={"#666666"} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.applyButton}
-            activeOpacity={0.8}
-            onPress={handleViewApplicationMethod}
-          >
-            <ThemedText style={styles.applyButtonText}>立即申请</ThemedText>
-          </TouchableOpacity>
-        </ThemedView>
-      </View>
-    </KeyboardAvoidingView>
+            {/* 底部间距 */}
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+      {/* 底部按钮 */}
+      <ThemedView style={styles.footer}>
+        <TouchableOpacity
+          style={styles.favoriteButton}
+          onPress={() => {
+            console.log("收藏");
+          }}
+          activeOpacity={0.8}
+        >
+          <SimpleLineIcons name="heart" size={18} color={"#666666"} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.applyButton}
+          activeOpacity={0.8}
+          onPress={handleViewApplicationMethod}
+        >
+          <ThemedText style={styles.applyButtonText}>立即申请</ThemedText>
+        </TouchableOpacity>
+      </ThemedView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   headerButton: {
     width: 40,
     height: 40,
     alignItems: "center",
     justifyContent: "center",
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 80,
   },
   productHeader: {
     marginBottom: 16,
@@ -738,12 +741,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   footer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
     padding: 16,
-    paddingBottom: Platform.OS === "ios" ? 32 : 16,
     borderTopWidth: 1,
     borderTopColor: "#e0e0e0",
     flexDirection: "row",

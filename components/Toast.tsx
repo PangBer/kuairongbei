@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     top: 50,
     left: 16,
     right: 16,
-    zIndex: 9999,
+    zIndex: 999999,
   },
   toast: {
     borderRadius: 8,

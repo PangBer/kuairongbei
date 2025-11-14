@@ -15,6 +15,7 @@ import "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
+
 export const unstable_settings = {
   anchor: "(home)",
 };

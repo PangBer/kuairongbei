@@ -1,6 +1,6 @@
 import PageHeader from "@/components/PageHeader";
 import globalStyles from "@/components/styles/globalStyles";
-import { ThemedCard, ThemedText } from "@/components/ui";
+import { ThemedCard, ThemedText, ThemedView } from "@/components/ui";
 import { customDarkTheme, customLightTheme } from "@/constants/theme";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
@@ -12,6 +12,7 @@ import {
   View,
   useColorScheme,
 } from "react-native";
+import { Divider } from "react-native-paper";
 const failReasons = [
   {
     icon: "idcard",
@@ -61,7 +62,7 @@ export default function FailMessageScreen() {
   const router = useRouter();
 
   return (
-    <View style={styles.container}>
+    <View style={globalStyles.globalContainer}>
       <PageHeader title="审核结果" />
       <ScrollView
         style={[
@@ -92,15 +93,10 @@ export default function FailMessageScreen() {
             <AntDesign name="exclamation-circle" size={18} color="#F56C6C" />
             <ThemedText style={styles.sectionTitle}>未通过原因</ThemedText>
           </View>
-          <View style={styles.divider} />
+          {/* <View  /> */}
+          <Divider style={styles.divider} />
           {failReasons.map((item, index) => (
-            <View
-              key={item.title}
-              style={[
-                styles.listItem,
-                index !== failReasons.length - 1 && styles.listDivider,
-              ]}
-            >
+            <View key={item.title} style={[styles.listItem]}>
               <View style={[styles.listIcon, styles.failIconBackground]}>
                 <AntDesign name={item.icon as any} size={18} color="#F56C6C" />
               </View>
@@ -120,19 +116,20 @@ export default function FailMessageScreen() {
             <AntDesign name="bulb" size={18} color="#2B56F6" />
             <ThemedText style={styles.sectionTitle}>重新申请建议</ThemedText>
           </View>
-          <View style={styles.divider} />
+          <Divider style={styles.divider} />
           {suggestions.map((item, index) => (
-            <View
-              key={item.text}
-              style={[
-                styles.listItem,
-                index !== suggestions.length - 1 && styles.listDivider,
-              ]}
-            >
-              <View style={[styles.listIcon, styles.suggestionIconBackground]}>
-                <AntDesign name="check-circle" size={18} color={item.color} />
+            <View key={item.text}>
+              <View style={[styles.listItem]}>
+                <View
+                  style={[styles.listIcon, styles.suggestionIconBackground]}
+                >
+                  <AntDesign name="check-circle" size={18} color={item.color} />
+                </View>
+                <ThemedText style={styles.listSuggestion}>
+                  {item.text}
+                </ThemedText>
               </View>
-              <ThemedText style={styles.listSuggestion}>{item.text}</ThemedText>
+              <Divider style={styles.divider} />
             </View>
           ))}
         </ThemedCard>
@@ -159,7 +156,7 @@ export default function FailMessageScreen() {
         </ThemedCard>
       </ScrollView>
 
-      <View style={styles.footerBar}>
+      <ThemedView style={styles.footerBar}>
         <TouchableOpacity
           style={[styles.footerButton, styles.footerButtonSecondary]}
           activeOpacity={0.8}
@@ -178,16 +175,12 @@ export default function FailMessageScreen() {
         >
           <ThemedText style={styles.footerButtonText}>重新申请</ThemedText>
         </TouchableOpacity>
-      </View>
+      </ThemedView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f8fafc",
-  },
   heroCard: {
     alignItems: "center",
     paddingVertical: 32,
@@ -209,11 +202,9 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#333333",
   },
   heroDescription: {
     fontSize: 14,
-    color: "#666666",
     lineHeight: 22,
     textAlign: "center",
     paddingHorizontal: 16,
@@ -231,11 +222,8 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#333333",
   },
   divider: {
-    height: 1,
-    backgroundColor: "#F0F2F5",
     marginVertical: 16,
   },
   listItem: {
@@ -243,10 +231,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     gap: 12,
     paddingVertical: 12,
-  },
-  listDivider: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#E5E7EB",
   },
   listIcon: {
     width: 36,
@@ -258,9 +242,7 @@ const styles = StyleSheet.create({
   failIconBackground: {
     backgroundColor: "rgba(245,108,108,0.12)",
   },
-  suggestionIconBackground: {
-    backgroundColor: "#EBF4FF",
-  },
+  suggestionIconBackground: {},
   listContent: {
     flex: 1,
     gap: 6,
@@ -268,17 +250,14 @@ const styles = StyleSheet.create({
   listTitle: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#333333",
   },
   listDescription: {
     fontSize: 13,
-    color: "#666666",
     lineHeight: 20,
   },
   listSuggestion: {
     flex: 1,
     fontSize: 13,
-    color: "#606266",
     lineHeight: 20,
   },
   helpCard: {
@@ -289,11 +268,9 @@ const styles = StyleSheet.create({
     borderColor: "#2B56F6",
     borderWidth: 1,
     borderRadius: 12,
-    backgroundColor: "#F0F7FF",
   },
   helpDescription: {
     fontSize: 13,
-    color: "#666666",
     lineHeight: 20,
   },
   helpButton: {
@@ -313,7 +290,6 @@ const styles = StyleSheet.create({
   footerBar: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#FFFFFF",
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: "#E5E7EB",
     flexDirection: "row",

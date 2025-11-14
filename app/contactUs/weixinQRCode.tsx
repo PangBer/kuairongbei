@@ -1,5 +1,6 @@
 import globalStyles from "@/components/styles/globalStyles";
 import { ThemedText } from "@/components/ui";
+import { customColors } from "@/constants/theme";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
@@ -58,7 +59,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#F5F5F5",
   },
   cardBox: {
     width: "100%",
@@ -77,13 +77,14 @@ const styles = StyleSheet.create({
   // 二维码卡片（蓝色背景）
   qrCodeCard: {
     width: "100%",
-    backgroundColor: "#2B56F6",
+    backgroundColor: customColors.primary,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
   // 卡片标题
   cardTitle: {
     fontSize: 26,
+    lineHeight: 42,
     fontWeight: "600",
     color: "#FFFFFF",
     marginTop: 50,
@@ -111,7 +112,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: 60,
     height: 60,
-    backgroundColor: "#2B56F6",
+    backgroundColor: customColors.primary,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
@@ -154,12 +155,11 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 20,
     fontWeight: "500",
-    color: "#2B56F6",
+    color: customColors.primary,
   },
   underText: {
     marginTop: 20,
     fontSize: 14,
-    color: "#666",
     textAlign: "center",
     marginBottom: 20,
   },

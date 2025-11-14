@@ -1,19 +1,13 @@
-import AntDesign from "@expo/vector-icons/AntDesign";
-import React, { useState } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
-import {
-  Avatar,
-  Badge,
-  Button,
-  Dialog,
-  Portal,
-  Text as TextPaper,
-} from "react-native-paper";
-
 import globalStyles from "@/components/styles/globalStyles";
+import ToastModal, { ToastModalChildrenStyle } from "@/components/ToastModal";
 import { ThemedCard, ThemedText } from "@/components/ui";
+import { customColors } from "@/constants/theme";
 import { useAuth, useAuthActions } from "@/store/hooks";
+import AntDesign from "@expo/vector-icons/AntDesign";
 import { Link, RelativePathString } from "expo-router";
+import React, { useMemo, useState } from "react";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Avatar, Badge } from "react-native-paper";
 
 interface MenuItem {
   title: string;
@@ -26,28 +20,28 @@ const functionServices: MenuItem[] = [
   {
     title: "我的资料",
     icon: (
-      <AntDesign name="user" size={24} color="#4a9aff" />
+      <AntDesign name="user" size={24} color={customColors.primary} />
     ) as React.ReactNode,
     link: "/info" as RelativePathString,
   },
   {
     title: "提现记录",
     icon: (
-      <AntDesign name="reload" size={24} color="#4a9aff" />
+      <AntDesign name="reload" size={24} color={customColors.primary} />
     ) as React.ReactNode,
     link: "/withdrawalRecord" as RelativePathString,
   },
   {
     title: "邀请助力",
     icon: (
-      <AntDesign name="team" size={24} color="#4a9aff" />
+      <AntDesign name="team" size={24} color={customColors.primary} />
     ) as React.ReactNode,
     link: "/promotion" as RelativePathString,
   },
   {
     title: "成为推荐官",
     icon: (
-      <AntDesign name="trophy" size={24} color="#4a9aff" />
+      <AntDesign name="trophy" size={24} color={customColors.primary} />
     ) as React.ReactNode,
     link: "" as RelativePathString,
   },
@@ -55,7 +49,7 @@ const functionServices: MenuItem[] = [
   {
     title: "我的团队码",
     icon: (
-      <AntDesign name="qrcode" size={24} color="#4a9aff" />
+      <AntDesign name="qrcode" size={24} color={customColors.primary} />
     ) as React.ReactNode,
     link: "" as RelativePathString,
   },
@@ -63,7 +57,7 @@ const functionServices: MenuItem[] = [
   {
     title: "联系我们",
     icon: (
-      <AntDesign name="phone" size={24} color="#4a9aff" />
+      <AntDesign name="phone" size={24} color={customColors.primary} />
     ) as React.ReactNode,
     link: "/contactUs" as RelativePathString,
   },
@@ -74,21 +68,25 @@ const settingsItems: MenuItem[] = [
   {
     title: "账户安全",
     icon: (
-      <AntDesign name="safety" size={20} color="#4a9aff" />
+      <AntDesign name="safety" size={20} color={customColors.primary} />
     ) as React.ReactNode,
     link: "" as RelativePathString,
   },
   {
     title: "隐私政策",
     icon: (
-      <AntDesign name="eye" size={20} color="#4a9aff" />
+      <AntDesign name="eye" size={20} color={customColors.primary} />
     ) as React.ReactNode,
     link: "" as RelativePathString,
   },
   {
     title: "帮助中心",
     icon: (
-      <AntDesign name="question-circle" size={20} color="#4a9aff" />
+      <AntDesign
+        name="question-circle"
+        size={20}
+        color={customColors.primary}
+      />
     ) as React.ReactNode,
     link: "" as RelativePathString,
   },
@@ -113,6 +111,14 @@ export default function MineScreen() {
     return points.toLocaleString();
   };
 
+  const myAvatar = useMemo(() => {
+    const lastDigit = userInfo?.mobilePhone?.at(-1) || 0;
+    const num = parseInt(lastDigit);
+    let avaterName = `mineAvatar${num % 5}`;
+    // 使用数字比较替代逻辑运算符
+    return `https://ryr123.com/app_resources/static/image/${avaterName}.png`;
+  }, [userInfo]);
+
   return (
     <>
       <ScrollView
@@ -123,18 +129,19 @@ export default function MineScreen() {
         <View style={styles.userCard}>
           {/* 用户基本信息行 */}
           <View style={styles.userInfoRow}>
-            <Avatar.Text
+            <Avatar.Image
               size={64}
-              label={userInfo?.mobilePhone?.slice(-2) || "用户"}
+              source={{ uri: myAvatar }}
               style={styles.avatar}
-              labelStyle={styles.avatarLabel}
             />
             <View style={styles.userDetails}>
               <ThemedText style={styles.userName}>
-                {isAuthenticated ? userInfo?.name || "张晓明" : "*****"}
+                {isAuthenticated
+                  ? userInfo?.name || `用户${userInfo?.mobilePhone?.slice(-4)}`
+                  : "*****"}
               </ThemedText>
               <ThemedText style={styles.userId}>
-                ID: {isAuthenticated ? userInfo?.id || "88652147" : "*****"}
+                账号: {isAuthenticated ? userInfo?.mobilePhone : "*****"}
               </ThemedText>
             </View>
             {isAuthenticated && (
@@ -168,7 +175,10 @@ export default function MineScreen() {
               <ThemedText style={styles.pointSectionLabel}>我的积分</ThemedText>
               <ThemedText style={styles.pointSectionValue}>
                 {isAuthenticated
-                  ? formatPoints(userInfo?.points || 12500)
+                  ? formatPoints(
+                      Number(userInfo?.stillAccumulateScore ?? 0) +
+                        Number(userInfo?.accountAccumulateScore ?? 0)
+                    )
                   : "*****"}
                 分
               </ThemedText>
@@ -178,7 +188,7 @@ export default function MineScreen() {
               <ThemedText style={styles.pointSectionLabel}>可用积分</ThemedText>
               <ThemedText style={styles.pointSectionValue}>
                 {isAuthenticated
-                  ? formatPoints(userInfo?.availablePoints || 8350)
+                  ? formatPoints(userInfo?.accountAccumulateScore || 0)
                   : "*****"}
                 分
               </ThemedText>
@@ -197,7 +207,15 @@ export default function MineScreen() {
               </TouchableOpacity>
             </Link>
           ) : (
-            <Link href="/login" asChild>
+            <Link
+              href={{
+                pathname: "/login",
+                params: {
+                  redirect: "/mine",
+                },
+              }}
+              asChild
+            >
               <TouchableOpacity
                 style={styles.withdrawButton}
                 activeOpacity={0.8}
@@ -242,35 +260,38 @@ export default function MineScreen() {
               </TouchableOpacity>
             </Link>
           ))}
+          {/* 退出登录按钮 */}
+          {isAuthenticated && (
+            <TouchableOpacity
+              onPress={showDialog}
+              style={styles.logoutButton}
+              activeOpacity={0.8}
+            >
+              <AntDesign name="logout" size={18} color="#ff6b6b" />
+              <ThemedText style={styles.logoutText}>退出登录</ThemedText>
+            </TouchableOpacity>
+          )}
         </ThemedCard>
-
-        {/* 退出登录按钮 */}
-        <TouchableOpacity
-          onPress={showDialog}
-          style={styles.logoutButton}
-          activeOpacity={0.8}
-        >
-          <AntDesign name="logout" size={18} color="#ff6b6b" />
-          <ThemedText style={styles.logoutText}>退出登录</ThemedText>
-        </TouchableOpacity>
       </ScrollView>
       {/* 退出确认对话框 */}
-      <Portal>
-        <Dialog
-          visible={visible}
-          onDismiss={hideDialog}
-          style={{ borderRadius: 16 }}
-        >
-          <Dialog.Title>系统提示</Dialog.Title>
-          <Dialog.Content>
-            <TextPaper variant="bodyMedium">确定要退出登录吗？</TextPaper>
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={hideDialog}>取消</Button>
-            <Button onPress={handleLogout}>确定</Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+
+      <ToastModal
+        visible={visible}
+        onConfirm={handleLogout}
+        confirmText="立即退出"
+        onCancel={() => setVisible(false)}
+        cancleText="关闭"
+      >
+        <View style={ToastModalChildrenStyle.modalIconContainer}>
+          <AntDesign name="warning" size={48} color={customColors.error} />
+        </View>
+        <ThemedText style={ToastModalChildrenStyle.modalTitle}>
+          系统提示
+        </ThemedText>
+        <ThemedText style={ToastModalChildrenStyle.modalContent}>
+          确定要退出登录吗？~
+        </ThemedText>
+      </ToastModal>
     </>
   );
 }
@@ -375,7 +396,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.25)",
+    backgroundColor: "rgba(79, 137, 255,0.5)",
     paddingVertical: 12,
     borderRadius: 12,
     gap: 8,
@@ -394,10 +415,10 @@ const styles = StyleSheet.create({
   functionGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
   },
   functionItem: {
-    width: "33%",
+    width: "33.333%",
     aspectRatio: 1,
     borderRadius: 12,
     alignItems: "center",
@@ -451,8 +472,6 @@ const styles = StyleSheet.create({
     borderColor: "#ff6b6b",
     borderRadius: 12,
     paddingVertical: 14,
-    marginHorizontal: 16,
-    marginBottom: 32,
     gap: 8,
   },
   logoutText: {

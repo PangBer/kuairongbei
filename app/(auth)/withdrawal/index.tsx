@@ -130,6 +130,7 @@ export default function WithdrawalRecordScreen() {
       <ScrollView
         style={globalStyles.globalContainer}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={globalStyles.globalPaddingBottom}
       >
         {/* 积分明细卡片 */}
         <ThemedCard>

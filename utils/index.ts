@@ -12,3 +12,31 @@ export const cityformatData = (list: any[]): any[] => {
       e.children && e.children?.length ? cityformatData(e.children) : undefined,
   }));
 };
+
+/**
+ *
+ * @param list 城市列表
+ * @param code 城市code
+ * @param l 递归深度
+ * @returns 城市等级
+ */
+
+export const getCitygGrade = (
+  list: any[],
+  code: string,
+  l = 2
+): 0 | 1 | 2 | 3 | 4 | 5 => {
+  if (code) {
+    const i = list?.findIndex(
+      (e) => e.code === code || e.code.startsWith(code.slice(0, l))
+    );
+    if (i == -1) return 5;
+    if (list[i].code === code) {
+      return list[i].grade;
+    } else {
+      return getCitygGrade(list[i].children, code, l * 2);
+    }
+  } else {
+    return 5;
+  }
+};

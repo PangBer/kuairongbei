@@ -1,9 +1,11 @@
 import PageHeader from "@/components/PageHeader";
 import globalStyles from "@/components/styles/globalStyles";
+import ToastModal, { ToastModalChildrenStyle } from "@/components/ToastModal";
 import { ThemedCard, ThemedText } from "@/components/ui";
+import { customColors } from "@/constants/theme";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -13,7 +15,12 @@ import {
 } from "react-native";
 
 // 消息类型
-type MessageType = "match_success" | "match_fail" | "system" | "points";
+type MessageType =
+  | "match_success"
+  | "match_fail"
+  | "system"
+  | "points"
+  | "match_status";
 
 interface MessageItem {
   id: string;
@@ -22,6 +29,8 @@ interface MessageItem {
   content: string;
   time: Date;
   buttonText?: string; // 匹配成功/失败时使用
+  confirmButtonText?: string; // 状态通知确认按钮
+  cancelButtonText?: string; // 状态通知取消按钮
 }
 
 // 时间格式化函数
@@ -80,6 +89,8 @@ const getIconBackgroundColor = (type: MessageType): string => {
       return "#E8F5E9"; // 浅绿色
     case "match_fail":
       return "#FFF3E0"; // 浅橙色
+    case "match_status":
+      return "#EBF4FF"; // 浅蓝色
     default:
       return "#EBF4FF"; // 默认浅蓝色
   }
@@ -92,6 +103,8 @@ const getIconColor = (type: MessageType): string => {
       return "#67C23A"; // 绿色
     case "match_fail":
       return "#E6A23C"; // 橙色
+    case "match_status":
+      return "#2B56F6"; // 蓝色
     default:
       return "#2B56F6"; // 默认蓝色
   }
@@ -99,6 +112,15 @@ const getIconColor = (type: MessageType): string => {
 
 // 模拟消息数据
 const messageList: MessageItem[] = [
+  {
+    id: "0",
+    type: "match_status",
+    title: "匹配状态通知",
+    content: "当前匹配的机构暂时无法办理，我们将您的需求上传至公海继续为您匹配",
+    time: new Date(Date.now() - 5 * 60 * 1000), // 5分钟前
+    confirmButtonText: "同意",
+    cancelButtonText: "不同意",
+  },
   {
     id: "1",
     type: "match_success",
@@ -135,15 +157,42 @@ const messageList: MessageItem[] = [
 
 export default function MessageScreen() {
   const router = useRouter();
+  const [waitingModalVisible, setWaitingModalVisible] = useState(false);
+  const [productModalVisible, setProductModalVisible] = useState(false);
 
   // 处理按钮点击
-  const handleButtonPress = (type: string) => {
-    // router.push("/(home)/demand");
+  const handleButtonPress = (type: string, action?: "confirm" | "cancel") => {
+    // 处理状态通知的双按钮情况
+    if (type === "match_status") {
+      if (action === "confirm") {
+        // 同意操作 - 打开等待模态框
+        setWaitingModalVisible(true);
+      } else if (action === "cancel") {
+        // 不同意操作 - 打开选择其他产品模态框
+        setProductModalVisible(true);
+      }
+      return;
+    }
+
+    // 处理原有的单按钮情况
     if (type === "match_fail") {
       router.push("/result/fail");
     } else {
       router.push("/result/success");
     }
+  };
+
+  // 处理等待模态框关闭
+  const handleWaitingModalClose = () => {
+    setWaitingModalVisible(false);
+    // 可以在这里添加模态框关闭后的逻辑
+  };
+
+  // 处理产品模态框关闭
+  const handleProductModalClose = () => {
+    setProductModalVisible(false);
+    // 导航到产品大全页面
+    router.push("/(home)/product");
   };
 
   return (
@@ -159,6 +208,7 @@ export default function MessageScreen() {
             ...(index > 0 ? styles.cardMargin : {}),
             ...(message.type === "match_success" ? styles.greenBorder : {}),
             ...(message.type === "match_fail" ? styles.orangeBorder : {}),
+            ...(message.type === "match_status" ? styles.blueBorder : {}),
           };
 
           return (
@@ -195,7 +245,35 @@ export default function MessageScreen() {
                     {message.content}
                   </ThemedText>
 
-                  {/* 匹配成功/失败时的按钮 */}
+                  {/* 匹配状态通知的双按钮 */}
+                  {message.type === "match_status" && (
+                    <View style={styles.buttonGroup}>
+                      <TouchableOpacity
+                        style={styles.confirmButton}
+                        activeOpacity={0.8}
+                        onPress={() =>
+                          handleButtonPress(message.type, "confirm")
+                        }
+                      >
+                        <ThemedText style={styles.confirmButtonText}>
+                          {message.confirmButtonText}
+                        </ThemedText>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.cancelButton}
+                        activeOpacity={0.8}
+                        onPress={() =>
+                          handleButtonPress(message.type, "cancel")
+                        }
+                      >
+                        <ThemedText style={styles.cancelButtonText}>
+                          {message.cancelButtonText}
+                        </ThemedText>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+
+                  {/* 匹配成功/失败时的单按钮 */}
                   {(message.type === "match_success" ||
                     message.type === "match_fail") && (
                     <TouchableOpacity
@@ -210,7 +288,7 @@ export default function MessageScreen() {
                             : "eye"
                         }
                         size={14}
-                        color="#2B56F6"
+                        color={customColors.primary}
                       />
                       <ThemedText style={styles.actionButtonText}>
                         {message.buttonText}
@@ -223,6 +301,41 @@ export default function MessageScreen() {
           );
         })}
       </ScrollView>
+
+      {/* 等待提示模态框 */}
+      <ToastModal
+        visible={waitingModalVisible}
+        onConfirm={handleWaitingModalClose}
+        onCancel={() => setWaitingModalVisible(false)}
+      >
+        <View style={ToastModalChildrenStyle.modalIconContainer}>
+          <AntDesign name="clock-circle" size={48} color="#2B56F6" />
+        </View>
+        <ThemedText style={ToastModalChildrenStyle.modalTitle}>
+          请您耐心等待
+        </ThemedText>
+        <ThemedText style={ToastModalChildrenStyle.modalContent}>
+          我们已将您的需求上传至公海，会持续为您匹配合适的机构
+        </ThemedText>
+      </ToastModal>
+
+      {/* 选择其他产品模态框 */}
+      <ToastModal
+        visible={productModalVisible}
+        onConfirm={handleProductModalClose}
+        onCancel={() => setProductModalVisible(false)}
+        confirmText="前往产品大全"
+      >
+        <View style={ToastModalChildrenStyle.modalIconContainer}>
+          <AntDesign name="product" size={48} color="#2B56F6" />
+        </View>
+        <ThemedText style={ToastModalChildrenStyle.modalTitle}>
+          选择其他产品
+        </ThemedText>
+        <ThemedText style={ToastModalChildrenStyle.modalContent}>
+          请前往APP产品大全选择产品
+        </ThemedText>
+      </ToastModal>
     </>
   );
 }
@@ -256,17 +369,14 @@ const styles = StyleSheet.create({
   messageTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#333333",
     flex: 1,
   },
   messageTime: {
     fontSize: 12,
-    color: "#999999",
     marginLeft: 8,
   },
   messageContent: {
     fontSize: 14,
-    color: "#666666",
     lineHeight: 20,
   },
   greenBorder: {
@@ -279,6 +389,11 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     paddingLeft: 10,
   },
+  blueBorder: {
+    borderLeftColor: customColors.primary,
+    borderLeftWidth: 4,
+    paddingLeft: 10,
+  },
   actionButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -288,13 +403,47 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: "#2B56F6",
-    backgroundColor: "#FFFFFF",
+    borderColor: customColors.primary,
+    color: customColors.primary,
     marginTop: 4,
   },
   actionButtonText: {
     fontSize: 12,
-    color: "#2B56F6",
+    color: customColors.primary,
     fontWeight: "500",
+  },
+  buttonGroup: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+    marginTop: 8,
+  },
+  confirmButton: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 4,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: customColors.primary,
+  },
+  confirmButtonText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: customColors.primary,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 4,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: customColors.onErrorContainer,
+  },
+  cancelButtonText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: customColors.onErrorContainer,
   },
 });

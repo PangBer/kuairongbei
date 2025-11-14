@@ -1,13 +1,15 @@
 import ExpandItem from "@/components/ExpandItem";
 import PageHeader from "@/components/PageHeader";
+import globalStyles from "@/components/styles/globalStyles";
 import { ThemedCard, ThemedText } from "@/components/ui";
 import {
   customColors,
   customDarkTheme,
   customLightTheme,
 } from "@/constants/theme";
+import { useAuth } from "@/store/hooks";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import {
   Alert,
   Linking,
@@ -34,9 +36,9 @@ export default function ReviewScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const paperTheme = isDark ? customDarkTheme : customLightTheme;
+  const { userInfo } = useAuth();
 
   // 倒计时状态（分钟）
-  const [remainingMinutes, setRemainingMinutes] = useState(26);
 
   // 贷款申请数据
   const loanData = {
@@ -53,7 +55,6 @@ export default function ReviewScreen() {
   const progressSteps: ProgressStep[] = [
     { label: "提交申请", completed: true, active: false },
     { label: "资质审核", completed: false, active: true },
-    { label: "电话核实", completed: false, active: false },
     { label: "审批通过", completed: false, active: false },
   ];
 
@@ -72,7 +73,7 @@ export default function ReviewScreen() {
     {
       question: "审核未通过可以重新申请吗?",
       answer:
-        "如果您的申请未通过审核，您可以在30天后重新提交申请。建议您在重新申请前，先了解未通过的原因，并确保您的资质符合要求后再提交。",
+        "如果您的申请未通过审核，您可以在60天后重新提交申请。建议您在重新申请前，先了解未通过的原因，并确保您的资质符合要求后再提交。",
     },
   ];
   const progress = useMemo(() => {
@@ -82,17 +83,8 @@ export default function ReviewScreen() {
   }, [progressSteps]);
   // 倒计时效果
   useEffect(() => {
-    const timer = setInterval(() => {
-      setRemainingMinutes((prev) => {
-        if (prev <= 0) {
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 60000); // 每分钟更新一次
-
-    return () => clearInterval(timer);
-  }, []);
+    console.log(userInfo);
+  }, [userInfo]);
 
   // 拨打电话
   const handleCall = () => {
@@ -103,12 +95,9 @@ export default function ReviewScreen() {
       .then((supported) => {
         if (supported) {
           return Linking.openURL(url);
-        } else {
-          Alert.alert("提示", "无法拨打电话，请检查设备是否支持");
         }
       })
       .catch((err) => {
-        Alert.alert("错误", "拨打电话失败");
         console.error("拨打电话失败:", err);
       });
   };
@@ -144,24 +133,22 @@ export default function ReviewScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <>
       {/* 头部导航 */}
       <PageHeader title="审核进度" />
 
       <ScrollView
         style={[
-          styles.scrollView,
+          globalStyles.globalContainer,
           { backgroundColor: paperTheme.colors.foreground },
         ]}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={globalStyles.globalPaddingBottom}
       >
         {/* 贷款申请详情卡片 */}
         <ThemedCard>
           <View style={styles.loanHeader}>
             <View style={styles.loanTitleRow}>
-              <ThemedText style={styles.loanTitle}>
-                申请编号: {loanData.applicationId}
-              </ThemedText>
               <View style={styles.statusBadge}>
                 <ThemedText style={styles.statusBadgeText}>
                   {loanData.status}
@@ -173,9 +160,7 @@ export default function ReviewScreen() {
           <View>
             <View style={styles.progressSteps}>
               {progressSteps.map((step, index) => (
-                <ThemedText key={step.label} style={{ fontSize: 14 }}>
-                  {step.label}
-                </ThemedText>
+                <ThemedText key={step.label}>{step.label}</ThemedText>
               ))}
             </View>
             <ProgressBar
@@ -204,25 +189,9 @@ export default function ReviewScreen() {
                 </ThemedText>
               </View>
               <View style={styles.infoItem}>
-                <ThemedText style={styles.infoLabel}>预计期限</ThemedText>
-                <ThemedText style={styles.infoValue}>
-                  {loanData.estimatedTerm}
-                </ThemedText>
-              </View>
-            </View>
-            <View style={styles.infoRow}>
-              <View style={styles.infoItem}>
                 <ThemedText style={styles.infoLabel}>申请日期</ThemedText>
                 <ThemedText style={styles.infoValue}>
                   {loanData.applicationDate}
-                </ThemedText>
-              </View>
-              <View style={styles.infoItem}>
-                <ThemedText style={styles.infoLabel}>当前进度</ThemedText>
-                <ThemedText
-                  style={[styles.infoValue, { color: customColors.primary }]}
-                >
-                  {loanData.currentProgress}
                 </ThemedText>
               </View>
             </View>
@@ -241,9 +210,7 @@ export default function ReviewScreen() {
           </View>
           <ThemedText style={styles.processingMessage}>
             您的贷款申请正在审核中，我们将在
-            <ThemedText style={styles.highlightText}>
-              {remainingMinutes}分钟
-            </ThemedText>
+            <ThemedText style={styles.highlightText}>30分钟</ThemedText>
             内通过电话与您联系核实信息。如超过30分钟未收到联系，请及时联系客服协助处理。
           </ThemedText>
         </ThemedCard>
@@ -256,7 +223,7 @@ export default function ReviewScreen() {
           <TouchableOpacity
             style={styles.contactItem}
             onPress={handleCall}
-            activeOpacity={0.7}
+            activeOpacity={0.8}
           >
             <View
               style={[
@@ -336,33 +303,22 @@ export default function ReviewScreen() {
           ))}
         </ThemedCard>
       </ScrollView>
-    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
   loanHeader: {
     marginBottom: 20,
   },
   loanTitleRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     marginBottom: 8,
     flexWrap: "wrap",
   },
-  loanTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    flex: 1,
-    marginRight: 8,
-  },
+
   statusBadge: {
     backgroundColor: "#FF9800",
     paddingHorizontal: 12,
@@ -373,10 +329,6 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 12,
     fontWeight: "600",
-  },
-  applicationId: {
-    fontSize: 14,
-    marginTop: 4,
   },
   progressSteps: {
     flexDirection: "row",

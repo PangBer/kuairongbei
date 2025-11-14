@@ -1,16 +1,16 @@
+import ExpandItem from "@/components/ExpandItem";
 import PageHeader from "@/components/PageHeader";
 import globalStyles from "@/components/styles/globalStyles";
 import { ThemedCard, ThemedText } from "@/components/ui";
+import { customColors } from "@/constants/theme";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
 export default function ContactUsScreen() {
   const router = useRouter();
-  // 常见问题展开状态
-  const [expandedQuestion, setExpandedQuestion] = useState<number | null>(null);
 
   // 常见问题数据
   const faqData = [
@@ -36,21 +36,13 @@ export default function ContactUsScreen() {
     },
   ];
 
-  // 处理问题展开/收起
-  const handleQuestionToggle = (index: number) => {
-    if (expandedQuestion === index) {
-      setExpandedQuestion(null);
-    } else {
-      setExpandedQuestion(index);
-    }
-  };
-
   return (
     <>
       <PageHeader title="联系我们" />
       <ScrollView
         style={globalStyles.globalContainer}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={globalStyles.globalPaddingBottom}
       >
         {/*企微客服/在线客服 */}
         <View style={styles.serviceCardsContainer}>
@@ -103,7 +95,7 @@ export default function ContactUsScreen() {
         <ThemedCard>
           {/* 标题 */}
           <View style={styles.qrCodeTitleContainer}>
-            <AntDesign name="qrcode" size={20} color="#2B56F6" />
+            <AntDesign name="qrcode" size={20} color={customColors.primary} />
             <ThemedText style={styles.qrCodeTitle}>企业微信二维码</ThemedText>
           </View>
 
@@ -132,39 +124,23 @@ export default function ContactUsScreen() {
         <ThemedCard>
           {/* 标题 */}
           <View style={styles.sectionTitleContainer}>
-            <AntDesign name="question-circle" size={20} color="#2B56F6" />
+            <AntDesign
+              name="question-circle"
+              size={20}
+              color={customColors.primary}
+            />
             <ThemedText style={styles.sectionTitle}>常见问题</ThemedText>
           </View>
 
           {/* 问题列表 */}
           <View style={styles.faqContainer}>
             {faqData.map((item, index) => (
-              <View key={index} style={styles.faqItem}>
-                <TouchableOpacity
-                  style={styles.faqQuestionRow}
-                  onPress={() => handleQuestionToggle(index)}
-                  activeOpacity={0.7}
-                >
-                  <ThemedText style={styles.faqQuestion}>
-                    {item.question}
-                  </ThemedText>
-                  <AntDesign
-                    name={expandedQuestion === index ? "up" : "down"}
-                    size={16}
-                    color="#666666"
-                  />
-                </TouchableOpacity>
-                {expandedQuestion === index && (
-                  <View style={styles.faqAnswerContainer}>
-                    <ThemedText style={styles.faqAnswer}>
-                      {item.answer}
-                    </ThemedText>
-                  </View>
-                )}
-                {index < faqData.length - 1 && (
-                  <View style={styles.faqDivider} />
-                )}
-              </View>
+              <ExpandItem
+                key={index}
+                title={item.question}
+                content={item.answer}
+                defaultExpanded={index === 0}
+              />
             ))}
           </View>
         </ThemedCard>
@@ -173,7 +149,7 @@ export default function ContactUsScreen() {
         <ThemedCard>
           {/* 标题 */}
           <View style={styles.sectionTitleContainer}>
-            <AntDesign name="phone" size={20} color="#2B56F6" />
+            <AntDesign name="phone" size={20} color={customColors.primary} />
             <ThemedText style={styles.sectionTitle}>其他联系方式</ThemedText>
           </View>
 
@@ -182,7 +158,11 @@ export default function ContactUsScreen() {
             {/* 客服热线 */}
             <View style={styles.contactItem}>
               <View style={styles.contactIconContainer}>
-                <AntDesign name="phone" size={20} color="#2B56F6" />
+                <AntDesign
+                  name="phone"
+                  size={20}
+                  color={customColors.primary}
+                />
               </View>
               <View style={styles.contactInfo}>
                 <ThemedText style={styles.contactLabel}>客服热线</ThemedText>
@@ -195,7 +175,11 @@ export default function ContactUsScreen() {
             {/* 工作时间 */}
             <View style={styles.contactItem}>
               <View style={styles.contactIconContainer}>
-                <AntDesign name="clock-circle" size={20} color="#2B56F6" />
+                <AntDesign
+                  name="clock-circle"
+                  size={20}
+                  color={customColors.primary}
+                />
               </View>
               <View style={styles.contactInfo}>
                 <ThemedText style={styles.contactLabel}>工作时间</ThemedText>
@@ -208,7 +192,7 @@ export default function ContactUsScreen() {
             {/* 官方邮箱 */}
             <View style={styles.contactItem}>
               <View style={styles.contactIconContainer}>
-                <AntDesign name="mail" size={20} color="#2B56F6" />
+                <AntDesign name="mail" size={20} color={customColors.primary} />
               </View>
               <View style={styles.contactInfo}>
                 <ThemedText style={styles.contactLabel}>官方邮箱</ThemedText>
@@ -261,14 +245,12 @@ const styles = StyleSheet.create({
   serviceTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#333333",
     marginBottom: 8,
     textAlign: "center",
   },
   // 描述文字
   serviceText: {
     fontSize: 12,
-    color: "#666666",
     textAlign: "center",
     marginBottom: 16,
     lineHeight: 18,
@@ -278,7 +260,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#2B56F6",
+    borderWidth: 1,
+    borderColor: customColors.primary,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -287,7 +270,6 @@ const styles = StyleSheet.create({
   },
   // 按钮文字
   serviceButtonText: {
-    color: "#FFFFFF",
     fontSize: 14,
     fontWeight: "600",
   },
@@ -301,7 +283,6 @@ const styles = StyleSheet.create({
   qrCodeTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#333333",
   },
   // 二维码图片容器（浅灰蓝色方框）
   qrCodeImageContainer: {
@@ -322,7 +303,6 @@ const styles = StyleSheet.create({
   // 提示文字样式
   qrCodeTipText: {
     fontSize: 12,
-    color: "#666666",
     lineHeight: 18,
     alignSelf: "center",
   },
@@ -336,42 +316,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#333333",
   },
   // 常见问题样式
   faqContainer: {
-    gap: 0,
-  },
-  faqItem: {
-    marginBottom: 0,
-  },
-  faqQuestionRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
-  },
-  faqQuestion: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#333333",
-    flex: 1,
-    marginRight: 12,
-  },
-  faqAnswerContainer: {
-    paddingTop: 8,
-    paddingBottom: 12,
-    paddingLeft: 0,
-  },
-  faqAnswer: {
-    fontSize: 12,
-    color: "#666666",
-    lineHeight: 20,
-  },
-  faqDivider: {
-    height: 1,
-    backgroundColor: "#E5E7EB",
-    marginVertical: 0,
+    marginTop: 8,
   },
   // 联系方式样式
   contactContainer: {
@@ -386,7 +334,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#EBF4FF",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -396,11 +343,9 @@ const styles = StyleSheet.create({
   },
   contactLabel: {
     fontSize: 12,
-    color: "#666666",
   },
   contactValue: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#333333",
   },
 });

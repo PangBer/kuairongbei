@@ -19,13 +19,10 @@ export default () => {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle:
-          pathname === "/demand"
-            ? { display: "none" }
-            : {
-                height: 65,
-                paddingVertical: 5,
-              },
+        tabBarStyle: {
+          height: 65,
+          paddingVertical: 5,
+        },
       }}
     >
       <Tabs.Screen

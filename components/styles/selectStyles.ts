@@ -104,12 +104,12 @@ export const selectStyles = StyleSheet.create({
     justifyContent: "space-between",
   },
   selectedOptionText: {
-    color: "#4a9aff",
+    color: customColors.primary,
     fontWeight: "600",
   },
   checkmark: {
     fontSize: 16,
-    color: "#4a9aff",
+    color: customColors.primary,
     fontWeight: "bold",
   },
   // LevelSelect 专用样式

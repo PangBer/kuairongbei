@@ -56,7 +56,6 @@ interface RequestOptions extends RequestInit {
   method?: Method;
   data?: any;
   headers?: Record<string, string>;
-  cancelToken?: AbortController;
 }
 
 // 请求防抖 map
@@ -123,7 +122,7 @@ const responseInterceptor = async (response: Response) => {
 
     return Promise.reject(data);
   }
-
+  console.log("response", data);
   return data;
 };
 
@@ -161,7 +160,7 @@ const sendRequest = async (options: RequestOptions) => {
 
   let url = BASE_URL + opts.url;
 
-  if (opts.method === "GET" && opts.data) {
+  if ((opts.method === "GET" || opts.method === "DELETE") && opts.data) {
     const queryString = new URLSearchParams(opts.data).toString();
     url += `?${queryString}`;
   }
@@ -169,10 +168,12 @@ const sendRequest = async (options: RequestOptions) => {
   const fetchOptions: RequestInit = {
     method: opts.method || "GET",
     headers: opts.headers,
-    body: opts.method !== "GET" ? opts.data : undefined,
-    signal: opts.cancelToken?.signal,
+    body: opts.method !== "GET" ? JSON.stringify(opts.data) : undefined,
   };
-
+  console.log(url, {
+    ...fetchOptions,
+    body: opts.method !== "GET" ? opts.data : undefined,
+  });
   try {
     const response = await fetch(url, fetchOptions);
     return await responseInterceptor(response);

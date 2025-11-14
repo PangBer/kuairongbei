@@ -1,18 +1,17 @@
 import globalStyles from "@/components/styles/globalStyles";
 import { ThemedCard, ThemedText } from "@/components/ui";
+import { customColors } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { useState } from "react";
 import {
-  Dimensions,
   RefreshControl,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
-
-const { width } = Dimensions.get("window");
 
 // 产品数据类型定义
 interface Product {
@@ -68,6 +67,7 @@ const productsData: Product[] = [
 
 export default () => {
   const [refreshing, setRefreshing] = useState(false);
+  const { width } = useWindowDimensions();
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => {
@@ -206,7 +206,15 @@ export default () => {
       {/* 推荐产品区域 */}
       <View style={styles.productsContainer}>
         {productsData.map((product) => (
-          <ThemedCard key={product.id} style={styles.productCard}>
+          <ThemedCard
+            key={product.id}
+            style={[
+              styles.productCard,
+              {
+                width: (width - 40) / 2,
+              },
+            ]}
+          >
             <ThemedText style={styles.productName}>{product.name}</ThemedText>
             <ThemedText style={styles.yieldLabel}>
               {product.yieldLabel}
@@ -329,7 +337,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   viewMoreText: {
-    color: "#4a9aff",
+    color: customColors.primary,
     fontSize: 14,
   },
   productsContainer: {
@@ -338,8 +346,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   productCard: {
-    width: (width - 40) / 2,
-    backgroundColor: "white",
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
@@ -349,24 +355,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 1,
-    marginBottom: 20,
+    marginBottom: 10,
   },
-  productHeader: {
-    alignItems: "flex-end",
-    marginBottom: 8,
-    marginTop: -30,
-  },
-  productTag: {
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    backgroundColor: "#4a9aff",
-  },
-  productTagText: {
-    color: "white",
-    fontSize: 10,
-    fontWeight: "bold",
-  },
-
   productName: {
     fontSize: 14,
     fontWeight: "bold",
@@ -395,15 +385,16 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   purchaseButton: {
-    backgroundColor: "#4a9aff",
+    borderWidth: 1,
+    borderColor: customColors.primary,
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 6,
     alignItems: "center",
   },
   purchaseButtonText: {
-    color: "white",
     fontSize: 12,
     fontWeight: "bold",
+    color: customColors.primary,
   },
 });

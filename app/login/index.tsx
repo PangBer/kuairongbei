@@ -4,7 +4,7 @@ import { customColors } from "@/constants/theme";
 import { imageCodeApi, sendLoginAPi, smsCodeApi, userInfoApi } from "@/service";
 import { useAuthActions, useToastActions } from "@/store/hooks";
 import { setToken } from "@/utils/token";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -51,7 +51,7 @@ const validationRules = {
     },
   },
 };
-export default function LoginScreen({ path }: { path?: any }) {
+export default function LoginScreen() {
   const router = useRouter();
   const { redirect } = useLocalSearchParams<{ redirect?: string }>();
   const { login } = useAuthActions();
@@ -60,12 +60,12 @@ export default function LoginScreen({ path }: { path?: any }) {
   const {
     control,
     handleSubmit,
-    watch,
+    getValues,
     setValue,
     formState: { errors, isValid },
     trigger,
   } = useForm<LoginFormData>({
-    mode: "onBlur",
+    mode: "all",
     defaultValues: {
       phone: "",
       code: "",
@@ -127,8 +127,8 @@ export default function LoginScreen({ path }: { path?: any }) {
     try {
       // 模拟 API 调用
       const response = await smsCodeApi({
-        phone: watch("phone"),
-        code: watch("code"),
+        phone: getValues("phone"),
+        code: getValues("code"),
         uuid: captchaId,
       });
       startCountdown();
@@ -177,12 +177,8 @@ export default function LoginScreen({ path }: { path?: any }) {
       const res = await userInfoApi();
       await login(res.data);
       // 登录成功后跳转到指定页面或首页
-      const redirectPath =  redirect || "/";
-      if(path) {
-        router.push(path)
-      } else {
-        router.replace(redirectPath as any);
-      }
+      const redirectPath = redirect || "/";
+      router.replace(redirectPath as any);
     } catch (error) {
       getImageCaptcha();
     } finally {
@@ -315,11 +311,10 @@ export default function LoginScreen({ path }: { path?: any }) {
           {/* 登录按钮 */}
           <View style={styles.buttonContainer}>
             <Button
-              mode="contained"
+              mode="outlined"
               onPress={handleLogin}
               loading={loading}
               disabled={loading}
-              style={styles.loginButton}
             >
               登录
             </Button>
@@ -329,8 +324,29 @@ export default function LoginScreen({ path }: { path?: any }) {
           <View style={styles.agreementContainer}>
             <ThemedText style={styles.agreementText}>
               登录即表示您同意
-              <ThemedText style={styles.linkText}>《用户协议》</ThemedText>和
-              <ThemedText style={styles.linkText}>《隐私政策》</ThemedText>
+              <Link
+                href={{
+                  pathname: "/doc",
+                  params: {
+                    name: "sqxy",
+                  },
+                }}
+                asChild
+              >
+                <ThemedText style={styles.linkText}>《用户协议》</ThemedText>
+              </Link>
+              和
+              <Link
+                href={{
+                  pathname: "/doc",
+                  params: {
+                    name: "yszc",
+                  },
+                }}
+                asChild
+              >
+                <ThemedText style={styles.linkText}>《隐私政策》</ThemedText>
+              </Link>
             </ThemedText>
           </View>
         </View>
@@ -409,10 +425,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 16,
   },
-  loginButton: {
-    borderRadius: 12,
-    paddingVertical: 8,
-  },
+
   agreementContainer: {
     alignItems: "center",
     paddingHorizontal: 16,
