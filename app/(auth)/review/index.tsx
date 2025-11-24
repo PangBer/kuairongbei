@@ -88,30 +88,18 @@ export default function ReviewScreen() {
 
   // 拨打电话
   const handleCall = () => {
-    const phoneNumber = "400-888-9999";
-    const url = `tel:${phoneNumber.replace(/-/g, "")}`;
+    const phoneNumber = "13188889999";
+    const url = `tel:${phoneNumber}`;
 
-    Linking.canOpenURL(url)
-      .then((supported) => {
-        if (supported) {
-          return Linking.openURL(url);
-        }
-      })
-      .catch((err) => {
-        console.error("拨打电话失败:", err);
-      });
+    Linking.openURL(url).catch((err) => {
+      console.error("拨打电话失败:", err);
+    });
   };
 
   // 打开微信客服
   const handleOpenWeChat = async () => {
     try {
       // 检查微信是否安装
-      const canOpenWechat = await Linking.canOpenURL("weixin://");
-
-      if (!canOpenWechat) {
-        Alert.alert("提示", "未检测到微信应用，请先安装微信");
-        return;
-      }
 
       // 尝试打开微信
       const opened = await Linking.openURL("weixin://");

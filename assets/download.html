@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>打开App</title>
+    <style>
+      body {
+        font-family: Arial;
+        padding: 20px;
+        text-align: center;
+      }
+      .btn {
+        padding: 12px 20px;
+        background: #ff4757;
+        color: #fff;
+        border-radius: 8px;
+        display: inline-block;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>正在为你打开 App…</h2>
+    <p>如果没有自动打开，请点击下方按钮</p>
+
+    <a id="openBtn" class="btn">立即打开</a>
+    <p>如果没有下载，请点下方按钮</p>
+    <a id="downBtn" class="btn" style="background-color: skyblue">立即下载</a>
+
+    <script>
+      const isDev = false;
+      const name = "rongyirong";
+      // ---------------------------
+      // 配置参数
+      // 获取当前页面 URL 中的查询参数
+      function getQueryParam(key) {
+        const params = new URLSearchParams(window.location.search);
+
+        return params.get(key);
+      }
+
+      // 读取 href 上的参数并赋值给 name
+      const page = getQueryParam("page") || "invite";
+      // ---------------------------
+      // 收集除 page 外的所有查询参数
+      const extraParams = [];
+      for (const [k, v] of new URLSearchParams(window.location.search)) {
+        if (k !== "page") extraParams.push(`${k}=${encodeURIComponent(v)}`);
+      }
+
+      const APP_SCHEME = isDev
+        ? `${name}://expo-development-client/?url=${encodeURIComponent(
+            `http://192.168.1.13:8081/${page}${
+              extraParams.length ? "?" + extraParams.join("&") : ""
+            }`
+          )}`
+        : `${name}://${page}${
+            extraParams.length ? "?" + extraParams.join("&") : ""
+          }`; // deep link
+
+      const APP_PACKAGE = "com.xingin.xhs"; // 包名
+
+      // 应用市场的详情页地址
+      const MARKET_LINKS = {
+        xiaomi: `mimarket://details?id=${APP_PACKAGE}`,
+        vivo: `vivomarket://details?id=${APP_PACKAGE}`,
+        oppo: `oppomarket://details?packagename=${APP_PACKAGE}`,
+        huawei: `appmarket://details?id=${APP_PACKAGE}`,
+        yingyongbao: `https://a.app.qq.com/o/simple.jsp?pkgname=${APP_PACKAGE}`,
+      };
+
+      // ---------------------------
+      // 是否微信内
+      // ---------------------------
+      function isWeChat() {
+        return /micromessenger/i.test(navigator.userAgent);
+      }
+
+      // ---------------------------
+      // 跳转 deep link
+      // ---------------------------
+      function openDeepLink() {
+        window.location.href = APP_SCHEME;
+
+        // 用定时器判断用户是否未安装 APP
+        // setTimeout(() => redirectToMarket(), 1000);
+      }
+
+      // ---------------------------
+      // 品牌判断
+      // ---------------------------
+      function getBrandMarket() {
+        const ua = navigator.userAgent.toLowerCase();
+
+        if (/xiaomi/.test(ua)) return MARKET_LINKS.xiaomi;
+        if (/miui/.test(ua)) return MARKET_LINKS.xiaomi;
+
+        if (/vivo/.test(ua)) return MARKET_LINKS.vivo;
+
+        if (/oppo/.test(ua)) return MARKET_LINKS.oppo;
+        if (/heyTap/.test(ua)) return MARKET_LINKS.oppo;
+
+        if (/huawei/.test(ua) || /honor/.test(ua)) return MARKET_LINKS.huawei;
+
+        return MARKET_LINKS.yingyongbao; // 默认应用宝
+      }
+
+      // ---------------------------
+      // 自动跳市场
+      // ---------------------------
+      function redirectToMarket() {
+        const url = getBrandMarket();
+        window.location.href = url;
+      }
+
+      // ---------------------------
+      // 微信安全落地页逻辑
+      // ---------------------------
+      function showWeChatSafePage() {
+        document.body.innerHTML = `
+        <h2>请点击右上角，用浏览器打开</h2>
+        <p>微信内无法直接打开 App</p>
+        <img src="https://cdn.jsdelivr.net/gh/itheima2017/xcx/click-browser.png" style="width:80%;margin-top:20px;" />
+    `;
+      }
+
+      // ---------------------------
+      // 按钮点击
+      // ---------------------------
+      document.getElementById("openBtn").onclick = () => openDeepLink();
+
+      document.getElementById("downBtn").onclick = () => redirectToMarket();
+
+      // ---------------------------
+      // 初始化
+      // ---------------------------
+      window.onload = () => {
+        if (isWeChat()) {
+          showWeChatSafePage(); // 微信内展示安全落地页
+        } else {
+          openDeepLink(); // 其他浏览器直接唤醒APP
+        }
+      };
+    </script>
+  </body>
+</html>

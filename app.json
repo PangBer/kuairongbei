@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "rongyirong.app",
+    "scheme": "rongyirong",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -26,8 +26,7 @@
       }
     },
     "android": {
-      "package": "com.rongyirong.app",
-      "versionCode": 1,
+      "package": "com.andriod.rongyirong",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

@@ -104,7 +104,7 @@ const responseInterceptor = async (response: Response) => {
     );
     return Promise.reject(data);
   }
-
+  console.log("response", data);
   if (data.code !== 200) {
     if (data.code === 401) {
       showToast("error", "未授权", "请先登录");
@@ -122,7 +122,7 @@ const responseInterceptor = async (response: Response) => {
 
     return Promise.reject(data);
   }
-  console.log("response", data);
+
   return data;
 };
 

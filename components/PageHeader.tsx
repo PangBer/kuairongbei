@@ -3,10 +3,10 @@ import { Appbar } from "react-native-paper";
 
 export default ({
   children,
-  title,
+  title = "系统页面",
 }: {
   children?: React.ReactNode;
-  title: string;
+  title?: string;
   onRightPress?: () => void;
 }) => {
   return (

@@ -183,6 +183,8 @@ export default () => {
             onSelect={setFilterAmount}
             placeholder="贷款额度"
             showClear={false}
+            showError={false}
+            style={styles.filterDropdown}
           />
         </View>
         <View style={styles.filterItem}>
@@ -193,6 +195,8 @@ export default () => {
             onSelect={setFilterRate}
             placeholder="贷款利率"
             showClear={false}
+            showError={false}
+            style={styles.filterDropdown}
           />
         </View>
         <View style={styles.filterItem}>
@@ -203,6 +207,8 @@ export default () => {
             onSelect={setFilterTerm}
             placeholder="贷款期限"
             showClear={false}
+            showError={false}
+            style={styles.filterDropdown}
           />
         </View>
       </View>
@@ -397,7 +403,10 @@ const styles = StyleSheet.create({
   filterItem: {
     flex: 1,
   },
-
+  filterDropdown: {
+    height: 30,
+    marginBottom: 5,
+  },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",

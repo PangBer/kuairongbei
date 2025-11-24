@@ -8,7 +8,7 @@ import {
   customLightTheme,
 } from "@/constants/theme";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import SimpleLineIcons from "@expo/vector-icons/build/SimpleLineIcons";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -170,7 +170,7 @@ export default function ProductDetailScreen() {
           icon={() => (
             <AntDesign
               name="export"
-              size={24}
+              size={20}
               color={isDark ? "#ffffff" : "#1a1a1a"}
             />
           )}
@@ -488,7 +488,7 @@ export default function ProductDetailScreen() {
           }}
           activeOpacity={0.8}
         >
-          <SimpleLineIcons name="heart" size={18} color={"#666666"} />
+          <FontAwesome5 name="heart" size={18} color={"#666666"} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.applyButton}

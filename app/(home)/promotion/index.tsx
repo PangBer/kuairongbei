@@ -136,11 +136,15 @@ export default () => {
             ))}
           </View>
         </View>
-        <SectionButton title="立即邀请" color={COLORS.accentOrange} />
+        <SectionButton
+          title="立即邀请"
+          herf="/inviteRegister"
+          color={COLORS.accentOrange}
+        />
       </ThemedCard>
 
       {/* 收益卡片 */}
-      <ThemedCard style={styles.summaryContainer}>
+      <View style={styles.summaryContainer}>
         <View style={styles.summaryHeader}>
           <View style={styles.summaryProfile}>
             <View style={styles.avatar} />
@@ -236,7 +240,7 @@ export default () => {
             没有更多了，继续加油！
           </ThemedText>
         </ThemedCard>
-      </ThemedCard>
+      </View>
     </ScrollView>
   );
 };
@@ -391,10 +395,7 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
 
-  summaryContainer: {
-    marginTop: 10,
-    backgroundColor: COLORS.blueLight,
-  },
+  summaryContainer: { margin: 10 },
   summaryCard: {
     marginTop: 10,
     backgroundColor: COLORS.sand,

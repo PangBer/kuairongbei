@@ -40,8 +40,6 @@ export default ({ url, name }: { url?: string; name?: string }) => {
     }
     return () => {
       setPdfUri("");
-      if (url?.startsWith("http")) {
-      }
     };
   }, [url, name]);
   return (

@@ -43,7 +43,12 @@ export default function ToastModal({
           <View style={styles.modalBody}>{children}</View>
 
           <View style={styles.buttonGroup}>
-            <Button mode="contained" onPress={onConfirm} loading={loading}>
+            <Button
+              mode="contained"
+              onPress={onConfirm}
+              loading={loading}
+              disabled={loading}
+            >
               {confirmText}
             </Button>
             {cancleText && (
@@ -52,6 +57,7 @@ export default function ToastModal({
                 buttonColor={customColors.onErrorContainer}
                 onPress={onCancel}
                 loading={loading}
+                disabled={loading}
               >
                 {cancleText}
               </Button>

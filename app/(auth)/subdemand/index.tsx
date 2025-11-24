@@ -43,10 +43,12 @@ import {
   View,
 } from "react-native";
 import { Button } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function DemandScreen() {
   const { userInfo } = useAuth();
   const { showSuccess } = useToastActions();
+  const inset = useSafeAreaInsets();
   // React Hook Form
   const { control, handleSubmit, getValues, setValue } =
     useForm<DemandFormData>({
@@ -67,6 +69,11 @@ export default function DemandScreen() {
   const [grade, setGrade] = useState<keyof typeof gradeScore>(5);
   const [loading, setLoading] = useState<boolean>(false);
   const [confirmVisible, setConfirmVisible] = useState<boolean>(false);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState<boolean>(false);
+  useEffect(() => {
+    Keyboard.addListener("keyboardDidShow", () => setIsKeyboardVisible(true));
+    Keyboard.addListener("keyboardDidHide", () => setIsKeyboardVisible(false));
+  }, []);
 
   useEffect(() => {
     fetchMultipleDicts([
@@ -82,7 +89,7 @@ export default function DemandScreen() {
     try {
       setLoading(true);
       const { data } = await getDemandDetail();
-      if(!data) throw new Error("未保存信息");
+      if (!data) throw new Error("未保存信息");
       // 从接口返回的 data 中仅提取 DemandFormData 接口定义的字段
       const demandFormData = new DemandFormDataImpl(data);
       const newGrade = getCitygGrade(
@@ -273,7 +280,8 @@ export default function DemandScreen() {
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={globalStyles.globalContainer}
-        keyboardVerticalOffset={45}
+        keyboardVerticalOffset={inset.top}
+        enabled={isKeyboardVisible}
       >
         <TouchableWithoutFeedback
           style={globalStyles.globalContainer}
@@ -593,7 +601,12 @@ export default function DemandScreen() {
         </View>
 
         {/* Submit Button */}
-        <Button mode="contained" onPress={submitDemand} loading={loading}>
+        <Button
+          mode="contained"
+          onPress={submitDemand}
+          loading={loading}
+          disabled={loading}
+        >
           {cantOperate ? "查看我的申请进度" : "提交资质信息"}
         </Button>
 

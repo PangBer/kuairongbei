@@ -13,6 +13,7 @@ interface MenuItem {
   title: string;
   icon: React.ReactNode;
   link: RelativePathString;
+  badge?: boolean;
 }
 
 // 功能服务项数组 - 根据图片设计
@@ -36,7 +37,7 @@ const functionServices: MenuItem[] = [
     icon: (
       <AntDesign name="team" size={24} color={customColors.primary} />
     ) as React.ReactNode,
-    link: "/promotion" as RelativePathString,
+    link: "/invite" as RelativePathString,
   },
   {
     title: "成为推荐官",
@@ -55,11 +56,12 @@ const functionServices: MenuItem[] = [
   },
 
   {
-    title: "联系我们",
+    title: "消息中心",
     icon: (
-      <AntDesign name="phone" size={24} color={customColors.primary} />
+      <AntDesign name="message" size={24} color={customColors.primary} />
     ) as React.ReactNode,
-    link: "/contactUs" as RelativePathString,
+    link: "/message" as RelativePathString,
+    badge: true,
   },
 ];
 
@@ -77,7 +79,14 @@ const settingsItems: MenuItem[] = [
     icon: (
       <AntDesign name="eye" size={20} color={customColors.primary} />
     ) as React.ReactNode,
-    link: "" as RelativePathString,
+    link: "/doc?name=yszc" as RelativePathString,
+  },
+  {
+    title: "联系我们",
+    icon: (
+      <AntDesign name="phone" size={24} color={customColors.primary} />
+    ) as React.ReactNode,
+    link: "/contactUs" as RelativePathString,
   },
   {
     title: "帮助中心",
@@ -154,7 +163,7 @@ export default function MineScreen() {
                     <AntDesign name="edit" size={16} color="#ffffff" />
                   </TouchableOpacity>
                 </Link>
-                <Link href="/message" asChild>
+                <Link href="/notify" asChild>
                   <TouchableOpacity
                     style={styles.notificationButton}
                     activeOpacity={0.8}
@@ -235,7 +244,18 @@ export default function MineScreen() {
                   activeOpacity={0.8}
                   style={styles.functionItem}
                 >
-                  <View style={styles.functionIconContainer}>{item.icon}</View>
+                  <View style={styles.functionIconContainer}>
+                    {item.icon}
+                    {item.badge && isAuthenticated ? (
+                      <Badge
+                        style={{ position: "absolute", top: -6, right: -6 }}
+                      >
+                        3
+                      </Badge>
+                    ) : (
+                      <></>
+                    )}
+                  </View>
                   <ThemedText style={styles.functionText}>
                     {item.title}
                   </ThemedText>
@@ -418,6 +438,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   functionItem: {
+    position: "relative",
     width: "33.333%",
     aspectRatio: 1,
     borderRadius: 12,
@@ -473,6 +494,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 14,
     gap: 8,
+    marginTop: 10,
   },
   logoutText: {
     fontSize: 16,

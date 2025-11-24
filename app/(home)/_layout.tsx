@@ -20,8 +20,7 @@ export default () => {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          height: 65,
-          paddingVertical: 5,
+          height: 70,
         },
       }}
     >

@@ -1,449 +1,249 @@
 import PageHeader from "@/components/PageHeader";
 import globalStyles from "@/components/styles/globalStyles";
-import ToastModal, { ToastModalChildrenStyle } from "@/components/ToastModal";
-import { ThemedCard, ThemedText } from "@/components/ui";
+import { ThemedCard, ThemedText, ThemedView } from "@/components/ui";
 import { customColors } from "@/constants/theme";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { Link } from "expo-router";
 import {
-  ScrollView,
+  Pressable,
   StyleSheet,
-  TouchableOpacity,
+  TextInput,
+  useColorScheme,
   View,
-  ViewStyle,
 } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
+import { Appbar, Badge } from "react-native-paper";
 
-// 消息类型
-type MessageType =
-  | "match_success"
-  | "match_fail"
-  | "system"
-  | "points"
-  | "match_status";
-
-interface MessageItem {
-  id: string;
-  type: MessageType;
-  title: string;
-  content: string;
-  time: Date;
-  buttonText?: string; // 匹配成功/失败时使用
-  confirmButtonText?: string; // 状态通知确认按钮
-  cancelButtonText?: string; // 状态通知取消按钮
-}
-
-// 时间格式化函数
-const formatTime = (date: Date): string => {
-  const now = new Date();
-  const diff = now.getTime() - date.getTime();
-  const diffMinutes = Math.floor(diff / (1000 * 60));
-
-  // 半小时内显示"刚刚"
-  if (diffMinutes < 30) {
-    return "刚刚";
-  }
-
-  // 判断是否是昨天
-  const yesterday = new Date(now);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const isYesterday =
-    date.getDate() === yesterday.getDate() &&
-    date.getMonth() === yesterday.getMonth() &&
-    date.getFullYear() === yesterday.getFullYear();
-
-  if (isYesterday) {
-    // 昨天显示"昨天+时分"
-    const hoursStr = date.getHours().toString().padStart(2, "0");
-    const minutesStr = date.getMinutes().toString().padStart(2, "0");
-    return `昨天 ${hoursStr}:${minutesStr}`;
-  }
-
-  // 更早的消息显示"月-日 时:分"
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const day = date.getDate().toString().padStart(2, "0");
-  const hoursStr = date.getHours().toString().padStart(2, "0");
-  const minutesStr = date.getMinutes().toString().padStart(2, "0");
-  return `${month}-${day} ${hoursStr}:${minutesStr}`;
-};
-
-const getMessageIcon = (type: MessageType): string => {
-  switch (type) {
-    case "match_success":
-      return "check-circle";
-    case "match_fail":
-      return "close-circle";
-    case "system":
-      return "notification";
-    case "points":
-      return "gift";
-    default:
-      return "notification";
-  }
-};
-
-// 获取图标容器背景色
-const getIconBackgroundColor = (type: MessageType): string => {
-  switch (type) {
-    case "match_success":
-      return "#E8F5E9"; // 浅绿色
-    case "match_fail":
-      return "#FFF3E0"; // 浅橙色
-    case "match_status":
-      return "#EBF4FF"; // 浅蓝色
-    default:
-      return "#EBF4FF"; // 默认浅蓝色
-  }
-};
-
-// 获取图标颜色
-const getIconColor = (type: MessageType): string => {
-  switch (type) {
-    case "match_success":
-      return "#67C23A"; // 绿色
-    case "match_fail":
-      return "#E6A23C"; // 橙色
-    case "match_status":
-      return "#2B56F6"; // 蓝色
-    default:
-      return "#2B56F6"; // 默认蓝色
-  }
-};
-
-// 模拟消息数据
-const messageList: MessageItem[] = [
-  {
-    id: "0",
-    type: "match_status",
-    title: "匹配状态通知",
-    content: "当前匹配的机构暂时无法办理，我们将您的需求上传至公海继续为您匹配",
-    time: new Date(Date.now() - 5 * 60 * 1000), // 5分钟前
-    confirmButtonText: "同意",
-    cancelButtonText: "不同意",
-  },
-  {
-    id: "1",
-    type: "match_success",
-    title: "匹配成功通知",
-    content:
-      "恭喜您！您的贷款需求已成功匹配到合适的产品，请尽快前往匹配页查看详情并进行下一步操作。",
-    time: new Date(Date.now() - 10 * 60 * 1000), // 10分钟前
-    buttonText: "前往匹配页面",
-  },
-  {
-    id: "2",
-    type: "match_fail",
-    title: "匹配失败通知",
-    content:
-      "很抱歉，目前没有匹配到适合您的贷款产品。您可以点击查看详情，了解具体原因及后续建议。",
-    time: new Date(Date.now() - 25 * 60 * 1000), // 25分钟前
-    buttonText: "查看详情",
-  },
-  {
-    id: "3",
-    type: "system",
-    title: "系统通知",
-    content: "您的贷款申请已提交，正在等待系统匹配适合的产品，请耐心等待。",
-    time: new Date(Date.now() - 24 * 60 * 60 * 1000 - 2 * 60 * 60 * 1000), // 昨天
-  },
-  {
-    id: "4",
-    type: "points",
-    title: "积分到账通知",
-    content: "您邀请的好友已成功为您助力,获得100积分奖励,已存入您的帐户。",
-    time: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3天前
-  },
-];
-
-export default function MessageScreen() {
-  const router = useRouter();
-  const [waitingModalVisible, setWaitingModalVisible] = useState(false);
-  const [productModalVisible, setProductModalVisible] = useState(false);
-
-  // 处理按钮点击
-  const handleButtonPress = (type: string, action?: "confirm" | "cancel") => {
-    // 处理状态通知的双按钮情况
-    if (type === "match_status") {
-      if (action === "confirm") {
-        // 同意操作 - 打开等待模态框
-        setWaitingModalVisible(true);
-      } else if (action === "cancel") {
-        // 不同意操作 - 打开选择其他产品模态框
-        setProductModalVisible(true);
-      }
-      return;
-    }
-
-    // 处理原有的单按钮情况
-    if (type === "match_fail") {
-      router.push("/result/fail");
-    } else {
-      router.push("/result/success");
-    }
-  };
-
-  // 处理等待模态框关闭
-  const handleWaitingModalClose = () => {
-    setWaitingModalVisible(false);
-    // 可以在这里添加模态框关闭后的逻辑
-  };
-
-  // 处理产品模态框关闭
-  const handleProductModalClose = () => {
-    setProductModalVisible(false);
-    // 导航到产品大全页面
-    router.push("/(home)/product");
-  };
+export default () => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  // 模拟消息数据
+  const messages = [
+    {
+      id: 1,
+      icon: "bank",
+      title: "诚信金融服务有限公司",
+      time: "15:30",
+      content: "您好！已为您匹配到企业贷产品...",
+      unread: 1,
+    },
+    {
+      id: 2,
+      icon: "bank",
+      title: "恒通贷款服务中心",
+      time: "昨天",
+      content: "您的贷款资料已收到，正在审核中",
+      unread: 0,
+    },
+    {
+      id: 3,
+      icon: "notification",
+      title: "快融呗官方客服",
+      time: "08:15",
+      content: "您的账户已完成实名认证，可申...",
+      unread: 0,
+    },
+    {
+      id: 4,
+      icon: "bank",
+      title: "诚信金融服务有限公司诚信金融服务有限公司",
+      time: "15:30",
+      content: "您好！已为您匹配到企业贷产品...",
+      unread: 1,
+    },
+    {
+      id: 5,
+      icon: "notification",
+      title: "快融呗官方客服",
+      time: "08:15",
+      content: "您的账户已完成实名认证，可申...",
+      unread: 0,
+    },
+    {
+      id: 6,
+      icon: "bank",
+      title: "诚信金融服务有限公司",
+      time: "15:30",
+      content: "您好！已为您匹配到企业贷产品...",
+      unread: 1,
+    },
+    {
+      id: 7,
+      icon: "bank",
+      title: "诚信金融服务有限公司",
+      time: "15:30",
+      content: "您好！已为您匹配到企业贷产品...",
+      unread: 1,
+    },
+    {
+      id: 8,
+      icon: "notification",
+      title: "快融呗官方客服",
+      time: "08:15",
+      content: "您的账户已完成实名认证，可申...",
+      unread: 0,
+    },
+    {
+      id: 9,
+      icon: "bank",
+      title: "诚信金融服务有限公司",
+      time: "15:30",
+      content: "您好！已为您匹配到企业贷产品...",
+      unread: 1,
+    },
+    {
+      id: 10,
+      icon: "bank",
+      title: "诚信金融服务有限公司",
+      time: "15:30",
+      content: "您好！已为您匹配到企业贷产品...",
+      unread: 1,
+    },
+  ];
 
   return (
     <>
-      <PageHeader title="消息通知" />
+      {/* 页面头部 */}
+      <PageHeader title="消息中心">
+        <Appbar.Action
+          icon={() => (
+            <AntDesign
+              name="clear"
+              size={20}
+              color={isDark ? "#ffffff" : "#1a1a1a"}
+            />
+          )}
+          onPress={() => {}}
+        />
+      </PageHeader>
+
+      {/* 搜索框 */}
+      <ThemedView style={styles.searchContainer}>
+        <FontAwesome5
+          name="search"
+          size={18}
+          color="#999999"
+          style={styles.searchIcon}
+        />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="搜索机构或消息内容"
+          placeholderTextColor="#999999"
+        />
+      </ThemedView>
+
+      {/* 消息列表 */}
       <ScrollView
         style={globalStyles.globalContainer}
-        showsVerticalScrollIndicator={false}
         contentContainerStyle={globalStyles.globalPaddingBottom}
+        showsVerticalScrollIndicator={false}
       >
-        {messageList.map((message, index) => {
-          const cardStyles: ViewStyle = {
-            ...(index > 0 ? styles.cardMargin : {}),
-            ...(message.type === "match_success" ? styles.greenBorder : {}),
-            ...(message.type === "match_fail" ? styles.orangeBorder : {}),
-            ...(message.type === "match_status" ? styles.blueBorder : {}),
-          };
-
-          return (
-            <ThemedCard key={message.id} style={cardStyles}>
-              <View style={styles.messageContainer}>
-                {/* 左侧图标 */}
-                <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: getIconBackgroundColor(message.type) },
-                  ]}
-                >
-                  <AntDesign
-                    name={getMessageIcon(message.type) as any}
-                    size={24}
-                    color={getIconColor(message.type)}
-                  />
-                </View>
-
-                {/* 右侧内容 */}
-                <View style={styles.contentContainer}>
-                  {/* 标题和时间行 */}
-                  <View style={styles.titleRow}>
-                    <ThemedText style={styles.messageTitle}>
-                      {message.title}
-                    </ThemedText>
-                    <ThemedText style={styles.messageTime}>
-                      {formatTime(message.time)}
-                    </ThemedText>
+        {messages.map((message) => (
+          <Link
+            key={message.id}
+            href={{
+              pathname: "/message/chat",
+              params: {
+                id: message.id,
+                name: message.title,
+              },
+            }}
+            asChild
+          >
+            <Pressable>
+              <ThemedCard style={styles.messageItem}>
+                <View style={styles.messageHeader}>
+                  <View style={styles.iconContainer}>
+                    <AntDesign
+                      name={message.icon as any}
+                      size={24}
+                      color={customColors.primary}
+                    />
                   </View>
 
-                  {/* 消息内容 */}
-                  <ThemedText style={styles.messageContent}>
-                    {message.content}
-                  </ThemedText>
-
-                  {/* 匹配状态通知的双按钮 */}
-                  {message.type === "match_status" && (
-                    <View style={styles.buttonGroup}>
-                      <TouchableOpacity
-                        style={styles.confirmButton}
-                        activeOpacity={0.8}
-                        onPress={() =>
-                          handleButtonPress(message.type, "confirm")
-                        }
-                      >
-                        <ThemedText style={styles.confirmButtonText}>
-                          {message.confirmButtonText}
-                        </ThemedText>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.cancelButton}
-                        activeOpacity={0.8}
-                        onPress={() =>
-                          handleButtonPress(message.type, "cancel")
-                        }
-                      >
-                        <ThemedText style={styles.cancelButtonText}>
-                          {message.cancelButtonText}
-                        </ThemedText>
-                      </TouchableOpacity>
-                    </View>
-                  )}
-
-                  {/* 匹配成功/失败时的单按钮 */}
-                  {(message.type === "match_success" ||
-                    message.type === "match_fail") && (
-                    <TouchableOpacity
-                      style={styles.actionButton}
-                      activeOpacity={0.8}
-                      onPress={() => handleButtonPress(message.type)}
-                    >
-                      <AntDesign
-                        name={
-                          message.type === "match_success"
-                            ? "arrow-right"
-                            : "eye"
-                        }
-                        size={14}
-                        color={customColors.primary}
-                      />
-                      <ThemedText style={styles.actionButtonText}>
-                        {message.buttonText}
+                  <View style={globalStyles.globalContainer}>
+                    <View style={styles.messageTitleRow}>
+                      <ThemedText style={styles.messageTitle}>
+                        {message.title}
                       </ThemedText>
-                    </TouchableOpacity>
-                  )}
+                      <ThemedText style={styles.messageTime}>
+                        {message.time}
+                      </ThemedText>
+                    </View>
+                    <View style={styles.messageList}>
+                      <ThemedText style={styles.messageText}>
+                        {message.content}
+                      </ThemedText>
+                      {message.unread > 0 && <Badge>51</Badge>}
+                    </View>
+                  </View>
                 </View>
-              </View>
-            </ThemedCard>
-          );
-        })}
+              </ThemedCard>
+            </Pressable>
+          </Link>
+        ))}
       </ScrollView>
-
-      {/* 等待提示模态框 */}
-      <ToastModal
-        visible={waitingModalVisible}
-        onConfirm={handleWaitingModalClose}
-        onCancel={() => setWaitingModalVisible(false)}
-      >
-        <View style={ToastModalChildrenStyle.modalIconContainer}>
-          <AntDesign name="clock-circle" size={48} color="#2B56F6" />
-        </View>
-        <ThemedText style={ToastModalChildrenStyle.modalTitle}>
-          请您耐心等待
-        </ThemedText>
-        <ThemedText style={ToastModalChildrenStyle.modalContent}>
-          我们已将您的需求上传至公海，会持续为您匹配合适的机构
-        </ThemedText>
-      </ToastModal>
-
-      {/* 选择其他产品模态框 */}
-      <ToastModal
-        visible={productModalVisible}
-        onConfirm={handleProductModalClose}
-        onCancel={() => setProductModalVisible(false)}
-        confirmText="前往产品大全"
-      >
-        <View style={ToastModalChildrenStyle.modalIconContainer}>
-          <AntDesign name="product" size={48} color="#2B56F6" />
-        </View>
-        <ThemedText style={ToastModalChildrenStyle.modalTitle}>
-          选择其他产品
-        </ThemedText>
-        <ThemedText style={ToastModalChildrenStyle.modalContent}>
-          请前往APP产品大全选择产品
-        </ThemedText>
-      </ToastModal>
     </>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  cardMargin: {
-    marginTop: 12,
-  },
-  messageContainer: {
+  searchContainer: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
+    alignItems: "center",
+    margin: 10,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    height: 40,
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+  },
+  messageItem: {
+    marginHorizontal: 10,
+    marginVertical: 5,
+    padding: 10,
+    borderRadius: 10,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  messageHeader: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
+    marginRight: 15,
   },
-  contentContainer: {
+  messageContent: {
     flex: 1,
-    gap: 8,
   },
-  titleRow: {
+  messageTitleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 5,
   },
   messageTitle: {
     fontSize: 16,
-    fontWeight: "600",
-    flex: 1,
+    fontWeight: "bold",
+    width: "80%",
   },
   messageTime: {
     fontSize: 12,
-    marginLeft: 8,
   },
-  messageContent: {
+  messageText: {
     fontSize: 14,
-    lineHeight: 20,
   },
-  greenBorder: {
-    borderLeftColor: "#67C23A",
-    borderLeftWidth: 4,
-    paddingLeft: 10,
-  },
-  orangeBorder: {
-    borderLeftColor: "#E6A23C",
-    borderLeftWidth: 4,
-    paddingLeft: 10,
-  },
-  blueBorder: {
-    borderLeftColor: customColors.primary,
-    borderLeftWidth: 4,
-    paddingLeft: 10,
-  },
-  actionButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-start",
-    gap: 4,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: customColors.primary,
-    color: customColors.primary,
-    marginTop: 4,
-  },
-  actionButtonText: {
-    fontSize: 12,
-    color: customColors.primary,
-    fontWeight: "500",
-  },
-  buttonGroup: {
+  messageList: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 12,
-    marginTop: 8,
-  },
-  confirmButton: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 4,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: customColors.primary,
-  },
-  confirmButtonText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: customColors.primary,
-  },
-  cancelButton: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 4,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: customColors.onErrorContainer,
-  },
-  cancelButtonText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: customColors.onErrorContainer,
   },
 });

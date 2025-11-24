@@ -1,6 +1,6 @@
 import globalStyles from "@/components/styles/globalStyles";
 import { ThemedText } from "@/components/ui";
-import { customColors } from "@/constants/theme";
+import { Colors, customColors } from "@/constants/theme";
 import { imageCodeApi, sendLoginAPi, smsCodeApi, userInfoApi } from "@/service";
 import { useAuthActions, useToastActions } from "@/store/hooks";
 import { setToken } from "@/utils/token";
@@ -10,12 +10,16 @@ import { Controller, useForm } from "react-hook-form";
 import {
   BackHandler,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
+  useColorScheme,
 } from "react-native";
 import {
   ActivityIndicator,
@@ -24,12 +28,14 @@ import {
   HelperText,
   TextInput,
 } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // 表单数据类型
 interface LoginFormData {
   phone: string;
   code: string;
   smsCode: string;
+  inviteCode?: string;
 }
 // 验证规则
 const validationRules = {
@@ -51,25 +57,31 @@ const validationRules = {
     },
   },
 };
+type Theme = keyof typeof Colors;
+
 export default function LoginScreen() {
   const router = useRouter();
   const { redirect } = useLocalSearchParams<{ redirect?: string }>();
   const { login } = useAuthActions();
   const { showInfo } = useToastActions();
+  const inset = useSafeAreaInsets();
+  const theme = useColorScheme() as Theme;
+  const [isRegister, setIsRegister] = useState(false);
   // React Hook Form
   const {
     control,
     handleSubmit,
     getValues,
-    setValue,
     formState: { errors, isValid },
     trigger,
+    clearErrors,
   } = useForm<LoginFormData>({
     mode: "all",
     defaultValues: {
       phone: "",
       code: "",
       smsCode: "",
+      inviteCode: "",
     },
   });
   useEffect(() => {
@@ -86,6 +98,11 @@ export default function LoginScreen() {
     );
     return () => backHandler.remove();
   }, [redirect]);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState<boolean>(false);
+  useEffect(() => {
+    Keyboard.addListener("keyboardDidShow", () => setIsKeyboardVisible(true));
+    Keyboard.addListener("keyboardDidHide", () => setIsKeyboardVisible(false));
+  }, []);
   // 其他状态
   const [captchaId, setCaptchaId] = useState("");
   const [loading, setLoading] = useState(false);
@@ -170,6 +187,7 @@ export default function LoginScreen() {
         grantType: "h5sms",
         tenantId: "000000",
         clientId: process.env.EXPO_PUBLIC_CLIENT_ID,
+        inviteCode: data.inviteCode,
       });
 
       // 先存储 token
@@ -186,178 +204,239 @@ export default function LoginScreen() {
     }
   });
 
+  const switchRegister = () => {
+    if (!isValid) {
+      clearErrors();
+    }
+
+    setIsRegister(!isRegister);
+  };
+
   return (
-    <ScrollView style={[globalStyles.globalContainer, styles.page]}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: Colors[theme as Theme].background,
+      }}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={globalStyles.globalContainer}
+        keyboardVerticalOffset={inset.top}
+        enabled={isKeyboardVisible}
       >
-        {/* 标题区域 */}
-        <View>
-          <View style={styles.headerContainer}>
-            <Avatar.Text size={96} label="融" />
-          </View>
+        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+          <ScrollView style={[globalStyles.globalContainer, styles.page]}>
+            {/* 标题区域 */}
 
-          {/* 登录账号 */}
-          <View style={styles.inputContainer}>
-            <Controller
-              control={control}
-              name="phone"
-              rules={validationRules.phone}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <>
-                  <TextInput
-                    label="登录账号 *"
-                    placeholder="请输入手机号"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    keyboardType="number-pad"
-                    autoCorrect={false}
-                    mode="outlined"
-                    error={!!errors.phone}
-                  />
-                  <HelperText type="error" visible={!!errors.phone}>
-                    {errors?.phone?.message as string}
-                  </HelperText>
-                </>
-              )}
-            />
-          </View>
+            <View style={styles.headerContainer}>
+              <Avatar.Text size={96} label="融" />
+            </View>
 
-          {/* 图像验证码 */}
-          <View style={styles.inputContainer}>
-            <View style={styles.captchaContainer}>
+            {/* 登录账号 */}
+            <View>
               <Controller
                 control={control}
-                name="code"
-                rules={validationRules.code}
+                name="phone"
+                rules={validationRules.phone}
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    label="图像验证码 *"
-                    placeholder="请输入验证码"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    keyboardType="number-pad"
-                    maxLength={4}
-                    mode="outlined"
-                    error={!!errors.code}
-                    style={styles.captchaInput}
-                  />
+                  <>
+                    <TextInput
+                      label="登录账号 *"
+                      placeholder="请输入手机号"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      keyboardType="number-pad"
+                      autoCorrect={false}
+                      mode="outlined"
+                      error={!!errors.phone}
+                    />
+                    <HelperText type="error" visible={!!errors.phone}>
+                      {errors?.phone?.message as string}
+                    </HelperText>
+                  </>
                 )}
               />
-              <TouchableOpacity
-                style={styles.captchaImageContainer}
-                onPress={getImageCaptcha}
-                activeOpacity={0.8}
-              >
-                {imageCaptchaLoading ? (
-                  <ActivityIndicator size="small" />
-                ) : captchaImage ? (
-                  <Image
-                    source={{ uri: captchaImage }}
-                    style={styles.captchaImage}
-                    resizeMode="contain"
-                  />
-                ) : (
-                  <ThemedText style={styles.captchaPlaceholder}>
-                    点击获取
-                  </ThemedText>
-                )}
-              </TouchableOpacity>
             </View>
-            <HelperText type="error" visible={!!errors.code}>
-              {errors?.code?.message as string}
-            </HelperText>
-          </View>
 
-          {/* 短信验证码 */}
-          <View style={styles.inputContainer}>
-            <View style={styles.smsContainer}>
+            {/* 图像验证码 */}
+            <View>
+              <View style={styles.captchaContainer}>
+                <Controller
+                  control={control}
+                  name="code"
+                  rules={validationRules.code}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      label="图像验证码 *"
+                      placeholder="请输入验证码"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      keyboardType="number-pad"
+                      maxLength={4}
+                      mode="outlined"
+                      error={!!errors.code}
+                      style={styles.captchaInput}
+                    />
+                  )}
+                />
+                <TouchableOpacity
+                  style={styles.captchaImageContainer}
+                  onPress={getImageCaptcha}
+                  activeOpacity={0.8}
+                >
+                  {imageCaptchaLoading ? (
+                    <ActivityIndicator size="small" />
+                  ) : captchaImage ? (
+                    <Image
+                      source={{ uri: captchaImage }}
+                      style={styles.captchaImage}
+                      resizeMode="contain"
+                    />
+                  ) : (
+                    <ThemedText style={styles.captchaPlaceholder}>
+                      点击获取
+                    </ThemedText>
+                  )}
+                </TouchableOpacity>
+              </View>
+              <HelperText type="error" visible={!!errors.code}>
+                {errors?.code?.message as string}
+              </HelperText>
+            </View>
+
+            {/* 短信验证码 */}
+            <View>
+              <View style={styles.smsContainer}>
+                <Controller
+                  control={control}
+                  name="smsCode"
+                  rules={validationRules.smsCode}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      label="短信验证码 *"
+                      placeholder="请输入短信验证码"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      keyboardType="number-pad"
+                      maxLength={6}
+                      mode="outlined"
+                      error={!!errors.smsCode}
+                      style={styles.smsInput}
+                    />
+                  )}
+                />
+                <Button
+                  mode="outlined"
+                  onPress={getSmsCode}
+                  disabled={smsCountdown > 0 || smsLoading}
+                  loading={smsLoading}
+                  style={styles.smsButton}
+                >
+                  {smsCountdown > 0 ? `${smsCountdown}s` : "获取验证码"}
+                </Button>
+              </View>
+              <HelperText type="error" visible={!!errors.smsCode}>
+                {errors?.smsCode?.message as string}
+              </HelperText>
+            </View>
+
+            {isRegister ? (
               <Controller
                 control={control}
-                name="smsCode"
-                rules={validationRules.smsCode}
+                name="inviteCode"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <TextInput
-                    label="短信验证码 *"
-                    placeholder="请输入短信验证码"
+                    label="邀请码"
+                    placeholder="请输入邀请码"
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
                     keyboardType="number-pad"
                     maxLength={6}
                     mode="outlined"
-                    error={!!errors.smsCode}
+                    error={!!errors.inviteCode}
                     style={styles.smsInput}
                   />
                 )}
               />
+            ) : (
+              <></>
+            )}
+            {/* 登录按钮 */}
+            <View style={styles.buttonContainer}>
               <Button
                 mode="outlined"
-                onPress={getSmsCode}
-                disabled={smsCountdown > 0 || smsLoading}
-                loading={smsLoading}
-                style={styles.smsButton}
+                onPress={handleLogin}
+                loading={loading}
+                disabled={loading}
+                style={{ borderColor: customColors.primary }}
               >
-                {smsCountdown > 0 ? `${smsCountdown}s` : "获取验证码"}
+                {isRegister ? "注册/登录" : "登录"}
               </Button>
             </View>
-            <HelperText type="error" visible={!!errors.smsCode}>
-              {errors?.smsCode?.message as string}
-            </HelperText>
-          </View>
-
-          {/* 登录按钮 */}
-          <View style={styles.buttonContainer}>
-            <Button
-              mode="outlined"
-              onPress={handleLogin}
-              loading={loading}
-              disabled={loading}
+            <View style={styles.agreementContainer}>
+              {isRegister ? (
+                <ThemedText style={styles.agreementText}>
+                  若您已经有账号，请点击
+                  <Pressable onPress={switchRegister}>
+                    <ThemedText style={styles.linkText}>
+                      " 登录账号 "
+                    </ThemedText>
+                  </Pressable>
+                </ThemedText>
+              ) : (
+                <ThemedText style={styles.agreementText}>
+                  若您还没有账号，请点击
+                  <Pressable onPress={switchRegister}>
+                    <ThemedText style={styles.linkText}>
+                      " 注册账号 "
+                    </ThemedText>
+                  </Pressable>
+                </ThemedText>
+              )}
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+        {/* 用户协议与隐私政策 */}
+        <View style={styles.agreementContainer}>
+          <ThemedText style={styles.agreementText}>
+            登录即表示您同意
+            <Link
+              href={{
+                pathname: "/doc",
+                params: {
+                  name: "sqxy",
+                },
+              }}
+              asChild
             >
-              登录
-            </Button>
-          </View>
-
-          {/* 用户协议与隐私政策 */}
-          <View style={styles.agreementContainer}>
-            <ThemedText style={styles.agreementText}>
-              登录即表示您同意
-              <Link
-                href={{
-                  pathname: "/doc",
-                  params: {
-                    name: "sqxy",
-                  },
-                }}
-                asChild
-              >
-                <ThemedText style={styles.linkText}>《用户协议》</ThemedText>
-              </Link>
-              和
-              <Link
-                href={{
-                  pathname: "/doc",
-                  params: {
-                    name: "yszc",
-                  },
-                }}
-                asChild
-              >
-                <ThemedText style={styles.linkText}>《隐私政策》</ThemedText>
-              </Link>
-            </ThemedText>
-          </View>
+              <ThemedText style={styles.linkText}>《用户协议》</ThemedText>
+            </Link>
+            和
+            <Link
+              href={{
+                pathname: "/doc",
+                params: {
+                  name: "yszc",
+                },
+              }}
+              asChild
+            >
+              <ThemedText style={styles.linkText}>《隐私政策》</ThemedText>
+            </Link>
+          </ThemedText>
         </View>
       </KeyboardAvoidingView>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   page: {
-    backgroundColor: "rgb(245, 247, 250)",
     flex: 1,
     paddingVertical: 100,
     paddingHorizontal: 20,
@@ -382,9 +461,6 @@ const styles = StyleSheet.create({
   formCard: {
     marginBottom: 24,
     elevation: 2,
-  },
-  inputContainer: {
-    marginBottom: 16,
   },
   captchaContainer: {
     flexDirection: "row",
@@ -422,10 +498,14 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   buttonContainer: {
-    marginTop: 16,
-    marginBottom: 16,
+    marginVertical: 16,
   },
-
+  inviteCodeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 4,
+  },
   agreementContainer: {
     alignItems: "center",
     paddingHorizontal: 16,
@@ -440,5 +520,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     fontSize: 14,
     color: customColors.primary,
+    textDecorationLine: "underline",
   },
 });

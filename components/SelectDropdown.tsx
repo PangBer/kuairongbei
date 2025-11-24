@@ -1,5 +1,11 @@
 import React, { useMemo } from "react";
-import { Modal, ScrollView, TouchableOpacity, View } from "react-native";
+import {
+  Modal,
+  ScrollView,
+  StyleProp,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { HelperText, TextInput } from "react-native-paper";
 import { useSelectModal } from "./hooks/useSelectModal";
 import globalStyles from "./styles/globalStyles";
@@ -28,6 +34,8 @@ interface SelectDropdownProps {
   errorMessage?: string; // 错误提示信息
   required?: boolean; // 是否必填
   showClear?: boolean; // 是否显示清除按钮，默认为 true
+  style?: StyleProp<any>; // 自定义样式
+  showError?: boolean; // 是否显示错误提示，默认为 true
 }
 
 /**
@@ -45,6 +53,8 @@ export default function SelectDropdown({
   errorMessage,
   required = false,
   showClear = true,
+  style = {},
+  showError = true,
 }: SelectDropdownProps) {
   // 弹窗状态管理
   const { visible, showModal, hideModal } = useSelectModal();
@@ -87,6 +97,7 @@ export default function SelectDropdown({
           disabled={disabled}
           mode="outlined"
           error={!!error}
+          style={style}
           right={
             <TextInput.Icon
               icon="chevron-down"
@@ -95,9 +106,13 @@ export default function SelectDropdown({
             />
           }
         />
-        <HelperText type="error" visible={!!error}>
-          {errorMessage as string}
-        </HelperText>
+        {showError ? (
+          <HelperText type="error" visible={!!error}>
+            {errorMessage as string}
+          </HelperText>
+        ) : (
+          <></>
+        )}
       </TouchableOpacity>
 
       {/* 选择弹窗 */}

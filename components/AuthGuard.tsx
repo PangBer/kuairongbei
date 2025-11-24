@@ -1,7 +1,7 @@
 import { useAuth, useAuthActions } from "@/store/hooks";
 import { usePathname, useRouter } from "expo-router";
 import React, { useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet } from "react-native";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -23,32 +23,13 @@ export function AuthGuard({ children, requireAuth = true }: AuthGuardProps) {
 
   // 处理重定向逻辑
   useEffect(() => {
-    if (requireAuth && !isAuthenticated && !isLoading) {
+    if (requireAuth && !isAuthenticated && !isLoading && pathname !== "/") {
       router.replace({
         pathname: "/login",
         params: { redirect: pathname },
       });
     }
   }, [requireAuth, isAuthenticated, isLoading, pathname]);
-
-  // 加载中状态
-  // if (isLoading) {
-  //   return (
-  //     <View style={styles.loadingContainer}>
-  //       <ActivityIndicator size="large" color={customColors.primary} />
-  //       <Text style={styles.loadingText}>加载中...</Text>
-  //     </View>
-  //   );
-  // }
-
-  // 需要登录但未登录
-  if (requireAuth && !isAuthenticated) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.redirectText}>重定向到登录页面...</Text>
-      </View>
-    );
-  }
 
   return <>{children}</>;
 }
