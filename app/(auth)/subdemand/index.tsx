@@ -1,3 +1,4 @@
+import KeyboardGuard from "@/components/KeyboardGuard";
 import {
   RenderFileUpload,
   RenderMultiLevelSelect,
@@ -33,22 +34,12 @@ import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import {
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { Button } from "react-native-paper";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function DemandScreen() {
-  const { userInfo } = useAuth();
+  const { userInfo, isAuthenticated } = useAuth();
   const { showSuccess } = useToastActions();
-  const inset = useSafeAreaInsets();
   // React Hook Form
   const { control, handleSubmit, getValues, setValue } =
     useForm<DemandFormData>({
@@ -69,11 +60,6 @@ export default function DemandScreen() {
   const [grade, setGrade] = useState<keyof typeof gradeScore>(5);
   const [loading, setLoading] = useState<boolean>(false);
   const [confirmVisible, setConfirmVisible] = useState<boolean>(false);
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState<boolean>(false);
-  useEffect(() => {
-    Keyboard.addListener("keyboardDidShow", () => setIsKeyboardVisible(true));
-    Keyboard.addListener("keyboardDidHide", () => setIsKeyboardVisible(false));
-  }, []);
 
   useEffect(() => {
     fetchMultipleDicts([
@@ -82,8 +68,10 @@ export default function DemandScreen() {
       "citys_collect",
       "crm_career",
     ]);
-    getSubDemadDetal();
   }, [fetchMultipleDicts]);
+  useEffect(() => {
+    getSubDemadDetal();
+  }, []);
 
   const getSubDemadDetal = async () => {
     try {
@@ -277,16 +265,8 @@ export default function DemandScreen() {
 
   return (
     <View style={globalStyles.globalContainer}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={globalStyles.globalContainer}
-        keyboardVerticalOffset={inset.top}
-        enabled={isKeyboardVisible}
-      >
-        <TouchableWithoutFeedback
-          style={globalStyles.globalContainer}
-          onPress={Keyboard.dismiss}
-        >
+      <KeyboardGuard
+        touchableComponent={
           <ScrollView
             style={globalStyles.globalContainer}
             showsVerticalScrollIndicator={false}
@@ -584,39 +564,41 @@ export default function DemandScreen() {
               />
             </ThemedView>
           </ScrollView>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-      <ThemedView style={styles.footerContainer}>
-        {/* Points Information Row */}
-        <View style={styles.pointsInfoRow}>
-          <View style={styles.pointsInfoLeft}>
-            <Ionicons name="star" size={20} color="#FF9500" />
-            <ThemedText style={styles.pointsInfoText}>
-              已获得{totalScore}积分 (价值{totalScore / 10}元)
+        }
+      >
+        <ThemedView style={styles.footerContainer}>
+          {/* Points Information Row */}
+          <View style={styles.pointsInfoRow}>
+            <View style={styles.pointsInfoLeft}>
+              <Ionicons name="star" size={20} color="#FF9500" />
+              <ThemedText style={styles.pointsInfoText}>
+                已获得{totalScore}积分 (价值{totalScore / 10}元)
+              </ThemedText>
+            </View>
+            <ThemedText style={styles.pointsConversionText}>
+              10积分=1元
             </ThemedText>
           </View>
-          <ThemedText style={styles.pointsConversionText}>
-            10积分=1元
+
+          {/* Submit Button */}
+          <Button
+            mode="contained"
+            onPress={submitDemand}
+            loading={loading}
+            disabled={loading}
+          >
+            {cantOperate ? "查看我的申请进度" : "提交资质信息"}
+          </Button>
+
+          {/* Privacy Notice */}
+          <ThemedText style={styles.privacyNotice}>
+            {cantOperate
+              ? "您的需求已经提交，正在处理中，可以前往查看申请进度"
+              : "提交即表示您信息真实性负责,我们将对您的信息严格保密"}
           </ThemedText>
-        </View>
+        </ThemedView>
+      </KeyboardGuard>
 
-        {/* Submit Button */}
-        <Button
-          mode="contained"
-          onPress={submitDemand}
-          loading={loading}
-          disabled={loading}
-        >
-          {cantOperate ? "查看我的申请进度" : "提交资质信息"}
-        </Button>
-
-        {/* Privacy Notice */}
-        <ThemedText style={styles.privacyNotice}>
-          {cantOperate
-            ? "您的需求已经提交，正在处理中，可以前往查看申请进度"
-            : "提交即表示您信息真实性负责,我们将对您的信息严格保密"}
-        </ThemedText>
-      </ThemedView>
       {/* 等待提示模态框 */}
       <ToastModal
         visible={confirmVisible}

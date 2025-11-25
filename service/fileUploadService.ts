@@ -257,7 +257,7 @@ export class FileUploadService {
     fileId: string
   ): Promise<{ success: boolean; message: string }> {
     try {
-      const response = await req.delete("/h5/app/oss/" + fileId);
+      const response = await req.delete("/mobile/oss/" + fileId);
       if (response.code !== 200) {
         throw new Error(`HTTP error! status: ${response.code}`);
       }

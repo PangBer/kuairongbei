@@ -30,7 +30,8 @@ export const sendLoginAPi = (data: any) =>
  * @returns {Promise<any>}
  * @description 获取用户信息
  */
-export const userInfoApi = () => req.get("/h5/collectorUser/appUserDetail");
+export const userInfoApi = () =>
+  req.get("/mobile/collectorUser/mobileUserDetail");
 
 /**
  *
@@ -39,7 +40,7 @@ export const userInfoApi = () => req.get("/h5/collectorUser/appUserDetail");
  * @description 获取城市列表
  */
 export const citysApi = (data: any) =>
-  req.get("/h5/app/area/appletTreeList", data);
+  req.get("/mobile/area/appletTreeList", data);
 
 /**
  *
@@ -48,4 +49,4 @@ export const citysApi = (data: any) =>
  * @description 获取字典列表
  */
 export const dictsApi = (dictType: string) =>
-  req.get("/h5/app/dict/data/type/" + dictType);
+  req.get("/mobile/dict/type/" + dictType);

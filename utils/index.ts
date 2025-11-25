@@ -40,3 +40,13 @@ export const getCitygGrade = (
     return 5;
   }
 };
+
+let currentPath = "/";
+
+export function setCurrentPath(path: string) {
+  currentPath = path;
+}
+
+export function getCurrentPath() {
+  return currentPath;
+}

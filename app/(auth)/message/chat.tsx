@@ -1,3 +1,4 @@
+import KeyboardGuard from "@/components/KeyboardGuard";
 import PageHeader from "@/components/PageHeader";
 import globalStyles from "@/components/styles/globalStyles";
 import { ThemedText, ThemedView } from "@/components/ui";
@@ -8,16 +9,11 @@ import { useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   FlatList,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 // 消息项组件
 const MessageItem = ({ item }: any) => {
   const isMe = item.sender === "me";
@@ -106,31 +102,15 @@ const messages = [
 ];
 export default () => {
   const { id, name } = useLocalSearchParams();
-  const inset = useSafeAreaInsets();
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const flatListRef = useRef<FlatList>(null);
   const [messageList, setMessageList] = useState<any[]>([]);
   useEffect(() => {
-    const showSub = Keyboard.addListener("keyboardDidShow", () => {
-      setIsKeyboardVisible(true);
-      const timeoutId = setTimeout(() => {
-        scrollToBottom(true);
-        clearTimeout(timeoutId);
-      }, 0);
-    });
-    const hideSub = Keyboard.addListener("keyboardDidHide", () =>
-      setIsKeyboardVisible(false)
-    );
     //  模拟接口请求
     setTimeout(() => {
       setMessageList(messages);
       setIsReady(true);
     }, 200);
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
   }, []);
   // ------- 首次渲染滚动到底 -------
   useEffect(() => {
@@ -164,13 +144,9 @@ export default () => {
         </View>
       </PageHeader>
       {/* 消息列表 */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={globalStyles.globalContainer}
-        keyboardVerticalOffset={inset.top}
-        enabled={isKeyboardVisible}
-      >
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+
+      <KeyboardGuard
+        touchableComponent={
           <FlatList
             ref={flatListRef}
             data={messageList}
@@ -181,7 +157,8 @@ export default () => {
             showsVerticalScrollIndicator={false}
             // onLayout={() => setIsReady(true)}
           />
-        </TouchableWithoutFeedback>
+        }
+      >
         {/* 输入框 */}
         <ThemedView style={styles.inputContainer}>
           <TextInput
@@ -193,7 +170,7 @@ export default () => {
             <Feather name="send" size={24} color="#ffffff" />
           </TouchableOpacity>
         </ThemedView>
-      </KeyboardAvoidingView>
+      </KeyboardGuard>
     </>
   );
 };

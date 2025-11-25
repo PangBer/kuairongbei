@@ -1,4 +1,5 @@
 import ExpandItem from "@/components/ExpandItem";
+import KeyboardGuard from "@/components/KeyboardGuard";
 import PageHeader from "@/components/PageHeader";
 import globalStyles from "@/components/styles/globalStyles";
 import { ThemedCard, ThemedText, ThemedView } from "@/components/ui";
@@ -14,13 +15,9 @@ import { useState } from "react";
 import {
   Alert,
   Image,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
   useColorScheme,
 } from "react-native";
@@ -177,15 +174,8 @@ export default function ProductDetailScreen() {
           onPress={() => {}}
         />
       </PageHeader>
-      <KeyboardAvoidingView
-        style={globalStyles.globalContainer}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={45}
-      >
-        <TouchableWithoutFeedback
-          style={globalStyles.globalContainer}
-          onPress={Keyboard.dismiss}
-        >
+      <KeyboardGuard
+        touchableComponent={
           <ScrollView
             style={[
               globalStyles.globalContainer,
@@ -477,8 +467,9 @@ export default function ProductDetailScreen() {
 
             {/* 底部间距 */}
           </ScrollView>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
+        }
+      />
+
       {/* 底部按钮 */}
       <ThemedView style={styles.footer}>
         <TouchableOpacity

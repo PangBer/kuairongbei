@@ -245,13 +245,13 @@ export const validationRules = {
 };
 
 export const submitDemandSave = async (data: DemandFormData) => {
-  return req.post("/h5/infoRecord/save", data);
+  return req.post("/mobile/infoRecord/save", data);
 };
 
 export const getDemandDetail = async () => {
-  return req.get(`/h5/infoRecord/recentRecode`);
+  return req.get(`/mobile/infoRecord/recentRecode`);
 };
 
 export const submitDemandToCommit = async (data: DemandFormData) => {
-  return req.post("/h5/infoRecord/customerToCommit", data);
+  return req.post("/mobile/infoRecord/customerToCommit", data);
 };

@@ -1,34 +1,34 @@
+import { myEmitter } from "@/app/doc";
+import KeyboardGuard from "@/components/KeyboardGuard";
 import globalStyles from "@/components/styles/globalStyles";
 import { ThemedText } from "@/components/ui";
 import { Colors, customColors } from "@/constants/theme";
 import { imageCodeApi, sendLoginAPi, smsCodeApi, userInfoApi } from "@/service";
 import { useAuthActions, useToastActions } from "@/store/hooks";
-import { setToken } from "@/utils/token";
+import { removeToken, setToken } from "@/utils/token";
+import { useEventListener } from "expo";
+import * as Network from "expo-network";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   BackHandler,
   Image,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
   useColorScheme,
 } from "react-native";
 import {
   ActivityIndicator,
-  Avatar,
   Button,
   HelperText,
   TextInput,
 } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+const Icon = require("@/assets/images/icon.png");
 
 // 表单数据类型
 interface LoginFormData {
@@ -42,8 +42,8 @@ const validationRules = {
   phone: {
     required: "请输入登录账号",
     pattern: {
-      value: /^(1[3-9]\d{9}|[^\s@]+@[^\s@]+\.[^\s@]+)$/,
-      message: "请输入正确的手机号或邮箱",
+      value: /^1[3-9]\d{9}$/,
+      message: "请输入正确的手机号",
     },
   },
   code: {
@@ -58,15 +58,25 @@ const validationRules = {
   },
 };
 type Theme = keyof typeof Colors;
-
 export default function LoginScreen() {
   const router = useRouter();
-  const { redirect } = useLocalSearchParams<{ redirect?: string }>();
+  const { redirect } = useLocalSearchParams<{
+    redirect?: string;
+  }>();
   const { login } = useAuthActions();
-  const { showInfo } = useToastActions();
+  const { showInfo, showError } = useToastActions();
   const inset = useSafeAreaInsets();
   const theme = useColorScheme() as Theme;
   const [isRegister, setIsRegister] = useState(false);
+  const [contract, setContract] = useState<{
+    ip: string;
+    time1: string;
+    time2: string;
+  }>({
+    ip: "",
+    time1: "",
+    time2: "",
+  });
   // React Hook Form
   const {
     control,
@@ -98,11 +108,19 @@ export default function LoginScreen() {
     );
     return () => backHandler.remove();
   }, [redirect]);
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState<boolean>(false);
-  useEffect(() => {
-    Keyboard.addListener("keyboardDidShow", () => setIsKeyboardVisible(true));
-    Keyboard.addListener("keyboardDidHide", () => setIsKeyboardVisible(false));
-  }, []);
+  useEventListener(myEmitter, "onBackData", (data: any) => {
+    if (data.check === "ok") {
+      setContract((pre: any) => {
+        if (data.name === "sqxy") {
+          pre.time1 = data.time;
+        } else if (data.name === "yszc") {
+          pre.time2 = data.time;
+        }
+        return pre;
+      });
+    }
+  });
+
   // 其他状态
   const [captchaId, setCaptchaId] = useState("");
   const [loading, setLoading] = useState(false);
@@ -113,8 +131,17 @@ export default function LoginScreen() {
 
   // 组件加载时获取图像验证码
   useEffect(() => {
+    getIpAddress();
     getImageCaptcha();
   }, []);
+
+  const getIpAddress = async () => {
+    const networkState = await Network.getIpAddressAsync();
+    setContract((pre: any) => {
+      pre.ip = networkState || "";
+      return pre;
+    });
+  };
 
   // 获取图像验证码
   const getImageCaptcha = async () => {
@@ -151,7 +178,7 @@ export default function LoginScreen() {
       startCountdown();
       // 开发环境下的验证码提示
       if (__DEV__) {
-        showInfo("短信验证码", response.data.response);
+        showInfo("短信验证码", response.data.response, 10000);
       }
     } catch (error) {
       // 获取短信验证码失败时弹出错误提示
@@ -177,14 +204,30 @@ export default function LoginScreen() {
 
   // 提交登录
   const handleLogin = handleSubmit(async (data) => {
+    const time = {
+      time1: contract.time1,
+      time2: contract.time2,
+    };
+    if (__DEV__) {
+      time.time1 = Date.now().toString();
+      time.time2 = Date.now().toString();
+    } else {
+      if (isRegister && (!contract.time1 || !contract.time2)) {
+        showError(
+          `请先阅读与同意${!contract.time1 ? "《用户协议》" : ""}${
+            !contract.time2 ? "《隐私政策》" : ""
+          }`
+        );
+        return;
+      }
+    }
     setLoading(true);
     try {
       // 模拟 API 调用
-
       const response = await sendLoginAPi({
         mobilePhone: data.phone,
         smsCode: data.smsCode,
-        grantType: "h5sms",
+        grantType: "app",
         tenantId: "000000",
         clientId: process.env.EXPO_PUBLIC_CLIENT_ID,
         inviteCode: data.inviteCode,
@@ -198,6 +241,7 @@ export default function LoginScreen() {
       const redirectPath = redirect || "/";
       router.replace(redirectPath as any);
     } catch (error) {
+      await removeToken();
       getImageCaptcha();
     } finally {
       setLoading(false);
@@ -214,25 +258,20 @@ export default function LoginScreen() {
 
   return (
     <View
-      style={{
-        flex: 1,
-        backgroundColor: Colors[theme as Theme].background,
-      }}
+      style={[
+        globalStyles.globalContainer,
+        {
+          backgroundColor: Colors[theme as Theme].background,
+        },
+      ]}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={globalStyles.globalContainer}
-        keyboardVerticalOffset={inset.top}
-        enabled={isKeyboardVisible}
-      >
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <KeyboardGuard
+        touchableComponent={
           <ScrollView style={[globalStyles.globalContainer, styles.page]}>
             {/* 标题区域 */}
-
             <View style={styles.headerContainer}>
-              <Avatar.Text size={96} label="融" />
+              <Image source={Icon} style={styles.logo} />
             </View>
-
             {/* 登录账号 */}
             <View>
               <Controller
@@ -259,7 +298,6 @@ export default function LoginScreen() {
                 )}
               />
             </View>
-
             {/* 图像验证码 */}
             <View>
               <View style={styles.captchaContainer}>
@@ -306,7 +344,6 @@ export default function LoginScreen() {
                 {errors?.code?.message as string}
               </HelperText>
             </View>
-
             {/* 短信验证码 */}
             <View>
               <View style={styles.smsContainer}>
@@ -343,7 +380,6 @@ export default function LoginScreen() {
                 {errors?.smsCode?.message as string}
               </HelperText>
             </View>
-
             {isRegister ? (
               <Controller
                 control={control}
@@ -383,33 +419,32 @@ export default function LoginScreen() {
                 <ThemedText style={styles.agreementText}>
                   若您已经有账号，请点击
                   <Pressable onPress={switchRegister}>
-                    <ThemedText style={styles.linkText}>
-                      " 登录账号 "
-                    </ThemedText>
+                    <ThemedText style={styles.linkText}>"登录账号"</ThemedText>
                   </Pressable>
                 </ThemedText>
               ) : (
                 <ThemedText style={styles.agreementText}>
                   若您还没有账号，请点击
                   <Pressable onPress={switchRegister}>
-                    <ThemedText style={styles.linkText}>
-                      " 注册账号 "
-                    </ThemedText>
+                    <ThemedText style={styles.linkText}>"注册账号"</ThemedText>
                   </Pressable>
                 </ThemedText>
               )}
             </View>
           </ScrollView>
-        </TouchableWithoutFeedback>
-        {/* 用户协议与隐私政策 */}
-        <View style={styles.agreementContainer}>
+        }
+      />
+      {/* 用户协议与隐私政策 */}
+      <View style={styles.agreementContainer}>
+        {isRegister ? (
           <ThemedText style={styles.agreementText}>
-            登录即表示您同意
+            请您查看并同意
             <Link
               href={{
                 pathname: "/doc",
                 params: {
                   name: "sqxy",
+                  check: "true",
                 },
               }}
               asChild
@@ -422,6 +457,7 @@ export default function LoginScreen() {
                 pathname: "/doc",
                 params: {
                   name: "yszc",
+                  check: "true",
                 },
               }}
               asChild
@@ -429,8 +465,10 @@ export default function LoginScreen() {
               <ThemedText style={styles.linkText}>《隐私政策》</ThemedText>
             </Link>
           </ThemedText>
-        </View>
-      </KeyboardAvoidingView>
+        ) : (
+          <></>
+        )}
+      </View>
     </View>
   );
 }
@@ -442,11 +480,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   logo: {
-    width: 60,
-    height: 60,
-    backgroundColor: "#0f40f5",
-    color: "#fff",
-    borderRadius: 10,
+    width: 80,
+    height: 80,
     justifyContent: "center",
     alignItems: "center",
   },

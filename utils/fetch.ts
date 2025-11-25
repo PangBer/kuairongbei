@@ -6,6 +6,7 @@ import {
   generateAesKey,
 } from "@/utils/crypto";
 import { router } from "expo-router";
+import { getCurrentPath } from "./index";
 import { getToken } from "./token";
 // 全局 Toast 管理器
 let globalToastActions: any = null;
@@ -113,9 +114,11 @@ const responseInterceptor = async (response: Response) => {
       if (globalClearAuthState) {
         globalClearAuthState();
       }
-
-      // 使用 expo-router 导航到登录页面
-      router.replace("/login");
+      const currentPath = getCurrentPath();
+      if (currentPath !== "/login") {
+        // 使用 expo-router 导航到登录页面
+        router.replace("/login");
+      }
     }
     // 显示业务错误 Toast
     showToast("error", "操作失败", data.msg || "请求处理失败");

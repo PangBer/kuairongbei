@@ -1,16 +1,22 @@
 import ToastContainer from "@/components/ToastContainer";
 import { customDarkTheme, customLightTheme } from "@/constants/theme";
 import { persistor, store } from "@/store";
+import { setCurrentPath } from "@/utils";
 import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
 import * as Linking from "expo-linking";
-import { router, Stack } from "expo-router";
+import { router, Stack, usePathname } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { StyleSheet, useColorScheme } from "react-native";
+import {
+  AppState,
+  AppStateStatus,
+  StyleSheet,
+  useColorScheme,
+} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Provider as PaperProvider } from "react-native-paper";
 import "react-native-reanimated";
@@ -26,36 +32,60 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const paperTheme = isDark ? customDarkTheme : customLightTheme;
+  const pathname = usePathname();
+  useEffect(() => {
+    setCurrentPath(pathname);
+  }, [pathname]);
 
   useEffect(() => {
-    const handleUrl = ({ url }: any) => {
-      let parsedUrl = url;
-      // 开发模式：提取真正目标 URL
-      if (__DEV__) {
-        try {
-          const u = new URL(url);
-          if (u.searchParams.has("url")) {
-            parsedUrl = decodeURIComponent(u?.searchParams?.get("url") || "");
-          }
-        } catch {}
-      }
-
-      const parsed = Linking.parse(parsedUrl);
-      // 跳转 invite 页面
-      if (parsed.path === "invite") {
-        router.navigate("/invite");
-      }
-      // 可以继续添加 profile/product/order 等路径
-    };
-
-    // // 冷启动 deep link
-    // Linking.getInitialURL().then((url) => url && handleUrl({ url }));
+    //  启动App
+    console.log("App 启动");
 
     // 后台唤醒 deep link
     const subscription = Linking.addEventListener("url", handleUrl);
+    const appStateSubscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
 
-    return () => subscription.remove();
+    return () => {
+      subscription.remove();
+      appStateSubscription.remove();
+    };
   }, []);
+
+  const handleAppStateChange = (nextState: AppStateStatus) => {
+    if (nextState === "active") {
+      // 从后台进入前台，处理 deep link
+      console.log("App 进入前台");
+    }
+
+    // 进入后台
+    if (nextState === "background") {
+      console.log("App 进入后台");
+    }
+  };
+
+  const handleUrl = ({ url }: any) => {
+    let parsedUrl = url;
+    // 开发模式：提取真正目标 URL
+    if (__DEV__) {
+      try {
+        const u = new URL(url);
+        if (u.searchParams.has("url")) {
+          parsedUrl = decodeURIComponent(u?.searchParams?.get("url") || "");
+        }
+      } catch {}
+    }
+
+    const parsed = Linking.parse(parsedUrl);
+    // 跳转 invite 页面
+    if (parsed.path === "invite") {
+      router.navigate("/invite");
+    } else if (parsed.path === "boost") {
+      router.navigate("/boost");
+    }
+  };
 
   return (
     <Provider store={store}>

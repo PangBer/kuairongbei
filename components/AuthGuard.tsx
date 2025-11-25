@@ -2,6 +2,7 @@ import { useAuth, useAuthActions } from "@/store/hooks";
 import { usePathname, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { StyleSheet } from "react-native";
+import { ThemedText } from "./ui";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -30,6 +31,11 @@ export function AuthGuard({ children, requireAuth = true }: AuthGuardProps) {
       });
     }
   }, [requireAuth, isAuthenticated, isLoading, pathname]);
+
+  // 如果是加载中状态，显示加载指示器
+  if (!isAuthenticated || isLoading) {
+    return <ThemedText>正在检查登录状态...</ThemedText>;
+  }
 
   return <>{children}</>;
 }

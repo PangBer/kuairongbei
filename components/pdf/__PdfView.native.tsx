@@ -2,7 +2,7 @@ import globalStyles from "@/components/styles/globalStyles";
 import { Asset } from "expo-asset";
 import { Directory, File, Paths } from "expo-file-system";
 import { useEffect, useState } from "react";
-import PdfRendererView from "react-native-pdf-renderer";
+import Pdf from "react-native-pdf";
 import { PdfMap } from "./types";
 
 async function downloadPDF(url?: string, name?: string) {
@@ -51,14 +51,18 @@ export default ({
     };
   }, [url, name]);
   return (
-    <PdfRendererView
-      style={globalStyles.globalContainer}
-      source={pdfUri}
-      distanceBetweenPages={16}
-      maxZoom={5}
-      onPageChange={(page, numberOfPages) => {
-        onPageChange?.(page + 1 === numberOfPages);
+    <Pdf
+      source={{ uri: pdfUri, cache: true }}
+      onLoadComplete={(numberOfPages) => {
+        onPageChange?.(numberOfPages === 1);
       }}
+      onPageChanged={(page, numberOfPages) => {
+        onPageChange?.(page === numberOfPages);
+      }}
+      onError={(error) => {
+        console.log(error);
+      }}
+      style={globalStyles.globalContainer}
     />
   );
 };

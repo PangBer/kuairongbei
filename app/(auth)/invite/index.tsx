@@ -36,7 +36,7 @@ export default () => {
   ];
 
   const shareInviteLink = async (method?: any) => {
-    const urlText = "kuairongbei://kuairongbei.com/invite";
+    const urlText = "https://hxzctech.com/download.html?page=boost";
     if (method.icon === "link") {
       // 复制链接逻辑
       Clipboard.setStringAsync(urlText);
@@ -266,6 +266,6 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   buttonContainer: {
-    paddingVertical: 10,
+    padding: 10,
   },
 });
