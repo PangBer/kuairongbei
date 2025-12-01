@@ -1,6 +1,8 @@
 import ToastContainer from "@/components/ToastContainer";
 import { customDarkTheme, customLightTheme } from "@/constants/theme";
+import wsService from "@/service/WebSocketService";
 import { persistor, store } from "@/store";
+import { useAuth } from "@/store/hooks";
 import { setCurrentPath } from "@/utils";
 import {
   DarkTheme,
@@ -26,6 +28,16 @@ import { PersistGate } from "redux-persist/integration/react";
 
 export const unstable_settings = {
   anchor: "(home)",
+};
+
+const WsLayout = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated } = useAuth();
+  useEffect(() => {
+    if (isAuthenticated) {
+      wsService.connect();
+    }
+  }, [isAuthenticated]);
+  return children;
 };
 
 export default function RootLayout() {
@@ -110,22 +122,24 @@ export default function RootLayout() {
           }
         >
           <GestureHandlerRootView style={{ flex: 1 }}>
-            <PaperProvider theme={paperTheme}>
-              <StatusBar style={isDark ? "light" : "dark"} />
-              <SafeAreaView
-                style={[
-                  styles.container,
-                  {
-                    backgroundColor: paperTheme.colors.foreground,
-                  },
-                ]}
-              >
-                <Stack screenOptions={{ headerShown: false }}>
-                  <Stack.Screen name="(home)" />
-                </Stack>
-                <ToastContainer />
-              </SafeAreaView>
-            </PaperProvider>
+            <WsLayout>
+              <PaperProvider theme={paperTheme}>
+                <StatusBar style={isDark ? "light" : "dark"} />
+                <SafeAreaView
+                  style={[
+                    styles.container,
+                    {
+                      backgroundColor: paperTheme.colors.foreground,
+                    },
+                  ]}
+                >
+                  <Stack screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="(home)" />
+                  </Stack>
+                  <ToastContainer />
+                </SafeAreaView>
+              </PaperProvider>
+            </WsLayout>
           </GestureHandlerRootView>
         </ThemeProvider>
       </PersistGate>

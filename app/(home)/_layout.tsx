@@ -1,11 +1,10 @@
 import { ThemedView } from "@/components/ui";
 import { useAuth, useAuthActions } from "@/store/hooks";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { Tabs, usePathname } from "expo-router";
+import { Tabs } from "expo-router";
 import React, { useEffect } from "react";
 
 export default () => {
-  const pathname = usePathname();
   const { isAuthenticated, isLoading } = useAuth();
   const { checkAuth } = useAuthActions();
   // 初始化时检查认证状态，只在组件挂载时执行一次

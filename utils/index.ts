@@ -50,3 +50,30 @@ export function setCurrentPath(path: string) {
 export function getCurrentPath() {
   return currentPath;
 }
+
+// 格式化时间
+export const formatTime = (timestamp: number) => {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffDays = Math.floor(
+    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  if (diffDays === 0) {
+    // 今天
+    return `${date.getHours().toString().padStart(2, "0")}:${date
+      .getMinutes()
+      .toString()
+      .padStart(2, "0")}`;
+  } else if (diffDays === 1) {
+    // 昨天
+    return "昨天";
+  } else if (diffDays < 7) {
+    // 一周内
+    const weekdays = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+    return weekdays[date.getDay()];
+  } else {
+    // 其他日期
+    return `${date.getMonth() + 1}/${date.getDate()}`;
+  }
+};

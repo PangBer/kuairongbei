@@ -1,4 +1,3 @@
-import { myEmitter } from "@/app/doc";
 import KeyboardGuard from "@/components/KeyboardGuard";
 import globalStyles from "@/components/styles/globalStyles";
 import { ThemedText } from "@/components/ui";
@@ -6,7 +5,8 @@ import { Colors, customColors } from "@/constants/theme";
 import { imageCodeApi, sendLoginAPi, smsCodeApi, userInfoApi } from "@/service";
 import { useAuthActions, useToastActions } from "@/store/hooks";
 import { removeToken, setToken } from "@/utils/token";
-import { useEventListener } from "expo";
+import { AntDesign } from "@expo/vector-icons";
+import * as Device from "expo-device";
 import * as Network from "expo-network";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -27,7 +27,6 @@ import {
   HelperText,
   TextInput,
 } from "react-native-paper";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 const Icon = require("@/assets/images/icon.png");
 
 // 表单数据类型
@@ -65,18 +64,16 @@ export default function LoginScreen() {
   }>();
   const { login } = useAuthActions();
   const { showInfo, showError } = useToastActions();
-  const inset = useSafeAreaInsets();
   const theme = useColorScheme() as Theme;
   const [isRegister, setIsRegister] = useState(false);
   const [contract, setContract] = useState<{
     ip: string;
-    time1: string;
-    time2: string;
+    deviceName: string;
   }>({
     ip: "",
-    time1: "",
-    time2: "",
+    deviceName: "",
   });
+  const [isAgreementChecked, setIsAgreementChecked] = useState(false);
   // React Hook Form
   const {
     control,
@@ -108,18 +105,6 @@ export default function LoginScreen() {
     );
     return () => backHandler.remove();
   }, [redirect]);
-  useEventListener(myEmitter, "onBackData", (data: any) => {
-    if (data.check === "ok") {
-      setContract((pre: any) => {
-        if (data.name === "sqxy") {
-          pre.time1 = data.time;
-        } else if (data.name === "yszc") {
-          pre.time2 = data.time;
-        }
-        return pre;
-      });
-    }
-  });
 
   // 其他状态
   const [captchaId, setCaptchaId] = useState("");
@@ -137,9 +122,9 @@ export default function LoginScreen() {
 
   const getIpAddress = async () => {
     const networkState = await Network.getIpAddressAsync();
-    setContract((pre: any) => {
-      pre.ip = networkState || "";
-      return pre;
+    setContract({
+      ip: networkState || "",
+      deviceName: Device.deviceName || Device.modelName || "",
     });
   };
 
@@ -204,23 +189,12 @@ export default function LoginScreen() {
 
   // 提交登录
   const handleLogin = handleSubmit(async (data) => {
-    const time = {
-      time1: contract.time1,
-      time2: contract.time2,
-    };
-    if (__DEV__) {
-      time.time1 = Date.now().toString();
-      time.time2 = Date.now().toString();
-    } else {
-      if (isRegister && (!contract.time1 || !contract.time2)) {
-        showError(
-          `请先阅读与同意${!contract.time1 ? "《用户协议》" : ""}${
-            !contract.time2 ? "《隐私政策》" : ""
-          }`
-        );
-        return;
-      }
+    if (!isAgreementChecked) {
+      showError(`请先阅读与同意《用户协议》《隐私政策》`);
+      return;
     }
+    console.log(contract);
+
     setLoading(true);
     try {
       // 模拟 API 调用
@@ -435,40 +409,47 @@ export default function LoginScreen() {
         }
       />
       {/* 用户协议与隐私政策 */}
-      <View style={styles.agreementContainer}>
-        {isRegister ? (
-          <ThemedText style={styles.agreementText}>
-            请您查看并同意
-            <Link
-              href={{
-                pathname: "/doc",
-                params: {
-                  name: "sqxy",
-                  check: "true",
-                },
-              }}
-              asChild
-            >
-              <ThemedText style={styles.linkText}>《用户协议》</ThemedText>
-            </Link>
-            和
-            <Link
-              href={{
-                pathname: "/doc",
-                params: {
-                  name: "yszc",
-                  check: "true",
-                },
-              }}
-              asChild
-            >
-              <ThemedText style={styles.linkText}>《隐私政策》</ThemedText>
-            </Link>
-          </ThemedText>
-        ) : (
-          <></>
-        )}
-      </View>
+      <TouchableOpacity
+        style={styles.agreementContainer}
+        onPress={() =>
+          !isAgreementChecked && setIsAgreementChecked(!isAgreementChecked)
+        }
+        activeOpacity={0.8}
+      >
+        <AntDesign
+          name="check-circle"
+          size={18}
+          color={
+            isAgreementChecked ? customColors.primary : customColors.outline
+          }
+        />
+        <ThemedText style={styles.agreementText}>
+          请您查看并授权
+          <Link
+            href={{
+              pathname: "/doc",
+              params: {
+                name: "sqxy",
+              },
+            }}
+            asChild
+          >
+            <ThemedText style={styles.linkText}>《用户协议》</ThemedText>
+          </Link>
+          和
+          <Link
+            href={{
+              pathname: "/doc",
+              params: {
+                name: "yszc",
+              },
+            }}
+            asChild
+          >
+            <ThemedText style={styles.linkText}>《隐私政策》</ThemedText>
+          </Link>
+        </ThemedText>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -542,6 +523,9 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   agreementContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 4,
     alignItems: "center",
     paddingHorizontal: 16,
     marginBottom: 24,
